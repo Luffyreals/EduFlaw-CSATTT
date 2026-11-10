@@ -9,17 +9,12 @@ from app.utils.temp_password import build_credentials_workbook, issue_temp_passw
 from db import db_pool
 
 # =====================================================================
-# CẤU HÌNH CƠ BẢN: 3 KHOÁ (D24, D25, D26) - 10 NGÀNH - 4 LỚP/NGÀNH/KHOÁ
+# CẤU HÌNH HỆ THỐNG: CHẾ ĐỘ DEMO TINH GỌN (MẶC ĐỊNH) & CHẾ ĐỘ FULL (3000 SV)
 # =====================================================================
-COHORTS = ('D24', 'D25', 'D26')
-STUDENTS_PER_MAJOR_COHORT = 100
-ADMIN_CLASSES_PER_MAJOR_COHORT = 4  # 100 SV / 4 lớp = 25 SV / lớp hành chính
-SEMESTER = 1
-ACADEMIC_YEAR = 2026
-
-# Lộ trình các học kỳ đã và đang học của từng khoá: (year, semester, stage_index)
-COHORT_TIMELINE = {
-    # D24 (Sinh viên năm 3): Từ Kỳ 1 năm 1 (2024) đến Kỳ 1 năm 3 (2026) -> 5 học kỳ
+FULL_COHORTS = ('D24', 'D25', 'D26')
+FULL_STUDENTS_PER_MAJOR_COHORT = 100
+FULL_ADMIN_CLASSES_PER_MAJOR_COHORT = 4
+FULL_COHORT_TIMELINE = {
     'D24': (
         (2024, 1, 1),
         (2024, 2, 2),
@@ -27,19 +22,16 @@ COHORT_TIMELINE = {
         (2025, 2, 4),
         (2026, 1, 5),
     ),
-    # D25 (Sinh viên năm 2): Từ Kỳ 1 năm 1 (2025) đến Kỳ 1 năm 2 (2026) -> 3 học kỳ
     'D25': (
         (2025, 1, 1),
         (2025, 2, 2),
         (2026, 1, 3),
     ),
-    # D26 (Sinh viên năm 1): Kỳ 1 năm 1 (2026) -> 1 học kỳ
     'D26': (
         (2026, 1, 1),
     ),
 }
-
-MAJORS_CONFIG = (
+FULL_MAJORS_CONFIG = (
     ('Công nghệ thông tin', 'CN', 100),
     ('An toàn thông tin', 'AT', 100),
     ('Khoa học máy tính', 'KH', 100),
@@ -51,6 +43,30 @@ MAJORS_CONFIG = (
     ('Kế toán', 'KT', 100),
     ('Thương mại điện tử', 'TM', 100),
 )
+
+# Chế độ Demo Tinh Gọn: Tập trung vào khoá D24 (Năm 3) của nhóm, 2 ngành cốt lõi ATTT & CNTT
+DEMO_COHORTS = ('D24',)
+DEMO_STUDENTS_PER_MAJOR_COHORT = 10  # 10 SV / ngành x 2 ngành = 20 SV
+DEMO_ADMIN_CLASSES_PER_MAJOR_COHORT = 1
+DEMO_COHORT_TIMELINE = {
+    'D24': (
+        (2025, 2, 4),  # Kỳ trước: Đã tổng kết điểm, phục vụ xem bảng điểm & tính GPA
+        (2026, 1, 5),  # Kỳ này: Đang học, phục vụ demo nhập điểm, sửa điểm & audit logs
+    ),
+}
+DEMO_MAJORS_CONFIG = (
+    ('Công nghệ thông tin', 'CN', 10),
+    ('An toàn thông tin', 'AT', 10),
+)
+
+# Mặc định kích hoạt cấu hình Demo
+COHORTS = DEMO_COHORTS
+STUDENTS_PER_MAJOR_COHORT = DEMO_STUDENTS_PER_MAJOR_COHORT
+ADMIN_CLASSES_PER_MAJOR_COHORT = DEMO_ADMIN_CLASSES_PER_MAJOR_COHORT
+COHORT_TIMELINE = DEMO_COHORT_TIMELINE
+MAJORS_CONFIG = DEMO_MAJORS_CONFIG
+SEMESTER = 1
+ACADEMIC_YEAR = 2026
 
 # Danh mục Môn học: mã môn -> (Tên môn học, Số tín chỉ, Trọng số (CC, BTTL, TBKT, TGK, TNTH, THI))
 SUBJECT_CATALOG = {
@@ -282,10 +298,13 @@ def build_demo_students(seed=42, count=8):
 
 def _split_into_credit_classes(students_list, rng):
     """
-    Chia danh sách sinh viên (100, 200 hoặc 300 SV) thành từ 5 đến 10 lớp tín chỉ,
-    đảm bảo mỗi lớp tín chỉ có từ 20 đến 40 sinh viên.
+    Chia danh sách sinh viên thành các lớp tín chỉ phù hợp với quy mô:
+    - Quy mô nhỏ (<= 30 SV): 1 lớp tín chỉ
+    - Quy mô lớn: chia thành 5-10 lớp
     """
     total = len(students_list)
+    if total <= 30:
+        return [students_list] if total > 0 else []
     if total == 100:
         num_classes = 5  # 5 lớp x 20 SV/lớp
     elif total == 200:
@@ -293,7 +312,7 @@ def _split_into_credit_classes(students_list, rng):
     elif total == 300:
         num_classes = rng.choice((8, 9, 10))  # 8-10 lớp (30 - 38 SV/lớp)
     else:
-        num_classes = max(5, min(10, round(total / 28)))
+        num_classes = max(1, min(10, round(total / 28)))
 
     base_size = total // num_classes
     remainder = total % num_classes
@@ -301,18 +320,34 @@ def _split_into_credit_classes(students_list, rng):
     start = 0
     for i in range(num_classes):
         size = base_size + (1 if i < remainder else 0)
-        chunks.append(students_list[start:start + size])
-        start += size
+        if size > 0:
+            chunks.append(students_list[start:start + size])
+            start += size
     return chunks
 
 
 class MvpSeedService:
     @classmethod
-    def seed(cls, random_seed=42, reset_existing=True, credentials_path=None):
+    def seed(cls, random_seed=42, reset_existing=True, credentials_path=None, full_dataset=False):
         rng = random.Random(random_seed)
         connection = cursor = None
-        # Mật khẩu tạm ngẫu nhiên của từng tài khoản mới tạo: chỉ ghi ra file Excel một lần sau khi commit
+        # Mật khẩu tạm của từng tài khoản mới tạo: chỉ ghi ra file Excel một lần sau khi commit
         issued_credentials = []
+
+        if full_dataset:
+            cohorts = FULL_COHORTS
+            students_per_major = FULL_STUDENTS_PER_MAJOR_COHORT
+            admin_classes_per_major = FULL_ADMIN_CLASSES_PER_MAJOR_COHORT
+            cohort_timeline = FULL_COHORT_TIMELINE
+            majors_config = FULL_MAJORS_CONFIG
+            num_lecturers = None
+        else:
+            cohorts = DEMO_COHORTS
+            students_per_major = DEMO_STUDENTS_PER_MAJOR_COHORT
+            admin_classes_per_major = DEMO_ADMIN_CLASSES_PER_MAJOR_COHORT
+            cohort_timeline = DEMO_COHORT_TIMELINE
+            majors_config = DEMO_MAJORS_CONFIG
+            num_lecturers = 5
 
         try:
             connection = db_pool.get_connection()
@@ -343,7 +378,7 @@ class MvpSeedService:
                     (master_id, 'Ban Giám Hiệu - Quản Trị Tối Cao', '0901000001', 'Nam', 'Hà Nội')
                 )
 
-            # 2. Khởi tạo 10 Ngành đào tạo cơ bản (Chỉ tiêu 100 SV/khoá)
+            # 2. Khởi tạo Ngành đào tạo
             cursor.executemany(
                 """
                 INSERT INTO majors (major_name, major_code, max_students_per_cohort)
@@ -352,71 +387,62 @@ class MvpSeedService:
                     major_name = VALUES(major_name),
                     max_students_per_cohort = VALUES(max_students_per_cohort)
                 """,
-                MAJORS_CONFIG
+                majors_config
             )
 
             # 3. Gom nhóm sinh viên theo từng (year, semester, subject_code)
-            # Sắp xếp ưu tiên học kỳ hiện tại (2026, 1) lên đầu để các giảng viên gv.001..gv.085 dạy kỳ hiện tại
+            # Sắp xếp ưu tiên học kỳ hiện tại (2026, 1) lên đầu để các giảng viên gv.001..gv.005 dạy kỳ hiện tại
             term_subject_groups = {}
-            for cohort, timeline in COHORT_TIMELINE.items():
+            for cohort, timeline in cohort_timeline.items():
                 for year, semester, stage_idx in timeline:
-                    for _, major_code, _ in MAJORS_CONFIG:
-                        subject_codes = STAGE_CURRICULUM[(major_code, stage_idx)]
+                    for _, major_code, _ in majors_config:
+                        subject_codes = STAGE_CURRICULUM.get((major_code, stage_idx), ())
                         for scode in subject_codes:
                             term_subject_groups.setdefault((year, semester, scode), []).append((major_code, cohort))
 
             sorted_term_keys = sorted(
                 term_subject_groups.keys(),
-                key=lambda k: (-k[0], -k[1], k[2])  # Ưu tiên 2026-S1 trước, sau đó 2025-S2, 2025-S1, 2024-S2, 2024-S1
+                key=lambda k: (-k[0], -k[1], k[2])  # Ưu tiên 2026-S1 trước, sau đó 2025-S2
             )
 
             lecturer_assignments = []
             lecturer_counter = 1
-            for (year, semester, scode) in sorted_term_keys:
+            for idx, (year, semester, scode) in enumerate(sorted_term_keys):
                 groups = term_subject_groups[(year, semester, scode)]
-                # Tách danh sách nhóm (mỗi nhóm 100 SV) thành các lô từ 1 đến 3 nhóm (100 - 300 SV -> 5 - 10 lớp tín chỉ)
-                idx = 0
-                while idx < len(groups):
-                    remaining = len(groups) - idx
-                    if remaining <= 3:
-                        batch_groups = groups[idx:]
-                        idx = len(groups)
-                    elif remaining == 4:
-                        batch_groups = groups[idx:idx + 2]
-                        idx += 2
-                    else:
-                        batch_groups = groups[idx:idx + 3]
-                        idx += 3
-
-                    lecturer_assignments.append({
-                        'lecturer_index': lecturer_counter,
-                        'year': year,
-                        'semester': semester,
-                        'subject_code': scode,
-                        'groups': batch_groups
-                    })
-                    lecturer_counter += 1
+                lec_idx = ((idx % num_lecturers) + 1) if num_lecturers else lecturer_counter
+                lecturer_assignments.append({
+                    'lecturer_index': lec_idx,
+                    'year': year,
+                    'semester': semester,
+                    'subject_code': scode,
+                    'groups': groups
+                })
+                lecturer_counter += 1
 
             # 4. Tạo tài khoản & hồ sơ cho Giảng viên (Admin)
-            # Tài khoản đã tồn tại (chạy --no-reset) giữ nguyên mật khẩu, chỉ tài khoản mới được cấp mật khẩu tạm
             cursor.execute("SELECT username FROM users")
             existing_usernames = {row['username'] for row in cursor.fetchall()}
             lecturer_user_rows = []
             lecturer_meta = []
+            demo_password = "EduFlaw@2026"
+            demo_password_hash = hash_temp_password(demo_password)
 
-            for item in lecturer_assignments:
-                l_idx = item['lecturer_index']
+            distinct_lec_indices = sorted(list({item['lecturer_index'] for item in lecturer_assignments}))
+            for l_idx in distinct_lec_indices:
                 username = f"gv.{l_idx:03d}@eduflaw.com"
                 gender = 'Nam' if l_idx % 2 else 'Nữ'
-                full_name = f"ThS. {_generate_full_name(rng, gender)}"
-                personal_email = None  # Giảng viên tự liên kết Gmail thật khi kích hoạt tài khoản
+                title = 'TS.' if l_idx % 2 == 0 else 'ThS.'
+                full_name = f"{title} {_generate_full_name(rng, gender)}"
+                personal_email = None
                 if username not in existing_usernames:
-                    temp_password, password_hash = issue_temp_password()
-                    lecturer_user_rows.append((username, password_hash, 'admin', personal_email))
+                    temp_pwd = demo_password if not full_dataset else issue_temp_password()[0]
+                    pwd_hash = demo_password_hash if not full_dataset else hash_temp_password(temp_pwd)
+                    lecturer_user_rows.append((username, pwd_hash, 'admin', personal_email))
                     issued_credentials.append({
-                        'username': username, 'full_name': full_name, 'role': 'admin', 'password': temp_password
+                        'username': username, 'full_name': full_name, 'role': 'admin', 'password': temp_pwd
                     })
                 lecturer_meta.append({
+                    'l_idx': l_idx,
                     'username': username,
                     'full_name': full_name,
                     'gender': gender,
@@ -424,7 +450,6 @@ class MvpSeedService:
                     'phone': f"0912{l_idx:06d}",
                     'dob': f"198{(l_idx % 9) + 1}-{(l_idx % 12) + 1:02d}-10",
                     'address': rng.choice(PROVINCES),
-                    'assignment': item
                 })
 
             if lecturer_user_rows:
@@ -460,31 +485,27 @@ class MvpSeedService:
                 admin_profile_rows
             )
 
-            # 5. Tạo 3.000 Sinh viên (3 khoá D24, D25, D26 x 10 ngành x 100 SV)
-            # Chia làm 120 lớp hành chính (4 lớp/ngành/khoá x 25 SV/lớp)
+            # 5. Tạo dữ liệu Sinh viên
             student_user_rows = []
             student_meta_list = []
             admin_class_counter = 0
 
-            # D24 (năm 3): sinh 2006 | D25 (năm 2): sinh 2007 | D26 (năm 1): sinh 2008
             birth_year_map = {'D24': 2006, 'D25': 2007, 'D26': 2008}
-            active_lecturers = [m for m in lecturer_meta if m['assignment']['year'] == ACADEMIC_YEAR]
+            active_lecturers = lecturer_meta
 
-            for cohort in COHORTS:
-                b_year = birth_year_map[cohort]
-                cohort_num = cohort[1:]  # '24', '25', '26'
-                for major_name, major_code, _ in MAJORS_CONFIG:
-                    for seq in range(1, STUDENTS_PER_MAJOR_COHORT + 1):
-                        class_idx = ((seq - 1) // 25) + 1  # 1..4 (mỗi lớp đúng 25 SV)
-                        pos_in_class = ((seq - 1) % 25) + 1
-                        if pos_in_class == 1:
-                            admin_class_counter += 1
+            for cohort in cohorts:
+                b_year = birth_year_map.get(cohort, 2006)
+                cohort_num = cohort[1:]
+                for major_name, major_code, _ in majors_config:
+                    admin_class_counter += 1
+                    class_name = f"{cohort}CQ{major_code}{admin_class_counter:02d}" if full_dataset else f"{cohort}CQ{major_code}01"
+                    advisor = active_lecturers[(admin_class_counter - 1) % len(active_lecturers)]
 
-                        advisor = active_lecturers[(admin_class_counter - 1) % len(active_lecturers)]
-                        class_name = f"{cohort}CQ{major_code}{class_idx:02d}"
+                    for seq in range(1, students_per_major + 1):
+                        pos_in_class = seq
                         student_code = f"B{cohort_num}DC{major_code}{seq:03d}"
                         username = f"{student_code.lower()}@eduflaw.com"
-                        personal_email = None  # Sinh viên tự liên kết Gmail thật khi kích hoạt tài khoản
+                        personal_email = None
 
                         gender = 'Nam' if rng.random() < 0.55 else 'Nữ'
                         full_name = _generate_full_name(rng, gender)
@@ -498,6 +519,31 @@ class MvpSeedService:
                             class_role = 'Thành viên'
 
                         hometown = rng.choice(PROVINCES)
+                        if username not in existing_usernames:
+                            temp_pwd = demo_password if not full_dataset else issue_temp_password()[0]
+                            pwd_hash = demo_password_hash if not full_dataset else hash_temp_password(temp_pwd)
+                            student_user_rows.append((username, pwd_hash, 'student', personal_email))
+                            issued_credentials.append({
+                                'username': username, 'full_name': full_name, 'role': 'student', 'password': temp_pwd
+                            })
+                        student_meta_list.append({
+                            'username': username,
+                            'student_code': student_code,
+                            'full_name': full_name,
+                            'dob': dob,
+                            'gender': gender,
+                            'phone': f"098{rng.randint(1000000, 9999999)}",
+                            'id_card': f"001{b_year % 100:02d}{rng.randint(1000000, 9999999)}",
+                            'hometown': hometown,
+                            'current_address': f"Ký túc xá / Nội thành Hà Nội (Quê: {hometown})",
+                            'class_role': class_role,
+                            'major_name': major_name,
+                            'major_code': major_code,
+                            'cohort': cohort,
+                            'class_name': class_name,
+                            'advisor_name': advisor['full_name'],
+                            'advisor_email': advisor['username'],
+                        })
                         if username not in existing_usernames:
                             temp_password, password_hash = issue_temp_password()
                             student_user_rows.append((username, password_hash, 'student', personal_email))
@@ -587,9 +633,9 @@ class MvpSeedService:
             credit_class_rosters = []
             term_subject_sec_counter = {}
 
-            for meta in lecturer_meta:
-                lecturer_id = meta['user_id']
-                assignment = meta['assignment']
+            for assignment in lecturer_assignments:
+                lecturer_username = f"gv.{assignment['lecturer_index']:03d}@eduflaw.com"
+                lecturer_id = admin_id_map[lecturer_username]
                 year = assignment['year']
                 semester = assignment['semester']
                 scode = assignment['subject_code']
@@ -598,9 +644,12 @@ class MvpSeedService:
 
                 pooled_students = []
                 for grp in assignment['groups']:
-                    pooled_students.extend(group_students_map[grp])
+                    if grp in group_students_map:
+                        pooled_students.extend(group_students_map[grp])
 
-                # Chia thành 5–10 lớp tín chỉ, mỗi lớp 20–40 sinh viên
+                if not pooled_students:
+                    continue
+
                 rosters = _split_into_credit_classes(pooled_students, rng)
 
                 for roster in rosters:
@@ -627,6 +676,9 @@ class MvpSeedService:
                             if candidate_slot not in lec_busy:
                                 chosen_slot = candidate_slot
                                 break
+
+                    if chosen_slot is None:
+                        chosen_slot = shuffled_slots[0]
 
                     day_of_week, shift = chosen_slot
                     lec_busy.add(chosen_slot)
@@ -738,8 +790,8 @@ class MvpSeedService:
                 cls._write_credentials_file(credentials_file, issued_credentials)
 
             return {
-                'cohorts': len(COHORTS),
-                'majors': len(MAJORS_CONFIG),
+                'cohorts': len(cohorts),
+                'majors': len(majors_config),
                 'admin_classes': admin_class_counter,
                 'students': len(student_meta_list),
                 'lecturers': len(lecturer_meta),
@@ -747,6 +799,7 @@ class MvpSeedService:
                 'enrollments': len(grade_rows),
                 'issued_passwords': len(issued_credentials),
                 'credentials_file': credentials_file,
+                'is_demo': not full_dataset,
             }
         except Exception:
             if connection:
@@ -768,7 +821,7 @@ class MvpSeedService:
 
     @staticmethod
     def _clean_academic_data(cursor):
-        """Dọn dẹp dữ liệu mẫu cũ để đảm bảo đúng 10 ngành và 3.000 sinh viên (D24, D25, D26)"""
+        """Dọn dẹp sạch toàn bộ dữ liệu học vụ mẫu cũ trước khi nạp bộ mới"""
         cursor.execute("DELETE FROM grade_audit_logs")
         cursor.execute("DELETE FROM grades")
         cursor.execute("DELETE FROM credit_classes")
@@ -794,9 +847,12 @@ class MvpSeedService:
             )
 
 
-def seed_data(random_seed=42, reset_existing=True, credentials_path=None):
+def seed_data(random_seed=42, reset_existing=True, credentials_path=None, full_dataset=False):
     return MvpSeedService.seed(
-        random_seed=random_seed, reset_existing=reset_existing, credentials_path=credentials_path
+        random_seed=random_seed,
+        reset_existing=reset_existing,
+        credentials_path=credentials_path,
+        full_dataset=full_dataset
     )
 
 
@@ -808,8 +864,9 @@ if __name__ == '__main__':
         except (AttributeError, ValueError):
             pass
     parser = argparse.ArgumentParser(
-        description='Seed 3,000 students (D24, D25, D26), 10 majors, lecturers, and multi-year transcripts for EduFlaw.'
+        description='Seed dữ liệu cho hệ thống EduFlaw (Mặc định: Demo Tinh Gọn 20 SV, 5 GV, 2 ngành AT & CN).'
     )
+    parser.add_argument('--full', action='store_true', help='Seed dữ liệu lớn (3.000 SV, 260 GV, 1.900 lớp).')
     parser.add_argument('--small', action='store_true', help='Giữ cờ tương thích CLI cũ.')
     parser.add_argument('--seed', type=int, default=42, help='Random seed cố định dữ liệu.')
     parser.add_argument('--no-reset', action='store_true', help='Không xóa dữ liệu cũ trước khi seed.')
@@ -822,20 +879,29 @@ if __name__ == '__main__':
     result = seed_data(
         random_seed=arguments.seed,
         reset_existing=not arguments.no_reset,
-        credentials_path=arguments.credentials_out
+        credentials_path=arguments.credentials_out,
+        full_dataset=arguments.full
     )
+    mode_text = "Dữ liệu lớn (3.000 SV)" if arguments.full else "Demo Tinh Gọn (20 SV, 5 GV - Báo cáo BTL CSATTT)"
     print(
-        f"✅ Seed hoàn tất:\n"
-        f"   - Khoá đào tạo     : {result['cohorts']} khoá (D24 - Năm 3, D25 - Năm 2, D26 - Năm 1)\n"
-        f"   - Ngành đào tạo    : {result['majors']} ngành (100 SV/khoá/ngành)\n"
-        f"   - Lớp hành chính   : {result['admin_classes']} lớp (4 lớp/ngành/khoá, 25 SV/lớp)\n"
+        f"✅ Seed hoàn tất [{mode_text}]:\n"
+        f"   - Khoá đào tạo     : {result['cohorts']} khoá\n"
+        f"   - Ngành đào tạo    : {result['majors']} ngành\n"
+        f"   - Lớp hành chính   : {result['admin_classes']} lớp\n"
         f"   - Tổng sinh viên   : {result['students']} sinh viên\n"
-        f"   - Tổng giảng viên  : {result['lecturers']} giảng viên (5-10 lớp tín chỉ/GV)\n"
-        f"   - Tổng lớp tín chỉ : {result['credit_classes']} lớp (20-40 SV/lớp)\n"
-        f"   - Tổng lượt điểm   : {result['enrollments']} bản ghi điểm (2024 - 2026)"
+        f"   - Tổng giảng viên  : {result['lecturers']} giảng viên\n"
+        f"   - Tổng lớp tín chỉ : {result['credit_classes']} lớp\n"
+        f"   - Tổng lượt điểm   : {result['enrollments']} bản ghi điểm"
     )
+    if not arguments.full:
+        print(
+            f"\n🎯 TÀI KHOẢN VÀ MẬT KHẨU DEMO:\n"
+            f"   👑 Quản trị Master : master@eduflaw.com / (mật khẩu trong .env, mặc định tung12345678)\n"
+            f"   👨‍🏫 Giảng viên      : gv.001@eduflaw.com .. gv.005@eduflaw.com / EduFlaw@2026\n"
+            f"   🛡️ Sinh viên ATTT  : b24dcat001@eduflaw.com .. b24dcat010@eduflaw.com / EduFlaw@2026\n"
+            f"   💻 Sinh viên CNTT  : b24dccn001@eduflaw.com .. b24dccn010@eduflaw.com / EduFlaw@2026\n"
+        )
     if result['credentials_file']:
         print(
-            f"🔑 Đã cấp {result['issued_passwords']} mật khẩu tạm ngẫu nhiên, lưu tại: {result['credentials_file']}\n"
-            f"   File chứa mật khẩu dạng rõ: chỉ phát cho chủ tài khoản rồi xóa, không commit lên git."
+            f"🔑 Đã lưu danh sách mật khẩu tạm tại: {result['credentials_file']}"
         )

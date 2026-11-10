@@ -105,14 +105,21 @@ CREATE DATABASE eduflaw_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   cd src
   ./setup.sh
   ```
-*(Script sẽ tự động tạo môi trường ảo `.venv`, cài thư viện, sinh file `.env`, tạo bảng từ `schema.sql` và tự động nạp dữ liệu mẫu gồm 3.000 sinh viên, 260 giảng viên, 1.900 lớp tín chỉ).*
+*(Script sẽ tự động tạo môi trường ảo `.venv`, cài thư viện, sinh file `.env`, tạo bảng từ `schema.sql` và tự động nạp dữ liệu mẫu **Demo Tinh Gọn** gồm 20 sinh viên, 5 giảng viên, 17 lớp tín chỉ phục vụ hoàn hảo cho buổi thuyết trình).*
+
+> **Mẹo:** Nếu cần xóa trắng CSDL và reset lại bộ dữ liệu Demo tinh gọn bất kỳ lúc nào, chỉ cần chạy:
+> ```powershell
+> python reset_db_demo.py
+> ```
 
 ### Bước 3: Khởi chạy Server
 ```bash
 python run.py
 ```
 Mở trình duyệt: **http://127.0.0.1:5000**  
-Đăng nhập tài khoản Master: `master@eduflaw.com` / `MasterEduFlaw@123`
+- **Tài khoản Master:** `master@eduflaw.com` / Mật khẩu trong file `.env` (mặc định: `tung12345678`)  
+- **Tài khoản Giảng viên Demo:** `gv.001@eduflaw.com` / Mật khẩu `EduFlaw@2026`  
+- **Tài khoản Sinh viên Demo:** `b24dcat001@eduflaw.com` / Mật khẩu `EduFlaw@2026`  
 
 ---
 
