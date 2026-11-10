@@ -5,7 +5,7 @@ import sys
 import time
 from werkzeug.security import generate_password_hash
 from app.utils.field_crypto import encrypt_field
-from app.utils.temp_password import build_credentials_workbook, issue_temp_password
+from app.utils.temp_password import build_credentials_workbook, hash_temp_password, issue_temp_password
 from db import db_pool
 
 # =====================================================================
@@ -544,30 +544,7 @@ class MvpSeedService:
                             'advisor_name': advisor['full_name'],
                             'advisor_email': advisor['username'],
                         })
-                        if username not in existing_usernames:
-                            temp_password, password_hash = issue_temp_password()
-                            student_user_rows.append((username, password_hash, 'student', personal_email))
-                            issued_credentials.append({
-                                'username': username, 'full_name': full_name, 'role': 'student', 'password': temp_password
-                            })
-                        student_meta_list.append({
-                            'username': username,
-                            'student_code': student_code,
-                            'full_name': full_name,
-                            'dob': dob,
-                            'gender': gender,
-                            'phone': f"098{rng.randint(1000000, 9999999)}",
-                            'id_card': f"001{b_year % 100:02d}{rng.randint(1000000, 9999999)}",
-                            'hometown': hometown,
-                            'current_address': f"Ký túc xá / Nội thành Hà Nội (Quê: {hometown})",
-                            'class_role': class_role,
-                            'major_name': major_name,
-                            'major_code': major_code,
-                            'cohort': cohort,
-                            'class_name': class_name,
-                            'advisor_name': advisor['full_name'],
-                            'advisor_email': advisor['username'],
-                        })
+
 
             # Batch insert 3,000 student users
             for i in range(0, len(student_user_rows), 1000):
