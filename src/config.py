@@ -31,19 +31,17 @@ class Config:
     # Số reverse proxy tin cậy đứng trước app (0 = không dùng X-Forwarded-*)
     TRUST_PROXY = int(os.getenv('TRUST_PROXY', '0') or 0)
 
-    MYSQL_HOST = os.getenv('MYSQL_HOST')
-    MYSQL_PORT = int(os.getenv('MYSQL_PORT') or 4000)
-    MYSQL_USER = os.getenv('MYSQL_USER')
-    MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD')
-    MYSQL_DB = os.getenv('MYSQL_DB')
+    MYSQL_HOST = os.getenv('MYSQL_HOST', '127.0.0.1')
+    MYSQL_PORT = int(os.getenv('MYSQL_PORT') or 3306)
+    MYSQL_USER = os.getenv('MYSQL_USER', 'root')
+    MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
+    MYSQL_DB = os.getenv('MYSQL_DB', 'eduflaw_db')
 
-    # TLS tới CSDL. CSDL ở xa (TiDB Cloud) cần kênh được mã hóa VÀ xác thực chứng chỉ, nếu không kẻ đứng giữa
-    # (MITM) có thể giả mạo máy chủ DB. Trỏ MYSQL_SSL_CA tới file CA (PEM) để bật TLS có xác thực danh tính.
-    # MYSQL_SSL_VERIFY=false chỉ tắt kiểm tra hostname (vẫn xác thực CA). MYSQL_SSL_DISABLED=true chỉ dùng cho
-    # CSDL local không có TLS (vd MySQL trên localhost khi phát triển).
+    # CSDL MySQL cục bộ (Localhost port 3306) mặc định không bật TLS.
+    # Đặt MYSQL_SSL_DISABLED=true làm mặc định để cài đặt nhanh chóng trên máy cá nhân.
     MYSQL_SSL_CA = os.getenv('MYSQL_SSL_CA')
-    MYSQL_SSL_VERIFY = _env_bool('MYSQL_SSL_VERIFY', True)
-    MYSQL_SSL_DISABLED = _env_bool('MYSQL_SSL_DISABLED', False)
+    MYSQL_SSL_VERIFY = _env_bool('MYSQL_SSL_VERIFY', False)
+    MYSQL_SSL_DISABLED = _env_bool('MYSQL_SSL_DISABLED', True)
 
     # Khóa mã hóa trường PII nhạy cảm (CCCD) ở tầng ứng dụng. Nên đặt khóa riêng, tách khỏi SECRET_KEY;
     # nếu để trống sẽ dẫn xuất tạm từ SECRET_KEY (xem app/utils/field_crypto.py). ĐỔI khóa này đồng nghĩa

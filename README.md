@@ -84,32 +84,56 @@ Mở trực tiếp trên trình duyệt: [`demo/index.html`](demo/index.html) *(
 
 ---
 
-## 🚀 Hướng dẫn chạy thử nghiệm
+## 🚀 Hướng dẫn khởi chạy ứng dụng (Python + MySQL cục bộ)
 
-### Cách 1: Khởi chạy nhanh bằng Docker (Khuyến nghị)
-Yêu cầu đã cài đặt [Docker Desktop](https://www.docker.com/products/docker-desktop/):
+Yêu cầu môi trường: **Python ≥ 3.11** và **MySQL** chạy cục bộ (cổng 3306).
 
-```bash
-# 1. Clone mã nguồn
-git clone https://github.com/Luffyreals/EduFlaw-CSATTT.git
-cd EduFlaw-CSATTT
-
-# 2. Khởi chạy toàn bộ hệ thống (Web + Database)
-docker compose up
+### Bước 1: Tạo Database MySQL
+Mở MySQL (MySQL Workbench / phpMyAdmin / dòng lệnh) và tạo cơ sở dữ liệu:
+```sql
+CREATE DATABASE eduflaw_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Truy cập: **http://localhost:8000**  
-Đăng nhập tài khoản Master: `master@eduflaw.com` / `MasterEduFlaw@123` *(Hệ thống tự động nạp sẵn dữ liệu mẫu 3.000 sinh viên, giảng viên và lớp tín chỉ)*. Dừng dịch vụ: `docker compose down`.
+### Bước 2: Cài đặt tự động một lệnh
+- **Windows (PowerShell):**
+  ```powershell
+  cd src
+  powershell -ExecutionPolicy Bypass -File .\setup.ps1
+  ```
+- **macOS / Linux:**
+  ```bash
+  cd src
+  ./setup.sh
+  ```
+*(Script sẽ tự động tạo môi trường ảo `.venv`, cài thư viện, sinh file `.env`, tạo bảng từ `schema.sql` và tự động nạp dữ liệu mẫu gồm 3.000 sinh viên, 260 giảng viên, 1.900 lớp tín chỉ).*
 
-### Cách 2: Chạy trực tiếp bằng Python
-Yêu cầu **Python ≥ 3.11** và **MySQL**:
-- **Windows:** Vào thư mục `src/`, chạy `powershell -ExecutionPolicy Bypass -File .\setup.ps1`, sau đó `python run.py`.
-- **macOS / Linux:** Vào thư mục `src/`, chạy `./setup.sh`, sau đó `python run.py`.
-- Chi tiết cấu hình tham khảo: [docs/DEPLOY.md](docs/DEPLOY.md).
+### Bước 3: Khởi chạy Server
+```bash
+python run.py
+```
+Mở trình duyệt: **http://127.0.0.1:5000**  
+Đăng nhập tài khoản Master: `master@eduflaw.com` / `MasterEduFlaw@123`
+
+---
+
+## ⚡ Bảng điều khiển kiểm thử trực tiếp (Live Pentest Console)
+
+Nhóm đã phát triển bảng điều khiển kiểm thử tương tác trực tiếp qua Terminal. Trong khi ứng dụng web đang chạy, mở một cửa sổ Terminal mới và gõ:
+```bash
+python pentest/live_demo.py
+```
+Menu tương tác cung cấp 5 chức năng kiểm thử thực chiến:
+1. **Live Fuzzing (Quét 69 đường dẫn):** Rà quét tiến trình thực, lập bản đồ xác thực và phát hiện route ẩn.
+2. **Live Input Fuzzing (23 Payload dị dạng):** Bơm SQLi, XSS, Path Traversal, SSTI vào API để kiểm chứng nguyên tắc **Fail-Closed** (0 lỗi 500).
+3. **Live Brute-force Attack (Chống dò mật khẩu A07):** Dội thử mật khẩu sai và kích hoạt cơ chế khóa bảo vệ **HTTP 429** sau lần thứ 5.
+4. **Live Database Forensic Inspector:** Kiểm chứng trực tiếp số CCCD được mã hóa AES-256-GCM trong bảng `student_profiles` và kiểm tra nhật ký kiểm toán `grade_audit_logs`.
+5. **Quick Automated Audit:** Chạy quét kiểm thử tổng hợp toàn bộ hệ thống.
 
 ---
 
 ## 📚 Tài liệu báo cáo & Thuyết trình của nhóm
 
 - **Báo cáo toàn văn BTL:** [`BAO-CAO-DAY-DU.md`](BAO-CAO-DAY-DU.md)
+- **Kịch bản thuyết trình (Slide 1–25):** [`NOI-DUNG-THUYET-TRINH.md`](NOI-DUNG-THUYET-TRINH.md)
+- **Cẩm nang kiến thức & Hỏi đáp phản biện:** [`GIAI-THICH-KIEN-THUC-VA-QA.md`](GIAI-THICH-KIEN-THUC-VA-QA.md)
 - **Bộ công cụ Pentest & Fuzzing:** [`pentest/README.md`](pentest/README.md)
