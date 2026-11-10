@@ -557,6 +557,44 @@
                 </button>
             </form>
 
+            <!-- Bảng Đăng nhập Nhanh Demo (1-Click Login dành cho Buổi Báo cáo BTL CSATTT) -->
+            <div class="demo-quick-box" style="margin-top: 20px; padding: 14px 16px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px;">
+                        <span>⚡</span> Đăng nhập Demo 1-Click
+                    </span>
+                    <span style="font-size: 11px; font-weight: 700; color: #701a24; background: #ffe4e6; padding: 2px 8px; border-radius: 20px;">
+                        Nhóm 7 - PTIT
+                    </span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <button type="button" onclick="demoLogin('master@eduflaw.com', 'tung12345678')" 
+                        style="padding: 10px 4px; border: 1px solid #e2e8f0; border-radius: 10px; background: #ffffff; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"
+                        onmouseover="this.style.borderColor='#701a24'; this.style.background='#fff1f2'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff'; this.style.transform='none'">
+                        <div style="font-size: 16px; margin-bottom: 2px;">👑</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #701a24;">Master</div>
+                        <div style="font-size: 10px; color: #64748b;">Quản trị</div>
+                    </button>
+                    <button type="button" onclick="demoLogin('gv.001@eduflaw.com', 'EduFlaw@2026')"
+                        style="padding: 10px 4px; border: 1px solid #e2e8f0; border-radius: 10px; background: #ffffff; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"
+                        onmouseover="this.style.borderColor='#0369a1'; this.style.background='#f0f9ff'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff'; this.style.transform='none'">
+                        <div style="font-size: 16px; margin-bottom: 2px;">👨‍🏫</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #0369a1;">Giảng viên</div>
+                        <div style="font-size: 10px; color: #64748b;">gv.001</div>
+                    </button>
+                    <button type="button" onclick="demoLogin('b24dcat001@eduflaw.com', 'EduFlaw@2026')"
+                        style="padding: 10px 4px; border: 1px solid #e2e8f0; border-radius: 10px; background: #ffffff; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"
+                        onmouseover="this.style.borderColor='#047857'; this.style.background='#ecfdf5'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff'; this.style.transform='none'">
+                        <div style="font-size: 16px; margin-bottom: 2px;">🛡️</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #047857;">Sinh viên</div>
+                        <div style="font-size: 10px; color: #64748b;">ATTT 001</div>
+                    </button>
+                </div>
+            </div>
+
             <div class="form-footer">
                 Kết nối được mã hóa và bảo vệ bằng xác thực CSRF & phiên an toàn.<br>
                 Hỗ trợ kỹ thuật: Phòng Quản lý Đào tạo & Công nghệ Thông tin.
@@ -610,6 +648,17 @@
             document.getElementById('submitArrow').style.display = 'none';
             document.getElementById('submitText').textContent = 'Đang xác thực...';
         });
+
+        function demoLogin(user, pwd) {
+            document.getElementById('usernameInput').value = user;
+            document.getElementById('loginPassword').value = pwd;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            document.getElementById('submitSpinner').style.display = 'inline-block';
+            document.getElementById('submitArrow').style.display = 'none';
+            document.getElementById('submitText').textContent = 'Đang đăng nhập 1-Click...';
+            document.getElementById('loginForm').submit();
+        }
     </script>
 </body>
 </html>

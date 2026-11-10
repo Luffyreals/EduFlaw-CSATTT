@@ -88,6 +88,15 @@ Mở trực tiếp trên trình duyệt: [`demo/index.html`](demo/index.html) *(
 
 Yêu cầu môi trường: **Python ≥ 3.11** và **MySQL** chạy cục bộ (cổng 3306).
 
+### ⚡ Khởi chạy 1-Click siêu nhanh (Dành cho Windows)
+Để buổi thuyết trình diễn ra nhanh nhất mà không cần gõ lệnh dòng lệnh:
+* Nhấp đúp file **`1_CHAY_WEB_DEMO.bat`**: Tự động bật máy chủ Web và tự động mở trình duyệt `http://127.0.0.1:5000` với nút **Đăng nhập 1-Click** (Master, Giảng viên, Sinh viên).
+* Nhấp đúp file **`2_MO_LAB_THUYET_TRINH.bat`**: Mở trang mô phỏng tương tác trực quan 4 bài Lab OWASP (A01, A03, A07, A10).
+* Nhấp đúp file **`3_RESET_CSDL_DEMO.bat`**: Tự động dọn dẹp và làm mới CSDL về đúng 20 sinh viên demo.
+
+---
+
+### Khởi chạy thủ công (Nhiều nền tảng)
 ### Bước 1: Tạo Database MySQL
 Mở MySQL (MySQL Workbench / phpMyAdmin / dòng lệnh) và tạo cơ sở dữ liệu:
 ```sql
@@ -106,11 +115,6 @@ CREATE DATABASE eduflaw_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   ./setup.sh
   ```
 *(Script sẽ tự động tạo môi trường ảo `.venv`, cài thư viện, sinh file `.env`, tạo bảng từ `schema.sql` và tự động nạp dữ liệu mẫu **Demo Tinh Gọn** gồm 20 sinh viên, 5 giảng viên, 17 lớp tín chỉ phục vụ hoàn hảo cho buổi thuyết trình).*
-
-> **Mẹo:** Nếu cần xóa trắng CSDL và reset lại bộ dữ liệu Demo tinh gọn bất kỳ lúc nào, chỉ cần chạy:
-> ```powershell
-> python reset_db_demo.py
-> ```
 
 ### Bước 3: Khởi chạy Server
 ```bash

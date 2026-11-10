@@ -428,16 +428,17 @@ class MvpSeedService:
             demo_password_hash = hash_temp_password(demo_password)
 
             distinct_lec_indices = sorted(list({item['lecturer_index'] for item in lecturer_assignments}))
+            must_change = 1 if full_dataset else 0
             for l_idx in distinct_lec_indices:
                 username = f"gv.{l_idx:03d}@eduflaw.com"
                 gender = 'Nam' if l_idx % 2 else 'Nữ'
                 title = 'TS.' if l_idx % 2 == 0 else 'ThS.'
                 full_name = f"{title} {_generate_full_name(rng, gender)}"
-                personal_email = None
+                personal_email = f"gv.{l_idx:03d}@gmail.com" if not full_dataset else None
                 if username not in existing_usernames:
                     temp_pwd = demo_password if not full_dataset else issue_temp_password()[0]
                     pwd_hash = demo_password_hash if not full_dataset else hash_temp_password(temp_pwd)
-                    lecturer_user_rows.append((username, pwd_hash, 'admin', personal_email))
+                    lecturer_user_rows.append((username, pwd_hash, 'admin', personal_email, must_change))
                     issued_credentials.append({
                         'username': username, 'full_name': full_name, 'role': 'admin', 'password': temp_pwd
                     })
@@ -456,8 +457,8 @@ class MvpSeedService:
                 cursor.executemany(
                     """
                     INSERT INTO users (username, password, role, personal_email, must_change_password)
-                    VALUES (%s, %s, %s, %s, TRUE)
-                    ON DUPLICATE KEY UPDATE role = VALUES(role)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE role = VALUES(role), personal_email = VALUES(personal_email), must_change_password = VALUES(must_change_password)
                     """,
                     lecturer_user_rows
                 )
@@ -519,10 +520,11 @@ class MvpSeedService:
                             class_role = 'Thành viên'
 
                         hometown = rng.choice(PROVINCES)
+                        personal_email = f"{student_code.lower()}@gmail.com" if not full_dataset else None
                         if username not in existing_usernames:
                             temp_pwd = demo_password if not full_dataset else issue_temp_password()[0]
                             pwd_hash = demo_password_hash if not full_dataset else hash_temp_password(temp_pwd)
-                            student_user_rows.append((username, pwd_hash, 'student', personal_email))
+                            student_user_rows.append((username, pwd_hash, 'student', personal_email, must_change))
                             issued_credentials.append({
                                 'username': username, 'full_name': full_name, 'role': 'student', 'password': temp_pwd
                             })
@@ -546,13 +548,13 @@ class MvpSeedService:
                         })
 
 
-            # Batch insert 3,000 student users
+            # Batch insert student users
             for i in range(0, len(student_user_rows), 1000):
                 cursor.executemany(
                     """
                     INSERT INTO users (username, password, role, personal_email, must_change_password)
-                    VALUES (%s, %s, %s, %s, TRUE)
-                    ON DUPLICATE KEY UPDATE role = VALUES(role)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE role = VALUES(role), personal_email = VALUES(personal_email), must_change_password = VALUES(must_change_password)
                     """,
                     student_user_rows[i:i + 1000]
                 )
