@@ -757,6 +757,18 @@ class MvpSeedService:
                     grade_rows[i:i + 4000]
                 )
 
+            # Tạo 1 bản ghi mẫu trong grade_audit_logs để chứng minh nhật ký kiểm toán trong demo
+            if not full_dataset:
+                cursor.execute("SELECT id FROM grades WHERE subject LIKE '%An toàn%' LIMIT 1")
+                sample_grade = cursor.fetchone()
+                if sample_grade:
+                    lec_1_id = admin_id_map.get('gv.001@eduflaw.com')
+                    cursor.execute("""
+                        INSERT INTO grade_audit_logs 
+                        (grade_id, field_name, old_score, new_score, modified_by, reason)
+                        VALUES (%s, 'score_thi', 6.5, 8.0, %s, 'Phúc khảo bài thi: Chấm lại câu hỏi tự luận 3 (+1.5 điểm)')
+                    """, (sample_grade['id'], lec_1_id))
+
             connection.commit()
 
             credentials_file = None
