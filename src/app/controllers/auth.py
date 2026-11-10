@@ -87,6 +87,7 @@ def login():
                 log_security_event('login_lockout', account=username_input,
                                    scope='account' if account_locked else 'ip')
                 error = f"Bạn đã nhập sai {LOGIN_MAX_ATTEMPTS} lần liên tiếp. Vui lòng đợi {LOGIN_LOCKOUT_SECONDS} giây trước khi thử lại."
+                return render_template('auth/login.html', error=error), 429
             else:
                 error = "Thông tin đăng nhập không chính xác."
         else:

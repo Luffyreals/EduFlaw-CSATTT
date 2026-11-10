@@ -108,6 +108,14 @@ def create_app(config_class=None):
         # Kiểm tra tiến trình còn sống (không chạm CSDL để CSDL chập chờn không làm nền tảng khởi động lại app)
         return {'status': 'ok'}
 
+    @app.route('/demo')
+    def demo_lab():
+        from flask import send_file
+        demo_path = os.path.abspath(os.path.join(app.root_path, '..', '..', 'demo', 'index.html'))
+        if os.path.exists(demo_path):
+            return send_file(demo_path)
+        return "Demo lab file not found", 404
+
     # 3. Đăng ký các Blueprints
     from app.controllers.auth import auth_bp
     from app.controllers.student import student_bp
