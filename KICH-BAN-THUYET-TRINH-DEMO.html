@@ -2,31 +2,31 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<title>Kịch Bản Thuyết Trình & Hướng Dẫn Demo Bảo Mật EduFlaw</title>
+<title>Kịch Bản Thuyết Trình &amp; Hướng Dẫn Demo Toàn Diện — EduFlaw (OWASP Top 10:2025)</title>
 <style>
   @page {
     size: A4;
-    margin: 10mm 12mm 10mm 12mm;
+    margin: 9mm 12mm 9mm 12mm;
   }
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #0f172a;
-    line-height: 1.4;
-    font-size: 11.8px;
+    line-height: 1.38;
+    font-size: 11.2px;
     margin: 0;
     padding: 0;
   }
   .header-box {
     border-bottom: 2px solid #701a24;
-    padding-bottom: 6px;
-    margin-bottom: 10px;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
   .header-left h1 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
     color: #701a24;
     margin: 0 0 2px 0;
@@ -34,14 +34,14 @@
     letter-spacing: 0.3px;
   }
   .header-left h2 {
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 600;
     color: #334155;
     margin: 0;
   }
   .header-right {
     text-align: right;
-    font-size: 10.5px;
+    font-size: 10px;
     color: #64748b;
     line-height: 1.35;
   }
@@ -49,9 +49,9 @@
 
   .badge-tag {
     display: inline-block;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9.5px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -61,16 +61,17 @@
   .badge-green { background: #dcfce7; color: #166534; }
   .badge-purple { background: #f3e8ff; color: #6b21a8; }
   .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-gray { background: #f1f5f9; color: #334155; }
 
   .plan-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 10px;
-    font-size: 11px;
+    margin-bottom: 8px;
+    font-size: 10.5px;
   }
   .plan-table th, .plan-table td {
     border: 1px solid #cbd5e1;
-    padding: 5px 8px;
+    padding: 4px 6px;
     text-align: left;
   }
   .plan-table th {
@@ -81,90 +82,90 @@
   .plan-table tr:nth-child(even) { background-color: #fbfcfe; }
 
   .sec-title {
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 800;
     color: #701a24;
-    border-left: 3.5px solid #701a24;
-    padding-left: 7px;
-    margin: 10px 0 6px 0;
+    border-left: 3px solid #701a24;
+    padding-left: 6px;
+    margin: 8px 0 5px 0;
     text-transform: uppercase;
   }
   .sub-title {
-    font-size: 12px;
+    font-size: 11.2px;
     font-weight: 700;
     color: #0f172a;
-    margin: 8px 0 3px 0;
+    margin: 6px 0 2px 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
   }
 
   .script-box {
     background: #fdf2f4;
     border: 1px solid #fecdd3;
-    border-left: 3.5px solid #e11d48;
+    border-left: 3px solid #e11d48;
     border-radius: 4px;
-    padding: 7px 10px;
-    margin: 4px 0 6px 0;
+    padding: 5px 8px;
+    margin: 3px 0 4px 0;
   }
   .script-box .label {
     font-weight: 700;
     color: #9f1239;
-    font-size: 10px;
+    font-size: 9.5px;
     text-transform: uppercase;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
   .script-box .content {
     font-style: italic;
     color: #1f2937;
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
   .explain-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-left: 3.5px solid #3b82f6;
+    border-left: 3px solid #3b82f6;
     border-radius: 4px;
-    padding: 6px 10px;
-    margin: 4px 0 6px 0;
+    padding: 5px 8px;
+    margin: 3px 0 5px 0;
   }
   .explain-box .label {
     font-weight: 700;
     color: #1d4ed8;
-    font-size: 10px;
+    font-size: 9.5px;
     text-transform: uppercase;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
   .explain-box ul {
-    margin: 2px 0 0 16px;
+    margin: 2px 0 0 14px;
     padding: 0;
   }
-  .explain-box li { margin-bottom: 2px; }
+  .explain-box li { margin-bottom: 1.5px; }
 
   .step-list {
-    margin: 3px 0 5px 16px;
+    margin: 2px 0 4px 14px;
     padding: 0;
   }
-  .step-list li { margin-bottom: 2px; }
+  .step-list li { margin-bottom: 1.5px; }
 
   .qa-card {
     border: 1px solid #e2e8f0;
     border-radius: 4px;
-    padding: 6px 10px;
-    margin-bottom: 6px;
+    padding: 5px 8px;
+    margin-bottom: 5px;
     background: #ffffff;
   }
   .qa-q {
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 3px;
-    font-size: 11.5px;
+    margin-bottom: 2px;
+    font-size: 10.8px;
   }
   .qa-a {
     color: #334155;
-    line-height: 1.4;
+    line-height: 1.35;
   }
   .qa-a strong { color: #0f172a; }
 
@@ -174,44 +175,44 @@
   }
   .footer-note {
     border-top: 1px solid #e2e8f0;
-    padding-top: 5px;
-    margin-top: 8px;
-    font-size: 9.5px;
+    padding-top: 4px;
+    margin-top: 6px;
+    font-size: 9px;
     color: #64748b;
     text-align: center;
   }
   code {
     background: #f1f5f9;
-    padding: 1px 4px;
+    padding: 1px 3px;
     border-radius: 3px;
     font-family: Consolas, monospace;
-    font-size: 10.5px;
+    font-size: 10px;
     color: #0f172a;
   }
 </style>
 </head>
 <body>
 
-<!-- ================= TRANG 1 ================= -->
+<!-- ================= TRANG 1: LỘ TRÌNH 15 PHÚT & DEMO WEB THẬT ================= -->
 <div class="header-box">
   <div class="header-left">
-    <h1>Kịch Bản Thuyết Trình &amp; Hướng Dẫn Demo Thực Chiến</h1>
-    <h2>Hệ thống Quản lý Đào tạo EduFlaw — BTL Cơ sở An toàn thông tin (PTIT)</h2>
+    <h1>Kịch Bản Thuyết Trình &amp; Hướng Dẫn Demo Thực Chiến Toàn Diện</h1>
+    <h2>Hệ thống Quản lý Đào tạo EduFlaw — BTL Cơ sở An toàn thông tin (PTIT Hà Nội)</h2>
   </div>
   <div class="header-right">
     <div><strong>Nhóm 7 — Khóa D24</strong></div>
     <div>GVHD: <strong>ThS. Đỗ Xuân Chợ</strong></div>
-    <div>Chuẩn: <strong>OWASP Top 10:2025</strong></div>
+    <div>Chuẩn đánh giá: <strong>OWASP Top 10:2025</strong></div>
   </div>
 </div>
 
-<h2 class="sec-title">1. Phân Bổ Thời Gian 15 Phút Bảo Vệ Đồ Án</h2>
+<h2 class="sec-title">1. Phân Bổ Thời Gian 15 Phút Bảo Vệ Đồ Án Trước Hội Đồng</h2>
 <table class="plan-table">
   <thead>
     <tr>
-      <th style="width: 15%;">Màn diễn</th>
-      <th style="width: 25%;">Nội dung trọng tâm</th>
-      <th style="width: 25%;">Thao tác thực hiện</th>
+      <th style="width: 15%;">Phân đoạn</th>
+      <th style="width: 25%;">Trọng tâm nội dung</th>
+      <th style="width: 25%;">Công cụ / Thao tác</th>
       <th style="width: 35%;">Mục tiêu thuyết phục Thầy cô</th>
     </tr>
   </thead>
@@ -219,86 +220,85 @@
     <tr>
       <td><strong>MÀN 1 (3 phút)</strong></td>
       <td>Slide Kiến trúc &amp; Mô hình đe dọa</td>
-      <td>Trình chiếu Slide Canva / PPTX</td>
-      <td>Đặt vấn đề: 4 trọng tâm OWASP 2025: A01 (IDOR), A03 (Supply Chain), A07 (Auth), A10 (Fail-Closed).</td>
+      <td>Slide Canva / PPTX</td>
+      <td>Tổng quan EduFlaw; 4 trọng tâm OWASP 2025: A01 (IDOR), A03 (Supply Chain), A07 (Auth), A10 (Fail-Closed).</td>
     </tr>
     <tr>
       <td><strong>MÀN 2 (4 phút)</strong></td>
       <td><strong>Demo Web thật &amp; DevTools</strong></td>
       <td>Nhấp đúp <code>1_CHAY_WEB_DEMO.bat</code></td>
-      <td><strong>Minh chứng A01 &amp; A03 trên Web thật</strong> (IDOR, phân quyền 3 vai trò, chặn SRI đỏ rực ở F12).</td>
+      <td><strong>Minh chứng A01 &amp; A03 trên Web thật</strong> (Phân quyền 3 vai trò, thử IDOR trên URL, chặn SRI đỏ rực ở F12).</td>
     </tr>
     <tr>
-      <td><strong>MÀN 3 (4 phút)</strong></td>
+      <td><strong>MÀN 3 (5 phút)</strong></td>
       <td><strong>Live Pentest Console</strong></td>
       <td>Nhấp đúp <code>4_CHAY_KIEM_THU_PENTEST.bat</code></td>
-      <td><strong>Bảng kiểm thử tấn công tự động:</strong> A01 (3 kịch bản), A03 (SRI live), A07 (Khóa 429), A10 (0 lỗi 5xx).</td>
+      <td><strong>Tấn công tự động 7 kịch bản:</strong> A01 (3 test), A03 (SRI live), A07 (Khóa 429), A10 (0 lỗi 5xx), Fuzzing 69 routes, CSDL.</td>
     </tr>
     <tr>
-      <td><strong>MÀN 4 (4 phút)</strong></td>
+      <td><strong>MÀN 4 (3 phút)</strong></td>
       <td>Pháp chứng CSDL &amp; Phản biện</td>
-      <td>Soi MySQL + Trả lời Q&amp;A</td>
-      <td>Minh chứng số CCCD mã hóa AES-256-GCM, bảo vệ toàn vẹn điểm và trả lời trôi chảy mọi câu hỏi bẫy.</td>
+      <td>Soi CSDL MySQL + Trả lời Q&amp;A</td>
+      <td>Chứng minh CCCD mã hóa AES-256-GCM, Audit Trail sửa điểm và giải quyết thuyết phục 7 câu hỏi phản biện.</td>
     </tr>
   </tbody>
 </table>
 
-<h2 class="sec-title">2. Kịch Bản Biểu Diễn A01 &amp; A03 Trên Ứng Dụng Web Thật (Màn 2)</h2>
-<p style="margin: 0 0 6px 0; color: #475569;">
-  💡 <strong>Thao tác:</strong> Nhấp đúp vào <code>1_CHAY_WEB_DEMO.bat</code>. Trình duyệt tự mở <code>http://127.0.0.1:5000/login</code>.
+<h2 class="sec-title">2. Kịch Bản Biểu Diễn Màn 2: Ứng Dụng Web Thật &amp; DevTools F12</h2>
+<p style="margin: 0 0 4px 0; color: #475569;">
+  💡 <strong>Khởi động:</strong> Nhấp đúp chuột vào <strong><code>1_CHAY_WEB_DEMO.bat</code></strong>. Web tự khởi động tại <code>http://127.0.0.1:5000/login</code> với các nút đăng nhập 1-click tiện lợi.
 </p>
 
 <!-- DEMO A01 TRÊN WEB -->
 <h3 class="sub-title">
   <span class="badge-tag badge-red">A01:2025</span>
-  Biểu Diễn Chống IDOR &amp; Phân Quyền Trên Giao Diện Web
+  Biểu Diễn Chống IDOR &amp; Phân Quyền 3 Vai Trò Trực Tiếp Trên Web
 </h3>
 <ol class="step-list">
-  <li>Bấm nút tiện ích <strong>"Sinh viên 1"</strong> trên trang đăng nhập (tài khoản <code>b24dcat001</code>).</li>
-  <li>Vào trang <strong>Xem điểm học phần</strong> (URL: <code>/student/grades</code>). Bảng điểm của sinh viên hiện ra.</li>
-  <li><strong>Thao tác tấn công IDOR:</strong> Trên thanh địa chỉ URL, gõ thêm <code>?student_id=2</code> rồi Enter.
-    <br><em>Kết quả:</em> Trang web vẫn hiển thị đúng điểm của Sinh viên 1. Tham số do client truyền lên bị bỏ qua hoàn toàn.
+  <li>Bấm nút <strong>"Sinh viên 1"</strong> (tài khoản <code>b24dcat001</code>). Vào mục <strong>Xem điểm học phần</strong> (URL: <code>/student/grades</code>). Bảng điểm của Đặng Tuấn Bình hiện ra.</li>
+  <li><strong>Thao tác tấn công IDOR:</strong> Trên URL trình duyệt, gõ thêm: <code>?student_id=2</code> rồi bấm Enter.
+    <br><em>Hiện tượng:</em> Web tải lại nhưng <strong>vẫn hiển thị đúng bảng điểm của Sinh viên 1</strong>. Tham số client gửi lên bị vô hiệu hóa hoàn toàn.
   </li>
-  <li><strong>Thao tác tấn công leo thang dọc:</strong> Gõ thẳng <code>http://127.0.0.1:5000/master</code> rồi Enter.
-    <br><em>Kết quả:</em> Trình duyệt ngay lập tức đá văng người dùng về <code>/student</code>, không lộ bất kỳ thông tin nào.
+  <li><strong>Thao tác tấn công leo thang dọc:</strong> Gõ thẳng trên thanh URL: <code>http://127.0.0.1:5000/master</code> rồi bấm Enter.
+    <br><em>Hiện tượng:</em> Trình duyệt <strong>lập tức đá văng về `/student`</strong>, sinh viên không xem được bảng quản trị.
   </li>
-  <li><strong>Thao tác can thiệp chéo:</strong> Đăng xuất, đăng nhập <strong>"Giảng viên 2"</strong> (gv.002, không dạy lớp 243198). Thử chỉnh sửa điểm lớp của gv.001 -> Web hiển thị cảnh báo đỏ: <code>⛔ Bạn không có quyền chỉnh sửa điểm của lớp học phần này!</code> (HTTP 403).</li>
+  <li><strong>Thao tác can thiệp chéo giữa 2 GV:</strong> Đăng xuất, bấm <strong>"Giảng viên 2"</strong> (gv.002, không dạy lớp 243198). Thử chỉnh sửa ô điểm của lớp gv.001 -> Web hiển thị cảnh báo đỏ cấm quyền: <code>⛔ Bạn không có quyền chỉnh sửa điểm của lớp học phần này!</code> (HTTP 403).</li>
 </ol>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
   <div class="content">
-    "Kính thưa Thầy, em xin chứng minh khả năng phòng thủ lỗ hổng Phân quyền A01. Đầu tiên là IDOR: Kẻ tấn công dùng tài khoản sinh viên 1, cố tình sửa tham số trên URL thành student_id=2 để soi điểm của sinh viên khác. Như Thầy thấy, màn hình vẫn hiển thị nguyên vẹn điểm của sinh viên 1. Lý do vì máy chủ EduFlaw tuyệt đối không tin dữ liệu client gửi lên mà neo chặt danh tính vào session đã ký số session['user_id']. Khi sinh viên gõ URL quản trị /master, decorator @role_required lập tức chặn đứng và điều hướng về trang sinh viên. Khi Giảng viên 2 cố sửa điểm lớp của Giảng viên 1, máy chủ trả về mã HTTP 403 Forbidden, bảo vệ triệt để tính toàn vẹn điểm số."
+    "Kính thưa Thầy, em xin chứng minh khả năng phòng thủ lỗ hổng Phân quyền A01 ngay trên web thật. Kẻ tấn công dùng tài khoản Sinh viên 1, cố tình sửa URL thành student_id=2 để soi trộm điểm của bạn khác. Như Thầy thấy, màn hình vẫn hiển thị nguyên vẹn điểm của Sinh viên 1. Lý do vì máy chủ EduFlaw tuyệt đối không tin tham số client mà neo chặt danh tính vào session đã ký số session['user_id']. Khi sinh viên cố tình gõ URL quản trị /master, hệ thống lập tức chặn đứng và chuyển hướng về trang sinh viên. Khi Giảng viên 2 cố sửa trộm điểm của lớp do Giảng viên 1 phụ trách, máy chủ từ chối với mã HTTP 403 Forbidden."
   </div>
 </div>
 
 <!-- DEMO A03 TRÊN WEB -->
 <h3 class="sub-title">
   <span class="badge-tag badge-purple">A03:2025</span>
-  Biểu Diễn Kiểm Tra Toàn Vẹn SRI Bằng Google Chrome / Edge DevTools (F12)
+  Biểu Diễn Cơ Chế Chống Đầu Độc CDN Bằng W3C SRI Trong Chrome / Edge DevTools (F12)
 </h3>
 <ol class="step-list">
-  <li>Tại trang đăng nhập <code>http://127.0.0.1:5000/login</code>, bấm phím <strong>F12</strong> để mở DevTools.</li>
+  <li>Tại trang <code>http://127.0.0.1:5000/login</code>, bấm phím <strong>F12</strong> để mở Developer Tools.</li>
   <li>Chọn tab <strong>Elements</strong>, chỉ vào dòng thẻ:
     <br><code>&lt;script src="https://cdn.jsdelivr.net/...sweetalert2@11.10.5/..." integrity="sha256-+0Qf8IHM..." crossorigin="anonymous"&gt;&lt;/script&gt;</code>
   </li>
-  <li><strong>Thao tác "ăn điểm tuyệt đối":</strong> Nhấp đúp vào giá trị thuộc tính <code>integrity</code>, cố tình sửa ký tự cuối cùng thành chữ cái khác (ví dụ: đổi <code>I=</code> thành <code>X=</code>) rồi bấm Enter. Sau đó nhấn <strong>Ctrl + F5</strong> tải lại trang.</li>
+  <li><strong>Thao tác thực chiến "ăn điểm 10":</strong> Nhấp đúp vào giá trị thuộc tính <code>integrity</code>, cố tình sửa ký tự cuối cùng thành chữ khác (ví dụ: đổi <code>I=</code> thành <code>X=</code>) rồi bấm Enter. Sau đó nhấn <strong>Ctrl + F5</strong> tải lại trang.</li>
   <li>Chuyển ngay sang tab <strong>Console</strong> của DevTools.</li>
 </ol>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
   <div class="content">
-    "Thưa Thầy, A03:2025 là hạng mục hoàn toàn mới về Rủi ro Chuỗi cung ứng phần mềm. EduFlaw sử dụng thư viện giao diện SweetAlert2 từ CDN jsDelivr. Nhóm áp dụng chuẩn W3C Subresource Integrity (SRI) bằng cách ghim mã băm SHA-256 và cờ crossorigin='anonymous'. Để chứng minh tính hiệu quả thực tế, em vừa sửa thử 1 ký tự mã băm trong DevTools để giả lập kịch bản CDN bị hacker đầu độc mã độc đánh cắp mật khẩu. Khi tải lại trang, Thầy thấy ngay trên tab Console của trình duyệt xuất hiện dòng chữ đỏ rực: 'Failed to find a valid digest in the integrity attribute... The resource has been blocked'. Trình duyệt đã phát hiện sai lệch toàn vẹn và lập tức tiêu diệt file ngay tại cổng mạng, bảo vệ 100% mật khẩu của người dùng."
+    "Thưa Thầy, A03:2025 là hạng mục mới về Chuỗi cung ứng phần mềm. EduFlaw sử dụng thư viện SweetAlert2 từ CDN jsDelivr. Nhóm áp dụng chuẩn W3C Subresource Integrity (SRI) ghim mã băm SHA-256 và cờ crossorigin='anonymous'. Em vừa sửa thử 1 ký tự mã băm trong DevTools để giả lập kịch bản máy chủ CDN bị hacker chèn mã độc đánh cắp mật khẩu. Khi tải lại trang, Thầy thấy ngay trên tab Console xuất hiện dòng chữ đỏ rực: 'Failed to find a valid digest in the integrity attribute... The resource has been blocked'. Trình duyệt phát hiện mã băm không khớp và tiêu diệt file ngay tại cổng mạng, bảo vệ 100% tài khoản người dùng."
   </div>
 </div>
 
 <div class="page-break"></div>
 
-<!-- ================= TRANG 2 ================= -->
+<!-- ================= TRANG 2: LIVE ATTACK CONSOLE (BÀI 1 & BÀI 2) ================= -->
 <h2 class="sec-title" style="margin-top: 0;">3. Kịch Bản Biểu Diễn Live Pentest Console (Màn 3 — Trọng Tâm)</h2>
-<p style="margin: 0 0 6px 0; color: #475569;">
-  💡 <strong>Thao tác:</strong> Nhấp đúp vào file <strong><code>4_CHAY_KIEM_THU_PENTEST.bat</code></strong>. Bảng điều khiển màu đen xuất hiện.
+<p style="margin: 0 0 5px 0; color: #475569;">
+  💡 <strong>Khởi động:</strong> Tại thư mục gốc, nhấp đúp <strong><code>4_CHAY_KIEM_THU_PENTEST.bat</code></strong>. Cửa sổ màu đen xuất hiện.
 </p>
 
 <!-- BÀI 1: A01 -->
@@ -306,7 +306,7 @@
   <span class="badge-tag badge-red">Bài 1</span>
   Kiểm Thử Kiểm Soát Truy Cập &amp; Chống IDOR (OWASP A01:2025)
 </h3>
-<p style="margin: 0 0 3px 0;"><strong>Thao tác:</strong> Tại menu chính, bạn gõ số <strong><code>1</code></strong> rồi bấm <strong>Enter</strong>.</p>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Tại menu chính, bạn gõ số <strong><code>1</code></strong> rồi bấm <strong>Enter</strong>.</p>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
@@ -318,8 +318,9 @@
 <div class="explain-box">
   <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
   <ul>
-    <li><strong>Session-Bound Identity:</strong> Hàm <code>view_grades()</code> trong <code>student.py</code> lấy <code>session['user_id']</code> trực tiếp từ cookie Flask được ký HMAC-SHA256, vô hiệu hóa hoàn toàn kỹ thuật thao túng URL Parameter.</li>
-    <li><strong>Object-Level Access Control:</strong> API <code>/admin/grades/api/auto-save</code> kiểm tra quyền sở hữu dòng điểm <code>WHERE lecturer_id == session['user_id']</code> trước khi cho phép ghi nhận vào CSDL.</li>
+    <li><strong>Kịch bản 1.1 (IDOR Ngang):</strong> Hàm <code>view_grades()</code> trong <code>student.py</code> lấy <code>session['user_id']</code> trực tiếp từ cookie Flask được ký HMAC-SHA256, vô hiệu hóa hoàn toàn kỹ thuật thao túng URL Parameter.</li>
+    <li><strong>Kịch bản 1.2 (Leo thang Dọc):</strong> 5/5 route quản trị (<code>/master</code>, <code>/master/students</code>, <code>/master/grades</code>, <code>/admin</code>, <code>/admin/grades</code>) được bảo vệ bằng <code>@role_required</code>, trả về HTTP 302 điều hướng an toàn.</li>
+    <li><strong>Kịch bản 1.3 (Can thiệp Chéo):</strong> API <code>/admin/grades/api/auto-save</code> xác thực quyền sở hữu dòng điểm <code>WHERE lecturer_id == session['user_id']</code>, chặn đứng với HTTP 403 Forbidden.</li>
   </ul>
 </div>
 
@@ -328,7 +329,7 @@
   <span class="badge-tag badge-purple">Bài 2</span>
   Rà Soát Chuỗi Cung Ứng &amp; Kiểm Tra Toàn Vẹn SRI (OWASP A03:2025)
 </h3>
-<p style="margin: 0 0 3px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>2</code></strong> rồi bấm <strong>Enter</strong>.</p>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>2</code></strong> rồi bấm <strong>Enter</strong>.</p>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
@@ -340,17 +341,21 @@
 <div class="explain-box">
   <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
   <ul>
-    <li><strong>Subresource Integrity:</strong> Ngăn chặn cuộc tấn công Man-in-the-Middle hoặc CDN Compromise (như sự cố polyfill.io năm 2024 ảnh hưởng hàng trăm nghìn trang web).</li>
-    <li><strong>Dependency Pinning:</strong> 10/10 thư viện trong <code>src/requirements.txt</code> ghim phiên bản cụ thể (Flask==3.1.3, PyMySQL==26.7.0...), loại bỏ nguy cơ tự động tải các gói mới bị dính backdoor hoặc lỗi thời.</li>
+    <li><strong>Kịch bản 2.1 (Kiểm toán SRI Live):</strong> Tải file trực tiếp từ CDN, tính Base64 SHA-256 digest khớp chính xác 100% với giá trị ghim trong mã nguồn, chứng minh tính toàn vẹn của mã nhúng bên thứ ba.</li>
+    <li><strong>Kịch bản 2.2 (PoC CDN Poisoning):</strong> Tiêm đoạn mã độc giả định <code>navigator.sendBeacon(...)</code> làm thay đổi hash -> Trình duyệt từ chối thực thi với thông báo vi phạm SRI.</li>
+    <li><strong>Kịch bản 2.3 (Dependency Pinning):</strong> 10/10 thư viện trong <code>src/requirements.txt</code> ghim phiên bản cụ thể (Flask==3.1.3, PyMySQL==26.7.0...), loại bỏ nguy cơ Dependency Confusion và Typosquatting.</li>
   </ul>
 </div>
 
+<div class="page-break"></div>
+
+<!-- ================= TRANG 3: LIVE ATTACK CONSOLE (BÀI 3, 4, 5, 6, 7) ================= -->
 <!-- BÀI 3: A07 -->
-<h3 class="sub-title">
+<h3 class="sub-title" style="margin-top: 0;">
   <span class="badge-tag badge-amber">Bài 3</span>
   Kiểm Thử Chống Brute-Force &amp; Khóa Tài Khoản (OWASP A07:2025)
 </h3>
-<p style="margin: 0 0 3px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>3</code></strong> rồi bấm <strong>Enter</strong>.</p>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>3</code></strong> rồi bấm <strong>Enter</strong>.</p>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
@@ -363,19 +368,16 @@
   <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
   <ul>
     <li><strong>Cơ chế khóa kép (Dual-Scope Lockout):</strong> Lưu vết cả <code>ip:127.0.0.1</code> và <code>user:b24dcat001@eduflaw.com</code> trong bảng <code>login_attempts</code>. Dù tin tặc đổi IP bằng VPN thì tài khoản sinh viên vẫn được bảo vệ.</li>
-    <li><strong>Phản hồi siêu tốc (18ms):</strong> Giúp máy chủ từ chối request rác mà không tốn tài nguyên băm mật khẩu Argon2/PBKDF2.</li>
+    <li><strong>Phản hồi siêu tốc (18ms):</strong> Từ chối request rác mà không tốn tài nguyên CPU xử lý hàm băm mật khẩu PBKDF2/Argon2.</li>
   </ul>
 </div>
 
-<div class="page-break"></div>
-
-<!-- ================= TRANG 3 ================= -->
 <!-- BÀI 4: A10 -->
-<h3 class="sub-title" style="margin-top: 0;">
+<h3 class="sub-title">
   <span class="badge-tag badge-blue">Bài 4</span>
   Kiểm Thử Xử Lý Ngoại Lệ &amp; Nguyên Tắc Fail-Closed (OWASP A10:2025)
 </h3>
-<p style="margin: 0 0 3px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>4</code></strong> rồi bấm <strong>Enter</strong>.</p>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>4</code></strong> rồi bấm <strong>Enter</strong>.</p>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
@@ -384,12 +386,18 @@
   </div>
 </div>
 
-<div class="explain-box">
-  <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
-  <ul>
-    <li><strong>Ngăn chặn Information Disclosure:</strong> Thay vì in traceback của Python ra màn hình, hệ thống trả về thông điệp lỗi chung chung, khiến kẻ tấn công không thể suy đoán cấu trúc thư mục hay phiên bản phần mềm.</li>
-    <li><strong>Buffer Overflow Handling:</strong> Chuỗi 10.000 ký tự được xử lý an toàn trong 26ms, không làm tràn bộ nhớ tiến trình.</li>
-  </ul>
+<!-- BÀI 5: QUÉT 69 ENDPOINT -->
+<h3 class="sub-title">
+  <span class="badge-tag badge-gray">Bài 5</span>
+  Quét Toàn Diện Bề Mặt Tấn Công (Attack Surface Mapping — 69 Endpoint)
+</h3>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>5</code></strong> rồi bấm <strong>Enter</strong>.</p>
+
+<div class="script-box">
+  <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
+  <div class="content">
+    "Bài 5 thực hiện Fuzzing 69 đường dẫn để tự động vẽ bản đồ xác thực mà không cần đọc code trước: 23 route nghiệp vụ được bảo vệ bằng mã HTTP 302 chuyển hướng về /login; 40 endpoint rác hoặc file nhạy cảm như .env, .git, db.sql đều trả về 404 không tồn tại. Đồng thời công cụ chỉ ra chính xác đường dẫn debug /console của Werkzeug đang mở ở môi trường dev, chứng minh khả năng rà quét phát hiện điểm yếu của công cụ."
+  </div>
 </div>
 
 <!-- BÀI 6: CSDL -->
@@ -397,57 +405,73 @@
   <span class="badge-tag badge-green">Bài 6</span>
   Điều Tra Pháp Chứng CSDL &amp; Bảo Vệ Dữ Liệu Lưu Trữ (Data-at-Rest)
 </h3>
-<p style="margin: 0 0 3px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>6</code></strong> rồi bấm <strong>Enter</strong>.</p>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>6</code></strong> rồi bấm <strong>Enter</strong>.</p>
 
 <div class="script-box">
   <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
   <div class="content">
-    "Để chứng minh an toàn ở tầng lưu trữ CSDL, em truy vấn trực tiếp vào MySQL cục bộ: Thứ nhất, toàn bộ trường số CCCD của sinh viên đều hiển thị dưới dạng chuỗi mã hóa tiền tố enc:v1: bằng thuật toán AES-256-GCM. Dù kẻ trộm có lấy được toàn bộ file Database thì số CCCD vẫn vô nghĩa nếu không có Secret Key. Thứ hai, bảng nhật ký kiểm toán ghi vết chi tiết việc giảng viên sửa điểm từ 6.5 lên 8.0 với đầy đủ thời gian và lý do phúc khảo, đảm bảo tính toàn vẹn và bất khả chối bỏ."
+    "Em truy vấn trực tiếp vào CSDL MySQL: Thứ nhất, toàn bộ trường số CCCD của sinh viên đều hiển thị dưới dạng chuỗi mã hóa tiền tố enc:v1: bằng thuật toán AES-256-GCM kết hợp Nonce ngẫu nhiên. Dù kẻ trộm có lấy được toàn bộ file Database thì số CCCD vẫn vô nghĩa nếu không có Secret Key. Thứ hai, bảng nhật ký kiểm toán grade_audit_logs ghi vết chi tiết việc giảng viên sửa điểm từ 6.5 lên 8.0 với đầy đủ thời gian và lý do phúc khảo, đảm bảo tính toàn vẹn và bất khả chối bỏ."
   </div>
 </div>
 
-<div class="explain-box">
-  <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
-  <ul>
-    <li><strong>Mã hóa trường AES-256-GCM (Field-level Encryption):</strong> Kết hợp Secret Key với Nonce ngẫu nhiên. Mỗi lần mã hóa cùng 1 số CCCD sẽ tạo ra chuỗi băm khác nhau, chống tấn công phân tích tần suất (Frequency Analysis).</li>
-    <li><strong>Audit Trail:</strong> Mọi thao tác cập nhật điểm thi đều tự động lưu vết vào <code>grade_audit_logs</code>, ngăn chặn can thiệp điểm ngầm.</li>
-  </ul>
-</div>
+<!-- BÀI 7: CHẠY TRỌN GÓI -->
+<h3 class="sub-title">
+  <span class="badge-tag badge-red">Bài 7</span>
+  Chế Độ Tự Động Hóa Trọn Gói (Auto-Run Tất Cả Các Bài Trong 60s)
+</h3>
+<p style="margin: 0 0 2px 0;"><strong>Thao tác:</strong> Gõ số <strong><code>7</code></strong> rồi bấm <strong>Enter</strong>. Hệ thống tự động kích hoạt tuần tự toàn bộ 6 bài kiểm thử từ Bài 1 đến Bài 6 liên tục mà không cần can thiệp bàn phím, chứng minh sự ổn định tuyệt đối của hệ thống.</p>
 
-<h2 class="sec-title">4. Bộ Câu Hỏi Phản Biện Chuyên Sâu &amp; Câu Trả Lời Chuẩn "Điểm 10"</h2>
+<div class="page-break"></div>
+
+<!-- ================= TRANG 4: BỘ CÂU HỎI PHẢN BIỆN CHUẨN ĐIỂM 10 ================= -->
+<h2 class="sec-title" style="margin-top: 0;">4. Bộ 7 Câu Hỏi Phản Biện Chuyên Sâu &amp; Câu Trả Lời Chuẩn "Điểm 10"</h2>
 
 <div class="qa-card">
   <div class="qa-q">❓ Câu hỏi 1 (A01): Nếu sinh viên tự sửa Session Cookie để đổi `user_id` thành của người khác thì có xem trộm điểm được không?</div>
   <div class="qa-a">
-    <strong>Trả lời:</strong> Thưa Thầy, Flask Session sử dụng cơ chế <strong>Cryptographically Signed Session</strong> được ký bằng thuật toán HMAC-SHA256 với <code>SECRET_KEY</code> lưu bí mật ở server. Cookie ở client chỉ chứa dữ liệu đã mã hóa kèm chữ ký số. Nếu sinh viên tự ý sửa dù chỉ 1 bit của <code>user_id</code> trong cookie, chữ ký số sẽ không còn khớp. Máy chủ Flask khi giải mã sẽ phát hiện chữ ký giả mạo, lập tức hủy bỏ toàn bộ phiên làm việc và đá người dùng về trang đăng nhập.
+    <strong>Trả lời:</strong> Thưa Thầy, Flask Session sử dụng cơ chế <strong>Cryptographically Signed Session</strong> được ký bằng HMAC-SHA256 với <code>SECRET_KEY</code> lưu bí mật ở server. Cookie ở client chỉ chứa dữ liệu đã mã hóa kèm chữ ký số. Nếu sinh viên tự ý sửa dù chỉ 1 bit của <code>user_id</code> trong cookie, chữ ký số sẽ không còn khớp. Máy chủ Flask khi giải mã sẽ phát hiện chữ ký giả mạo, lập tức hủy bỏ toàn bộ phiên làm việc và đá người dùng về trang đăng nhập.
   </div>
 </div>
 
 <div class="qa-card">
-  <div class="qa-q">❓ Câu hỏi 2 (A03): Tại sao bắt buộc phải có thuộc tính `crossorigin="anonymous"` khi khai báo SRI? Nếu CDN bị sập mạng thì sao?</div>
+  <div class="qa-q">❓ Câu hỏi 2 (A01): Tại sao khi sinh viên truy cập trái phép vào `/master`, nhóm lại chuyển hướng HTTP 302 thay vì trả về 403 Forbidden?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, theo khuyến nghị của OWASP, việc trả về mã 403 Forbidden vô tình xác nhận cho kẻ tấn công biết rằng URL này thực sự tồn tại trên hệ thống (Information Disclosure). Bằng cách chuyển hướng 302 về trang Dashboard đúng vai trò, hệ thống vừa tối ưu trải nghiệm người dùng thông thường khi gõ nhầm link, vừa hạn chế tối đa việc hỗ trợ kẻ tấn công do thám cấu trúc ứng dụng.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 3 (A03): Tại sao bắt buộc phải có thuộc tính `crossorigin="anonymous"` khi khai báo SRI? Nếu CDN bị sập mạng thì sao?</div>
   <div class="qa-a">
     <strong>Trả lời:</strong> Thưa Thầy, theo chính sách Same-Origin Policy của W3C, khi tải file JavaScript từ nguồn khác tên miền (Cross-Origin), nếu không có cờ <code>crossorigin="anonymous"</code>, trình duyệt sẽ không được phép đọc nội dung byte thô của file để tính mã băm SHA-256, dẫn đến việc kiểm tra SRI bị vô hiệu hóa. Về tính khả dụng: SRI bảo vệ tính toàn vẹn (Integrity), nếu CDN sập thì trang web mất hiệu ứng hộp thoại nhưng không bị lộ dữ liệu. Trong môi trường doanh nghiệp, giải pháp hoàn chỉnh nhất là tự lưu trữ nội bộ (Self-hosting) kết hợp CDN fallback có SRI.
   </div>
 </div>
 
 <div class="qa-card">
-  <div class="qa-q">❓ Câu hỏi 3 (A07): Tại sao nhóm chọn khóa tài khoản trong 60 giây mà không khóa vĩnh viễn luôn? Nếu hacker dùng Botnet nhiều IP thì sao?</div>
+  <div class="qa-q">❓ Câu hỏi 4 (A07): Tại sao nhóm chọn khóa tài khoản trong 60 giây mà không khóa vĩnh viễn luôn? Nếu hacker dùng Botnet nhiều IP thì sao?</div>
   <div class="qa-a">
     <strong>Trả lời:</strong> Thưa Thầy, theo chuẩn NIST SP 800-63B, khóa vĩnh viễn sẽ tạo ra lỗ hổng Từ chối dịch vụ (DoS) vì kẻ xấu chỉ cần cố tình gõ sai tài khoản của bạn bè để cả trường bị khóa. Khóa 60s (Rate-limit) đủ làm tê liệt mọi công cụ dò quét tự động. Nếu hacker dùng Botnet đổi hàng nghìn IP, cơ chế <strong>Dual-Scope Throttle</strong> của EduFlaw vẫn đếm theo khóa <code>user:&lt;account&gt;</code> và khóa tài khoản đó trên phạm vi toàn cầu.
   </div>
 </div>
 
 <div class="qa-card">
-  <div class="qa-q">❓ Câu hỏi 4 (A10): Tại sao nhóm lại coi việc trả về lỗi HTTP 500 là điểm yếu bảo mật (OWASP A10)?</div>
+  <div class="qa-q">❓ Câu hỏi 5 (A10): Tại sao nhóm lại coi việc trả về lỗi HTTP 500 là điểm yếu bảo mật (OWASP A10)?</div>
   <div class="qa-a">
     <strong>Trả lời:</strong> Thưa Thầy, mã lỗi HTTP 500 thường đi kèm với việc ứng dụng bị sập ngoại lệ chưa bắt (Unhandled Exception), dẫn đến rò rỉ Stack Trace, tên thư viện và câu lệnh SQL. Tin tặc sẽ lợi dụng các thông tin này để vẽ sơ đồ kiến trúc hệ thống và xây dựng payload khai thác chính xác. EduFlaw áp dụng nguyên tắc Fail-Closed: bắt gọn mọi ngoại lệ, ghi log nội bộ và trả về mã lỗi 400 cùng câu thông báo chung chung, giữ kín toàn bộ chi tiết kỹ thuật.
   </div>
 </div>
 
 <div class="qa-card">
-  <div class="qa-q">❓ Câu hỏi 5: Khóa bí mật dùng để mã hóa số CCCD được lưu ở đâu? Nếu hacker dump được CSDL thì có giải mã được không?</div>
+  <div class="qa-q">❓ Câu hỏi 6: Khóa bí mật dùng để mã hóa số CCCD được lưu ở đâu? Nếu hacker dump được CSDL thì có giải mã được không?</div>
   <div class="qa-a">
     <strong>Trả lời:</strong> Thưa Thầy, khóa mã hóa CCCD (<code>SECRET_KEY</code>) được tách biệt hoàn toàn khỏi Database và chỉ lưu dưới dạng biến môi trường trong file <code>.env</code> trên hệ điều hành máy chủ. Dù hacker có Dump được toàn bộ file MySQL thì trong bảng <code>student_profiles</code> cũng chỉ thu được các chuỗi ngẫu nhiên <code>enc:v1:...</code>. Nếu không chiếm được quyền root máy chủ ứng dụng, dữ liệu CCCD của sinh viên an toàn tuyệt đối.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 7: Nhóm làm thế nào để đảm bảo Giảng viên không tự ý sửa điểm rồi xóa vết trong CSDL?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, hệ thống đảm bảo tính Bất khả chối bỏ (Non-repudiation) qua 3 tầng: 1. Giảng viên chỉ có quyền sửa điểm lớp mình phụ trách (Chống IDOR); 2. Mỗi thao tác lưu điểm đều tự động tạo 1 bản ghi vào bảng <code>grade_audit_logs</code> ghi rõ người sửa, giờ sửa, điểm cũ, điểm mới và lý do; 3. Giảng viên hoàn toàn không được cấp quyền <code>DELETE</code> trên bảng audit logs.
   </div>
 </div>
 
