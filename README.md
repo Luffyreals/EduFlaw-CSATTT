@@ -91,8 +91,8 @@ Yêu cầu đã cài đặt [Docker Desktop](https://www.docker.com/products/doc
 
 ```bash
 # 1. Clone mã nguồn
-git clone https://github.com/Luffyreals/EduFlaw.git
-cd EduFlaw
+git clone https://github.com/Luffyreals/EduFlaw-CSATTT.git
+cd EduFlaw-CSATTT
 
 # 2. Khởi chạy toàn bộ hệ thống (Web + Database)
 docker compose up
