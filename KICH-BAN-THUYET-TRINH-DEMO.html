@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Kịch Bản Thuyết Trình &amp; Hướng Dẫn Demo Bảo Mật EduFlaw</title>
+<style>
+  @page {
+    size: A4;
+    margin: 11mm 13mm 11mm 13mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    line-height: 1.45;
+    font-size: 12.5px;
+    margin: 0;
+    padding: 0;
+  }
+  .header-box {
+    border-bottom: 2.5px double #701a24;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .header-left h1 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #701a24;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .header-left h2 {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.35;
+  }
+  .header-right strong { color: #0f172a; }
+
+  .badge-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #e0f2fe; color: #075985; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+
+  h2.sec-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+    border-left: 3.5px solid #701a24;
+    padding-left: 8px;
+    margin: 12px 0 8px 0;
+    text-transform: uppercase;
+  }
+  h3.sub-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 10px 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .script-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 3.5px solid #2563eb;
+    border-radius: 5px;
+    padding: 7px 11px;
+    margin: 5px 0 7px 0;
+  }
+  .script-box .label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+  }
+  .script-box .content {
+    font-style: italic;
+    color: #0f172a;
+    line-height: 1.42;
+  }
+
+  .explain-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 3.5px solid #16a34a;
+    border-radius: 5px;
+    padding: 6px 11px;
+    margin: 5px 0 9px 0;
+  }
+  .explain-box .label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #16a34a;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+  }
+  .explain-box ul {
+    margin: 2px 0 2px 18px;
+    padding: 0;
+  }
+  .explain-box li {
+    margin-bottom: 2px;
+  }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0 10px 0;
+    font-size: 11.5px;
+  }
+  table.data-table th, table.data-table td {
+    border: 1px solid #cbd5e1;
+    padding: 5px 8px;
+    text-align: left;
+  }
+  table.data-table th {
+    background: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  table.data-table tr:nth-child(even) { background: #f8fafc; }
+
+  code {
+    font-family: Consolas, "JetBrains Mono", monospace;
+    font-size: 11px;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #b91c1c;
+    border: 1px solid #e2e8f0;
+  }
+
+  .qa-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 7px 11px;
+    margin-bottom: 7px;
+  }
+  .qa-q {
+    font-weight: 700;
+    color: #701a24;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+  .qa-a {
+    color: #334155;
+    font-size: 11.8px;
+    line-height: 1.42;
+  }
+
+  .page-break { page-break-after: always; }
+  .footer-note {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 10.5px;
+    color: #64748b;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= TRANG 1 ================= -->
+<div class="header-box">
+  <div class="header-left">
+    <h1>Kịch Bản Thuyết Trình &amp; Demo Bảo Mật</h1>
+    <h2>Hệ Thống Quản Lý Đào Tạo EduFlaw — Tiêu Chuẩn OWASP Top 10:2025</h2>
+  </div>
+  <div class="header-right">
+    <div><strong>Học phần:</strong> Cơ sở An toàn thông tin</div>
+    <div><strong>Nhóm sinh viên:</strong> Nhóm 7 (Khóa D24 - PTIT)</div>
+    <div><strong>Giảng viên hướng dẫn:</strong> ThS. Đỗ Xuân Chợ</div>
+  </div>
+</div>
+
+<h2 class="sec-title" style="margin-top: 0;">1. Cấu Trúc Buổi Thuyết Trình Bảo Vệ BTL (Tổng 15 Phút)</h2>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th style="width: 16%;">Thời lượng</th>
+      <th style="width: 22%;">Nội dung trọng tâm</th>
+      <th style="width: 26%;">Thao tác thực hiện</th>
+      <th style="width: 36%;">Mục tiêu cần đạt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MÀN 1 (3 phút)</strong></td>
+      <td>Kiến trúc &amp; Mô hình đe dọa</td>
+      <td>Trình chiếu Slide bài báo cáo</td>
+      <td>Trình bày 4 lỗ hổng OWASP 2025: A01 (IDOR), A03 (Supply Chain), A07 (Auth), A10 (Fail-Closed).</td>
+    </tr>
+    <tr>
+      <td><strong>MÀN 2 (4 phút)</strong></td>
+      <td>Demo ứng dụng Web thực tế</td>
+      <td>Nhấp đúp <code>1_CHAY_WEB_DEMO.bat</code></td>
+      <td>Biểu diễn phân quyền 3 vai trò: Master, Giảng viên (nhập điểm), Sinh viên (xem điểm).</td>
+    </tr>
+    <tr>
+      <td><strong>MÀN 3 (4 phút)</strong></td>
+      <td><strong>Live Pentest Console (Trọng tâm)</strong></td>
+      <td>Nhấp đúp <code>4_CHAY_KIEM_THU_PENTEST.bat</code></td>
+      <td><strong>Biểu diễn console kiểm thử an toàn thông tin</strong> (Chặn dò mật khẩu HTTP 429, 0 lỗi 5xx).</td>
+    </tr>
+    <tr>
+      <td><strong>MÀN 4 (4 phút)</strong></td>
+      <td>Pháp chứng CSDL &amp; Hỏi đáp</td>
+      <td>Bảng Audit Log + Trả lời phản biện</td>
+      <td>Minh chứng số CCCD mã hóa AES-256-GCM, bảo vệ toàn vẹn điểm số và phản biện chuyên sâu.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="sec-title">2. Kịch Bản Chi Tiết Phần Live Demo (Màn 3 — Trọng Tâm)</h2>
+<p style="margin: 0 0 8px 0; color: #475569; font-size: 12px;">
+  💡 <strong>Thao tác:</strong> Tại thư mục gốc dự án, <strong>nhấp đúp chuột vào <code>4_CHAY_KIEM_THU_PENTEST.bat</code></strong>. Cửa sổ màu đen chuyên nghiệp xuất hiện. Sau đó bạn gõ số bài tương ứng:
+</p>
+
+<!-- BÀI 3 TRƯỚC (ẤN TƯỢNG NHẤT) -->
+<h3 class="sub-title">
+  <span class="badge-tag badge-red">Bài 3</span>
+  Kiểm Thử Chống Brute-Force &amp; Khóa Tài Khoản (OWASP A07:2025)
+</h3>
+<p style="margin: 0 0 4px 0;"><strong>Thao tác:</strong> Tại menu chính, bạn gõ số <strong><code>3</code></strong> rồi bấm <strong>Enter</strong>.</p>
+
+<div class="script-box">
+  <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
+  <div class="content">
+    "Kính thưa Thầy, em xin biểu diễn kịch bản phòng thủ lỗ hổng Xác thực A07. Kẻ tấn công sử dụng công cụ dội thử liên tiếp 7 mật khẩu sai vào tài khoản sinh viên b24dcat001. Như Thầy thấy trên màn hình: Từ lần 1 đến lần 4, máy chủ báo sai mật khẩu (HTTP 200). Đúng đến lần thứ 5, hệ thống kích hoạt cơ chế khóa bảo vệ, trả về mã HTTP 429 Too Many Requests và khóa cứng IP cùng tài khoản trong 60 giây. Các lần thử 6 và 7 đều bị từ chối ngay lập tức."
+  </div>
+</div>
+
+<div class="explain-box">
+  <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
+  <ul>
+    <li><strong>Thời gian phản hồi:</strong> Các lần thử bị khóa phản hồi cực nhanh (chỉ từ 6ms - 19ms), giúp máy chủ không bị tốn tài nguyên CPU xử lý mật khẩu băm.</li>
+    <li><strong>Cơ chế khóa kép (Dual-Scope Lockout):</strong> Máy chủ lưu vết cả <code>ip:127.0.0.1</code> và <code>user:b24dcat001@eduflaw.com</code> trong bảng CSDL <code>login_attempts</code>. Dù tin tặc đổi IP bằng VPN/Proxy thì tài khoản sinh viên vẫn được bảo vệ nguyên vẹn.</li>
+  </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ================= TRANG 2 ================= -->
+<h3 class="sub-title" style="margin-top: 0;">
+  <span class="badge-tag badge-amber">Bài 2</span>
+  Kiểm Thử Xử Lý Ngoại Lệ &amp; Nguyên Tắc Fail-Closed (OWASP A10:2025)
+</h3>
+<p style="margin: 0 0 4px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>2</code></strong> rồi bấm <strong>Enter</strong>.</p>
+
+<div class="script-box">
+  <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
+  <div class="content">
+    "Tiếp theo là kịch bản kiểm thử xử lý điều kiện ngoại lệ A10. Em gửi liên tục 23 payload độc hại gồm SQL Injection, XSS, Path Traversal, Null Byte và chuỗi dài 10.000 ký tự vào API xác thực để ép máy chủ phát sinh lỗi. Kết quả đạt 0 lỗi 5xx trên toàn bộ 23 payload, độ trễ trung bình chỉ 20ms. Hệ thống bắt toàn bộ ngoại lệ theo nguyên tắc Fail-Closed: đóng cửa an toàn, không crash server và tuyệt đối không để lộ Stack Trace ra ngoài."
+  </div>
+</div>
+
+<div class="explain-box">
+  <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
+  <ul>
+    <li><strong>Chuỗi rỗng / Khoảng trắng:</strong> Bị chặn ngay từ tầng xác thực định dạng, trả về <code>HTTP 400 Bad Request</code> (chỉ 24ms).</li>
+    <li><strong>Buffer Overflow (Chuỗi 10.000 ký tự):</strong> Xử lý an toàn trong 26ms, không xảy ra tràn bộ nhớ hay treo tiến trình Python.</li>
+    <li><strong>0 Lỗi 5xx (Internal Server Error):</strong> Chứng minh nhóm không dùng câu lệnh thô thiếu <code>try/except</code>, ngăn chặn hoàn toàn việc hacker đọc thông báo lỗi để suy ra cấu trúc bảng CSDL.</li>
+  </ul>
+</div>
+
+<h3 class="sub-title">
+  <span class="badge-tag badge-green">Bài 4</span>
+  Điều Tra Pháp Chứng CSDL &amp; Tính Toàn Vẹn Dữ Liệu Lưu Trữ (Data-at-Rest)
+</h3>
+<p style="margin: 0 0 4px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>4</code></strong> rồi bấm <strong>Enter</strong>.</p>
+
+<div class="script-box">
+  <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
+  <div class="content">
+    "Để chứng minh an toàn ở tầng lưu trữ CSDL, em truy vấn trực tiếp vào MySQL cục bộ: Thứ nhất, toàn bộ trường số CCCD của sinh viên đều hiển thị dưới dạng chuỗi mã hóa tiền tố enc:v1: bằng thuật toán AES-256-GCM. Dù kẻ trộm có lấy được toàn bộ file Database thì số CCCD vẫn vô nghĩa nếu không có Secret Key. Thứ hai, bảng nhật ký kiểm toán ghi vết chi tiết việc giảng viên sửa điểm từ 6.5 lên 8.0 với đầy đủ thời gian và lý do phúc khảo, đảm bảo tính toàn vẹn và bất khả chối bỏ."
+  </div>
+</div>
+
+<div class="explain-box">
+  <span class="label">Bản chất kỹ thuật &amp; Kết quả đo đạc:</span>
+  <ul>
+    <li><strong>Mã hóa AES-256-GCM (Field-level Encryption):</strong> Không dùng khóa cố định mà kết hợp Secret Key với Nonce ngẫu nhiên. Mỗi lần mã hóa cùng 1 số CCCD sẽ tạo ra chuỗi băm khác nhau, chống tấn công dò tìm mẫu (Frequency Analysis).</li>
+    <li><strong>Audit Trail:</strong> Ràng buộc mọi thao tác <code>UPDATE</code> trên cột điểm thi bắt buộc phải ghi 1 bản ghi vào bảng <code>grade_audit_logs</code>, không ai có thể can thiệp điểm ngầm.</li>
+  </ul>
+</div>
+
+<h3 class="sub-title">
+  <span class="badge-tag badge-blue">Bài 1</span>
+  Quét Endpoint &amp; Nhận Diện Bề Mặt Tấn Công (Attack Surface Mapping)
+</h3>
+<p style="margin: 0 0 4px 0;"><strong>Thao tác:</strong> Bấm Enter quay lại menu, gõ số <strong><code>1</code></strong> rồi bấm <strong>Enter</strong>.</p>
+
+<div class="script-box">
+  <span class="label">Lời thoại thuyết minh trước Hội đồng:</span>
+  <div class="content">
+    "Nhóm thực hiện Fuzzing 69 đường dẫn để tự động xác định ranh giới xác thực. Toàn bộ 23 route nghiệp vụ của sinh viên, giảng viên và quản trị viên đều phản hồi mã HTTP 302 chuyển hướng về trang đăng nhập. Các file cấu hình nhạy cảm như .env, .git, db.sql đều trả về 404 không tồn tại. Đồng thời công cụ chỉ ra chính xác đường dẫn debug /console của Werkzeug đang mở, chứng minh khả năng rà quét phát hiện điểm yếu của công cụ."
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ================= TRANG 3 ================= -->
+<h2 class="sec-title" style="margin-top: 0;">3. Bộ Câu Hỏi Phản Biện Của Giảng Viên &amp; Câu Trả Lời Chuẩn "Điểm 10"</h2>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 1: Tại sao nhóm chọn khóa tài khoản trong 60 giây mà không khóa vĩnh viễn luôn?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, theo tiêu chuẩn NIST SP 800-63B và OWASP, việc khóa vĩnh viễn tài khoản sau vài lần nhập sai sẽ vô tình biến cơ chế bảo mật thành một lỗ hổng Từ chối dịch vụ (Denial-of-Service - DoS). Kẻ tấn công chỉ cần dùng mã sinh viên công khai để gõ sai mật khẩu hàng loạt sinh viên, làm toàn bộ trường bị khóa tài khoản và không thể thi cử. Vì vậy nhóm chọn chính sách <strong>Khóa lũy tiến theo thời gian (Exponential Backoff / Rate-limit 60s)</strong>: đủ dài để làm tê liệt các công cụ dò quét tự động (1 triệu mật khẩu mất vài năm), nhưng người dùng thật vẫn có thể đăng nhập lại sau khi chờ đợi.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 2: Nếu kẻ tấn công dùng nhiều IP (Distributed Botnet) để dò mật khẩu thì hệ thống giải quyết thế nào?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, hệ thống EduFlaw áp dụng cơ chế <strong>Dual-Scope Throttle (Khóa kép 2 tầng)</strong> trong bảng <code>login_attempts</code>. Khi có request đăng nhập thất bại, hệ thống tăng đồng thời 2 bộ đếm: <code>ip:&lt;dia_chi_ip&gt;</code> và <code>user:&lt;ten_tai_khoan&gt;</code>. Nếu kẻ tấn công đổi sang hàng nghìn IP khác nhau nhưng cùng nhắm vào một tài khoản sinh viên, bộ đếm <code>user:...</code> sẽ chạm ngưỡng 5 lần và khóa tài khoản đó trên toàn bộ mọi địa chỉ IP. Ngược lại, nếu tin tặc từ 1 IP dò mật khẩu của nhiều sinh viên khác nhau, bộ đếm <code>ip:...</code> sẽ khóa toàn bộ request từ IP đó.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 3: Khóa bí mật dùng để mã hóa số CCCD được lưu ở đâu? Nếu hacker dump được CSDL thì có giải mã được không?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, khóa mã hóa CCCD (<code>SECRET_KEY</code>) được tách biệt hoàn toàn khỏi Database và chỉ được lưu trữ dưới dạng biến môi trường trong file <code>.env</code> trên hệ điều hành máy chủ. Kẻ tấn công dù khai thác được lỗ hổng SQL Injection hay Dump được toàn bộ file sao lưu CSDL thì trong bảng <code>student_profiles</code> cũng chỉ thu được các chuỗi ngẫu nhiên <code>enc:v1:...</code>. Nếu không chiếm được quyền root trên máy chủ ứng dụng để đọc khóa AES, dữ liệu danh tính cá nhân của sinh viên vẫn an toàn tuyệt đối.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 4: Nhóm làm thế nào để đảm bảo Giảng viên không tự ý sửa điểm rồi xóa vết trong CSDL?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, hệ thống đảm bảo tính Bất khả chối bỏ (Non-repudiation) qua 3 lớp:
+    1. Giảng viên chỉ có quyền <code>UPDATE</code> bảng điểm của lớp mình phụ trách (A01 - Chống IDOR).
+    2. Mỗi thao tác lưu điểm đều tự động tạo 1 bản ghi vào bảng <code>grade_audit_logs</code> ghi rõ người sửa, giờ sửa, điểm cũ, điểm mới và lý do.
+    3. Giảng viên hoàn toàn không được cấp quyền <code>DELETE</code> trên bảng <code>grade_audit_logs</code>. Chỉ tài khoản Master mới có quyền giám sát bảng này nhưng cũng không có quyền sửa chữa nhật ký.
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q">❓ Câu hỏi 5: Tại sao ở Bài 1 công cụ lại phát hiện lộ route debug /console (HTTP 200)?</div>
+  <div class="qa-a">
+    <strong>Trả lời:</strong> Thưa Thầy, đây là điểm nhóm cố tình thiết kế để kiểm thử khả năng nhận diện điểm yếu. Trong môi trường Development, Flask bật <code>debug=True</code> nên Werkzeug mở console tương tác tại <code>/console</code>. Khi chuyển sang môi trường Production (như nhóm đã cấu hình trong <code>config.py</code>), cờ <code>ENV=production</code> sẽ tự động tắt hoàn toàn debugger, bật cờ Cookie Secure và đóng route này, trả về mã 404 cho kẻ tấn công.
+  </div>
+</div>
+
+<div class="footer-note">
+  <strong>BTL Cơ sở An toàn thông tin — Học viện Công nghệ Bưu chính Viễn thông (PTIT Hà Nội)</strong><br>
+  Tài liệu chuẩn bị cho buổi bảo vệ đồ án • Nhóm 7 (D24) • Năm học 2025 - 2026
+</div>
+
+</body>
+</html>
