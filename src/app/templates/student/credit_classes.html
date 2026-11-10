@@ -1,0 +1,255 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lớp Tín Chỉ - EduFlaw</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; flex-wrap: wrap; gap: 15px; background: white; 
+            padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        .filter-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-box { 
+            display: flex; align-items: center; background: #f8fafc; 
+            border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 15px; 
+            min-width: 260px; transition: 0.2s; 
+        }
+        .search-box:focus-within { border-color: #0ea5e9; background: white; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+        .search-box .icon { color: #94a3b8; font-size: 14px; margin-right: 10px; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; padding: 10px 0; font-size: 13px; color: #334155; }
+        
+        .filter-select { 
+            padding: 10px 15px; border-radius: 8px; border: 1px solid #cbd5e1; 
+            outline: none; font-size: 13px; color: #334155; background: #f8fafc; 
+            cursor: pointer; font-weight: 500;
+        }
+
+        .btn-modern { 
+            padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; 
+            cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; 
+            align-items: center; gap: 8px; text-decoration: none;
+        }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .classes-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+            gap: 18px; margin-bottom: 30px;
+        }
+        .credit-class-card { 
+            border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; 
+            cursor: pointer; background: white; transition: all 0.25s ease; 
+            position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .credit-class-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 4px; background: #0ea5e9;
+        }
+        .credit-class-card:hover { 
+            border-color: #bae6fd; box-shadow: 0 12px 20px -5px rgba(14, 165, 233, 0.15); 
+            transform: translateY(-3px);
+        }
+
+        .badge-item {
+            padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .badge-day { background: #e0f2fe; color: #0369a1; }
+        .badge-period { background: #fef3c7; color: #b45309; }
+        .badge-room { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+
+        .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+        .student-card { 
+            background: white; border: 1px solid #e2e8f0; border-radius: 12px; 
+            padding: 15px; display: flex; align-items: center; gap: 14px; transition: 0.2s; 
+        }
+        .student-card:hover { border-color: #0ea5e9; transform: translateY(-2px); }
+        .student-avatar { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); 
+            color: white; display: flex; align-items: center; justify-content: center; 
+            font-weight: 700; font-size: 15px; flex-shrink: 0; 
+        }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('credit_classes') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        {% if not current_class %}
+            <div class="action-bar">
+                <div>
+                    <h2 style="margin: 0 0 5px 0; color: #0f172a;">📚 Lớp Tín Chỉ Đã Đăng Ký</h2>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Tra cứu thông tin học phần, giảng viên giảng dạy và danh sách sinh viên cùng lớp tín chỉ.</p>
+                </div>
+
+                <div class="filter-group">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="searchClassInput" onkeyup="filterCreditClasses()" placeholder="Tìm môn học, mã lớp, giảng viên...">
+                    </div>
+                    <select id="semesterFilter" class="filter-select" onchange="filterCreditClasses()">
+                        <option value="all">Tất cả Học kỳ</option>
+                        <option value="1">Học kỳ 1</option>
+                        <option value="2">Học kỳ 2</option>
+                        <option value="3">Học kỳ phụ (3)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="classes-grid">
+                {% for cls in my_classes %}
+                <div class="credit-class-card" onclick="window.location.href='/student/credit-classes?credit_class_id={{ cls.id }}'">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                            <div class="subject-name" style="font-weight: 700; color: #0f172a; font-size: 17px; line-height: 1.35;">
+                                {{ cls.subject_name }}
+                            </div>
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; white-space: nowrap;">
+                                {{ cls.credits }} TC
+                            </span>
+                        </div>
+
+                        <div class="class-code" style="font-size: 13px; color: #64748b; margin-bottom: 10px;">
+                            Mã lớp HP: <strong style="color: #0ea5e9;">{{ cls.class_code }}</strong>
+                        </div>
+
+                        <div class="lecturer-info" style="font-size: 13px; color: #334155; margin-bottom: 12px;">
+                            👨‍🏫 Giảng viên: <strong>{{ cls.lecturer_name or 'Chưa phân công' }}</strong>
+                        </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+                            {% if cls.day_of_week %}
+                                <span class="badge-item badge-day">
+                                    📅 {% if cls.day_of_week == 8 %}Chủ Nhật{% else %}Thứ {{ cls.day_of_week }}{% endif %}
+                                </span>
+                                <span class="badge-item badge-period">📚 Tiết {{ cls.shift or '?' }}</span>
+                                <span class="badge-item badge-room">📍 {{ ('P.' ~ cls.room) if cls.room else 'Chưa xếp phòng' }}</span>
+                            {% else %}
+                                <span class="badge-item badge-room" style="color: #94a3b8;">📅 Chưa xếp lịch học</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="semester-info" style="font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Học kỳ {{ cls.semester }} - Năm học {{ cls.year }}</span>
+                        <strong style="color: #10b981;">👥 {{ cls.enrolled_students }} SV &rarr;</strong>
+                    </div>
+                </div>
+                {% else %}
+                <div style="grid-column: 1 / -1; background: white; padding: 60px 20px; text-align: center; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                    <div style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;">📭</div>
+                    <div style="color: #64748b; font-size: 15px;">Bạn chưa đăng ký lớp tín chỉ nào.</div>
+                </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="action-bar">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <a href="/student/credit-classes" class="btn-modern btn-outline">🔙 Danh sách lớp tín chỉ</a>
+                    <div>
+                        <h3 style="margin: 0 0 5px 0; color: #0f172a; font-size: 20px;">
+                            {{ current_class.subject_name }}
+                            <span style="color: #0ea5e9; font-size: 16px;">({{ current_class.class_code }})</span>
+                        </h3>
+                        <div style="font-size: 13px; color: #64748b; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <span>Học kỳ {{ current_class.semester }} - Năm {{ current_class.year }}</span>
+                            <span>•</span>
+                            <span>Số tín chỉ: <strong>{{ current_class.credits }} TC</strong></span>
+                            <span>•</span>
+                            <span>Sĩ số: <strong style="color: #10b981;">{{ classmates | length }} SV</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <span class="icon">🔍</span>
+                    <input type="text" id="searchRosterInput" onkeyup="filterRoster()" placeholder="Tìm tên, mã SV hoặc lớp hành chính...">
+                </div>
+            </div>
+
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div>
+                    <h4 style="margin: 0 0 10px 0; color: #0f172a; font-size: 15px;">👨‍🏫 Giảng viên phụ trách</h4>
+                    <div style="font-size: 13.5px; color: #475569; line-height: 1.7;">
+                        <div>Họ và tên: <strong style="color: #0f172a;">{{ current_class.lecturer_name or 'Chưa phân công' }}</strong></div>
+                        <div>Email liên hệ: <strong style="color: #0ea5e9;">{{ current_class.lecturer_email or '---' }}</strong></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 10px 0; color: #0f172a; font-size: 15px;">⚖️ Cơ cấu trọng số điểm học phần</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; font-weight: 600;">
+                        <span class="badge-item badge-room">CC: {{ current_class.weight_cc }}%</span>
+                        {% if current_class.weight_bttl > 0 %}<span class="badge-item badge-room">BTTL: {{ current_class.weight_bttl }}%</span>{% endif %}
+                        {% if current_class.weight_tbkt > 0 %}<span class="badge-item badge-room">TBKT: {{ current_class.weight_tbkt }}%</span>{% endif %}
+                        {% if current_class.weight_tgk > 0 %}<span class="badge-item badge-room">TGK: {{ current_class.weight_tgk }}%</span>{% endif %}
+                        {% if current_class.weight_tnth > 0 %}<span class="badge-item badge-room">TNTH: {{ current_class.weight_tnth }}%</span>{% endif %}
+                        <span class="badge-item badge-day">Thi cuối kỳ: {{ current_class.weight_thi }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 0 0 16px 0; color: #0f172a; font-size: 17px;">👥 Danh sách Sinh viên cùng Lớp học phần</h3>
+
+            <div class="students-grid">
+                {% for st in classmates %}
+                {% set is_me = st.username == session.username %}
+                <div class="student-card roster-card" style="{% if is_me %}border: 1.5px solid #0ea5e9; background: #f0f9ff;{% endif %}">
+                    <div class="student-avatar">
+                        {{ st.full_name.strip().split()[-1][0] | upper if st.full_name else 'S' }}
+                    </div>
+                    <div style="flex: 1; overflow: hidden;">
+                        <div style="font-weight: 700; color: #0f172a; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; margin-bottom: 3px;">
+                            {{ st.full_name }} {% if is_me %}<span style="color: #0ea5e9; font-size: 12px;">(Bạn)</span>{% endif %}
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">
+                            {{ st.student_code }} • {{ st.gender }}
+                        </div>
+                        <div style="font-size: 11.5px; color: #0369a1; font-weight: 600;">
+                            🏫 Lớp HC: {{ st.class_name or '---' }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        function filterCreditClasses() {
+            const keyword = document.getElementById('searchClassInput').value.toUpperCase();
+            const sem = document.getElementById('semesterFilter').value;
+            const cards = document.getElementsByClassName('credit-class-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                const text = cards[i].innerText.toUpperCase();
+                const semText = cards[i].querySelector('.semester-info').innerText;
+                const matchKeyword = text.indexOf(keyword) > -1;
+                const matchSem = (sem === 'all' || semText.indexOf('Học kỳ ' + sem) > -1);
+                cards[i].style.display = (matchKeyword && matchSem) ? '' : 'none';
+            }
+        }
+
+        function filterRoster() {
+            const keyword = document.getElementById('searchRosterInput').value.toUpperCase();
+            const cards = document.getElementsByClassName('roster-card');
+            for (let i = 0; i < cards.length; i++) {
+                const text = cards[i].innerText.toUpperCase();
+                cards[i].style.display = (text.indexOf(keyword) > -1) ? 'flex' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

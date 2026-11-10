@@ -1,0 +1,273 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Điểm Cá Nhân - EduFlaw</title>
+    
+    {{ ui.render_common_css() }}
+    
+    <style>
+        .content { color: #334155; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-info { text-align: right; }
+        .stat-title { color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { color: #0f172a; font-size: 24px; font-weight: 800; margin: 0; line-height: 1; }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            overflow-x: auto;
+            margin-bottom: 50px;
+        }
+        
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 12px 12px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .table-grades { 
+            width: 100%; 
+            min-width: 1100px; 
+            border-collapse: collapse; 
+        }
+
+        .table-grades th { 
+            background-color: #f8fafc; 
+            color: #475569; 
+            font-weight: 700; 
+            font-size: 13px; 
+            padding: 15px 12px;
+            border-bottom: 2px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
+            text-align: center;
+        }
+
+        .table-grades td { 
+            padding: 12px; 
+            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #f8fafc;
+            color: #334155;
+            font-size: 13px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table-grades tbody tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .semester-header { 
+            background-color: #f0f9ff !important; 
+            color: #0369a1 !important; 
+            font-weight: 700 !important; 
+            font-size: 14px !important; 
+            text-align: left !important;
+            padding: 15px 20px !important;
+            border-bottom: 2px solid #bae6fd !important;
+        }
+
+        .badge-grade { 
+            display: inline-block;
+            min-width: 32px; 
+            border-radius: 6px; 
+            padding: 6px 10px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .check-icon { color: #10b981; font-weight: bold; font-size: 16px; }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('grades') }}
+    
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+            <div>
+                <h2 style="margin: 0 0 5px 0; color: #0f172a; font-size: 24px;">Kết quả học tập</h2>
+                <p style="margin: 0; color: #64748b; font-size: 14px;">Chi tiết điểm số thành phần và tổng kết các học phần</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0f2fe; color: #0ea5e9;">📈</div>
+                <div class="stat-info">
+                    <div class="stat-title">ĐTB Tích Lũy</div>
+                    <div class="stat-value" style="color: #0ea5e9;">{{ gpa }}</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #d1fae5; color: #10b981;">🎯</div>
+                <div class="stat-info">
+                    <div class="stat-title">Tổng TC Đạt</div>
+                    <div class="stat-value" style="color: #10b981;">{{ total_credits }} <span style="font-size: 14px; color:#94a3b8; font-weight: 600;">TC</span></div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;">🎓</div>
+                <div class="stat-info">
+                    <div class="stat-title">Hệ Đào tạo</div>
+                    <div class="stat-value">Đại học</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #f3e8ff; color: #8b5cf6;">🌟</div>
+                <div class="stat-info">
+                    <div class="stat-title">Xếp loại</div>
+                    <div class="stat-value" style="color: #8b5cf6;">{{ standing }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="color: #475569; font-weight: 600; font-size: 14px;">Lọc bảng điểm:</span>
+                <select id="semesterFilter" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-weight: 500; color: #0f172a; min-width: 250px; background: #f8fafc; cursor: pointer; transition: 0.2s;" onchange="filterSemester()" onmouseover="this.style.borderColor='#0ea5e9'" onmouseout="this.style.borderColor='#cbd5e1'">
+                    <option value="all">Tất cả học kỳ</option>
+                    {% for group in display_groups %}
+                        <option value="sem-{{ loop.index }}">{{ group.raw_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button onclick="location.reload()" style="background: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #475569; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                ↻ Làm mới
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="table-grades">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 4%;">TT</th>
+                        <th rowspan="2" style="width: 8%;">Mã HP</th>
+                        <th rowspan="2" style="width: 20%; text-align: left;">Tên học phần</th>
+                        <th rowspan="2" style="width: 5%;">Số TC</th>
+                        <th rowspan="2" style="width: 5%;">Đạt</th>
+                        <th colspan="5" style="border-bottom: 1px solid #cbd5e1;">Điểm thành phần</th>
+                        <th rowspan="2" style="width: 6%;">Lần 1</th>
+                        <th rowspan="2" style="width: 6%;">Lần 2</th>
+                        <th rowspan="2" style="width: 7%; background: #f1f5f9;">TK (10)</th>
+                        <th rowspan="2" style="width: 7%; background: #f1f5f9;">TK (4)</th>
+                        <th rowspan="2" style="width: 6%; background: #f1f5f9;">Chữ</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 5%; font-weight: 600; color: #64748b;">CC</th>
+                        <th style="width: 5%; font-weight: 600; color: #64748b;">BTTL</th>
+                        <th style="width: 5%; font-weight: 600; color: #64748b;">TBKT</th>
+                        <th style="width: 5%; font-weight: 600; color: #64748b;">TGK</th>
+                        <th style="width: 5%; font-weight: 600; color: #64748b;">TNTH</th>
+                    </tr>
+                </thead>
+                
+                {% if display_groups %}
+                    {% for group in display_groups %}
+                    <tbody id="sem-{{ loop.index }}" class="semester-block">
+                        <tr>
+                            <td colspan="15" class="semester-header">📌 {{ group.title }}</td>
+                        </tr>
+                        {% for item in group['items'] %}
+                        <tr>
+                            <td style="color: #94a3b8;">{{ loop.index }}</td>
+                            <td style="color: #64748b; font-weight: 500;">{{ item.class_code if item.class_code else '---' }}</td>
+                            <td style="text-align: left; color: #0f172a; font-weight: 600;">{{ item.subject }}</td>
+                            <td style="color: #475569;">{{ item.credits }}</td>
+                            <td>
+                                {% if item.score != None and item.score >= 4.0 %}
+                                    <span class="check-icon">✓</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.score_cc if item.score_cc != None else '' }}</td>
+                            <td>{{ item.score_bttl if item.score_bttl != None else '' }}</td>
+                            <td>{{ item.score_tbkt if item.score_tbkt != None else '' }}</td>
+                            <td>{{ item.score_tgk if item.score_tgk != None else '' }}</td>
+                            <td>{{ item.score_tnth if item.score_tnth != None else '' }}</td>
+                            <td style="font-weight: 600;">{{ item.score_thi if item.score_thi != None else '' }}</td>
+                            <td>{{ item.score_thi_2 if item.score_thi_2 != None else '' }}</td>
+                            <td style="font-weight: 700; color: #0f172a; background: #f8fafc;">{{ item.score if item.score != None else '--' }}</td>
+                            <td style="font-weight: 700; color: #0ea5e9; background: #f8fafc;">{{ item.score_4 if item.score_4 != None else '--' }}</td>
+                            <td style="background: #f8fafc;">
+                                {% if item.letter != '--' %}
+                                    <span class="badge-grade" style="background-color: {{ item.color }}; color: white;">{{ item.letter }}</span>
+                                {% else %}
+                                    <span style="color: #94a3b8;">--</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endfor %}
+                {% else %}
+                    <tbody>
+                        <tr>
+                            <td colspan="15" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                                <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">📭</div>
+                                <div style="font-size: 15px;">Chưa có dữ liệu điểm học tập nào được ghi nhận.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+    
+    <script>
+        function filterSemester() {
+            var selected = document.getElementById("semesterFilter").value;
+            var blocks = document.getElementsByClassName("semester-block");
+            for (var i = 0; i < blocks.length; i++) {
+                if (selected === "all" || blocks[i].id === selected) {
+                    blocks[i].style.display = "";
+                } else {
+                    blocks[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

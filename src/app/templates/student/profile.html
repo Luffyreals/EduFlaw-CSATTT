@@ -1,0 +1,629 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ Sinh viên - EduFlaw</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 14px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            margin-bottom: 24px;
+        }
+
+        .page-tabs { 
+            display: inline-flex; 
+            background: #f1f5f9; 
+            padding: 5px; 
+            border-radius: 12px; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .page-tab-link { 
+            padding: 10px 22px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: #64748b; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            font-size: 13.5px;
+            white-space: nowrap;
+            border: none;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .page-tab-link:hover { color: #0ea5e9; background: #e2e8f0; }
+        .page-tab-link.active { 
+            background: white; 
+            color: #0ea5e9; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        }
+        
+        .page-tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .page-tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) {
+            .profile-layout { grid-template-columns: 1fr; }
+        }
+
+        .settings-card { 
+            background: white; 
+            padding: 26px; 
+            border-radius: 14px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); 
+            border: 1px solid #f1f5f9; 
+            margin-bottom: 24px;
+        }
+        .settings-card:last-child { margin-bottom: 0; }
+
+        .student-id-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+        }
+        .id-card-banner {
+            height: 85px;
+            background: linear-gradient(135deg, #3d5262 0%, #1e293b 100%);
+            position: relative;
+        }
+        .id-card-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 38px;
+            margin: -48px auto 14px auto;
+            border: 4px solid white;
+            box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.35);
+            position: relative;
+            z-index: 2;
+        }
+        .id-card-body {
+            padding: 0 24px 24px 24px;
+            text-align: center;
+        }
+
+        .badge-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0 20px 0;
+        }
+        .badge-pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .badge-status-active { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-status-warn { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge-status-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-role { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge-leader { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .summary-list {
+            text-align: left;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            gap: 10px;
+        }
+        .summary-item .lbl { color: #64748b; }
+        .summary-item .val { font-weight: 700; color: #0f172a; text-align: right; }
+
+
+        .advisor-box {
+            margin-top: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: left;
+        }
+        .advisor-box .adv-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+
+        .section-title {
+            margin: 0 0 18px 0;
+            color: #0f172a;
+            font-size: 16px;
+            font-weight: 700;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .tag-readonly { background: #f1f5f9; color: #64748b; }
+        .tag-editable { background: #ecfdf5; color: #059669; }
+
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 18px;
+        }
+        .form-group { margin-bottom: 4px; }
+        .form-group label { 
+            display: block; 
+            font-weight: 600; 
+            color: #475569; 
+            margin-bottom: 6px; 
+            font-size: 12.5px; 
+        }
+        .form-control { 
+            width: 100%; 
+            padding: 11px 14px; 
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            background: #ffffff; 
+            outline: none; 
+            transition: all 0.2s; 
+            font-family: inherit;
+            font-size: 13.5px;
+            color: #0f172a;
+            font-weight: 500;
+        }
+        .form-control:focus { 
+            border-color: #0ea5e9; 
+            background: #ffffff; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.12); 
+        }
+        
+
+        .form-control[readonly], .form-control:disabled {
+            background-color: #f8fafc;
+            color: #334155;
+            cursor: default;
+            border-color: #e2e8f0;
+        }
+
+
+        .btn-modern { 
+            padding: 11px 24px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            font-size: 13.5px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+
+
+        .pwd-wrapper { position: relative; display: flex; align-items: center; }
+        .pwd-wrapper input { padding-right: 42px; }
+        .toggle-pwd {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .strength-meter {
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            margin-top: 7px;
+            overflow: hidden;
+        }
+        .strength-bar { height: 100%; width: 0%; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+    {{ ui.render_sidebar('profile') }}
+
+    <div class="content">
+
+        {{ ui.render_topbar(session) }}
+
+
+        <div class="page-header">
+            <div>
+                <h2 style="color: #0f172a; margin: 0 0 4px 0; font-size: 22px;">🎓 Hồ sơ Sinh viên Toàn diện</h2>
+                <p style="color: #64748b; margin: 0; font-size: 13.5px;">Tra cứu thông tin học vụ, lý lịch cá nhân và quản lý phương thức liên hệ.</p>
+            </div>
+
+            <div class="page-tabs">
+                <button type="button" class="page-tab-link {% if active_tab == 'info' %}active{% endif %}" onclick="switchPageTab(event, 'TabInfo')">
+                    👤 Lý lịch & Học vụ
+                </button>
+                <button type="button" class="page-tab-link {% if active_tab == 'settings' %}active{% endif %}" onclick="switchPageTab(event, 'TabSettings')">
+                    🔒 Cài đặt bảo mật
+                </button>
+            </div>
+        </div>
+
+        <div id="TabInfo" class="page-tab-content {% if active_tab == 'info' %}active{% endif %}">
+            <div class="profile-layout">
+                
+
+                <div class="student-id-card">
+                    <div class="id-card-banner"></div>
+                    <div class="id-card-avatar">
+                        {{ session.get('display_initial', 'S') }}
+                    </div>
+                    
+                    <div class="id-card-body">
+                        <h3 style="margin: 0 0 4px 0; color: #0f172a; font-size: 18px; font-weight: 800;">
+                            {{ user_info.full_name or 'Chưa cập nhật tên' }}
+                        </h3>
+                        <div style="color: #0ea5e9; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">
+                            {{ user_info.student_code or '---' }}
+                        </div>
+
+                        {% set st = user_info.status or 'Đang học' %}
+                        {% set is_leader = user_info.class_role in ['Lớp trưởng', 'Lớp phó'] %}
+                        <div class="badge-group">
+                            <span class="badge-pill {% if st == 'Đang học' or st == 'Đã tốt nghiệp' %}badge-status-active{% elif st == 'Bảo lưu' %}badge-status-warn{% else %}badge-status-danger{% endif %}">
+                                ● {{ st }}
+                            </span>
+                            <span class="badge-pill {% if is_leader %}badge-leader{% else %}badge-role{% endif %}">
+                                {% if is_leader %}👑{% else %}🎓{% endif %} {{ user_info.class_role or 'Thành viên' }}
+                            </span>
+                        </div>
+
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <span class="lbl">Lớp hành chính:</span>
+                                <span class="val" style="color: #0284c7;">{{ user_info.class_name or '---' }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Khóa đào tạo:</span>
+                                <span class="val">{{ (user_info.cohort ~ 'CQ') if user_info.cohort else '---' }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Ngành học:</span>
+                                <span class="val">{{ user_info.major or '---' }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="lbl">Trạng thái học phí:</span>
+                                {% if user_info.tuition_status == 'Còn nợ' %}
+                                    <span class="val" style="color: #dc2626;">🔴 Còn nợ học phí</span>
+                                {% else %}
+                                    <span class="val" style="color: #059669;">🟢 Hoàn thành</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="advisor-box">
+                            <div class="adv-title">👨‍🏫 Cố vấn học tập lớp</div>
+                            {% if user_info.advisor_name or user_info.advisor_email %}
+                                <div style="font-weight: 700; color: #0f172a; font-size: 13.5px; margin-bottom: 3px;">
+                                    {{ user_info.advisor_name or 'Giảng viên Cố vấn' }}
+                                </div>
+                                <div style="font-size: 12px; color: #0ea5e9; word-break: break-all;">
+                                    ✉️ {{ user_info.advisor_email or 'Chưa cập nhật email' }}
+                                </div>
+                            {% else %}
+                                <div style="font-size: 12.5px; color: #94a3b8; font-style: italic;">
+                                    Chưa phân công cố vấn học tập
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="settings-card">
+                        <div class="section-title">
+                            <span>🏫 Thông tin Học vụ & Đào tạo</span>
+                            <span class="section-tag tag-readonly">Nhà trường quản lý</span>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Mã sinh viên</label>
+                                <input type="text" class="form-control" value="{{ user_info.student_code or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Lớp hành chính</label>
+                                <input type="text" class="form-control" value="{{ user_info.class_name or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Khóa tuyển sinh</label>
+                                <input type="text" class="form-control" value="{{ (user_info.cohort ~ ' (Hệ Chính quy)') if user_info.cohort else '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Chuyên ngành đào tạo</label>
+                                <input type="text" class="form-control" value="{{ user_info.major or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Chức vụ Ban cán sự lớp</label>
+                                <input type="text" class="form-control" value="{{ user_info.class_role or 'Thành viên' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Tình trạng học vụ</label>
+                                <input type="text" class="form-control" value="{{ user_info.status or 'Đang học' }}" readonly>
+                            </div>
+                            {% if user_info.disciplinary_note %}
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Ghi nhận Thành tích / Kỷ luật</label>
+                                <input type="text" class="form-control" style="background: #fffbeb; border-color: #fde68a; color: #92400e;" value="{{ user_info.disciplinary_note }}" readonly>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="section-title">
+                            <span>🪪 Thông tin Định danh & Lý lịch Cá nhân</span>
+                            <span class="section-tag tag-readonly">Theo hồ sơ gốc</span>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Họ và tên khai sinh</label>
+                                <input type="text" class="form-control" value="{{ user_info.full_name or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Ngày tháng năm sinh</label>
+                                <input type="text" class="form-control" value="{{ user_info.dob or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <input type="text" class="form-control" value="{{ user_info.gender or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Số CCCD / Mã định danh</label>
+                                <input type="text" class="form-control" value="{{ user_info.id_card or 'Chưa cập nhật' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Quốc tịch</label>
+                                <input type="text" class="form-control" value="{{ user_info.nationality or 'Việt Nam' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Dân tộc</label>
+                                <input type="text" class="form-control" value="{{ user_info.ethnicity or 'Kinh' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Tôn giáo</label>
+                                <input type="text" class="form-control" value="{{ user_info.religion or 'Không' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Quê quán</label>
+                                <input type="text" class="form-control" value="{{ user_info.hometown or 'Chưa cập nhật' }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="settings-card">
+                        <div class="section-title">
+                            <span>📍 Phương thức Liên lạc & Địa chỉ Cư trú</span>
+                            <span class="section-tag tag-editable">✏️ Cho phép cập nhật</span>
+                        </div>
+                        <form action="/student/profile/update_info" method="POST">
+                            {{ ui.render_csrf_field() }}
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Tài khoản Email Học vụ (Nội bộ)</label>
+                                    <input type="text" class="form-control" value="{{ user_info.username or session.get('username') }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gmail Cá nhân (Đã xác thực OTP)</label>
+                                    <input type="text" class="form-control" value="{{ user_info.personal_email or 'Chưa liên kết' }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label style="color: #0f172a;">📞 Số điện thoại liên hệ cá nhân *</label>
+                                    <input type="text" name="phone_number" class="form-control" value="{{ user_info.phone_number }}" placeholder="Nhập số điện thoại di động..." required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label style="color: #0f172a;">🏠 Địa chỉ nơi ở hiện tại (Thường trú / Tạm trú) *</label>
+                                    <input type="text" name="current_address" class="form-control" value="{{ user_info.current_address }}" placeholder="Ví dụ: Số nhà, đường, phường/xã, quận/huyện, TP. Hà Nội..." required>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: right; margin-top: 22px; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                                <button type="submit" class="btn-modern btn-success">
+                                    💾 Lưu thông tin liên hệ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="TabSettings" class="page-tab-content {% if active_tab == 'settings' %}active{% endif %}">
+            <div class="settings-card" style="max-width: 660px;">
+                <div class="section-title">
+                    <span>🔐 Đổi Mật khẩu Truy cập</span>
+                    <span class="section-tag tag-readonly">Bảo mật tài khoản</span>
+                </div>
+
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+                    💡 <strong>Tiêu chuẩn bảo mật:</strong> Mật khẩu mới phải có tối thiểu <strong>12 ký tự</strong>. Nếu bạn quên mật khẩu hiện tại, có thể sử dụng tính năng khôi phục qua mã OTP gửi về Gmail <strong>{{ user_info.personal_email or 'cá nhân' }}</strong> ở màn hình đăng nhập.
+                </div>
+
+                <form action="/student/profile/update_password" method="POST">
+                    {{ ui.render_csrf_field() }}
+                    
+                    <div class="form-grid" style="margin-bottom: 18px;">
+                        <div class="form-group">
+                            <label>Tài khoản đăng nhập</label>
+                            <input type="text" class="form-control" value="{{ session.get('username') }}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Gmail nhận OTP bảo mật</label>
+                            <input type="text" class="form-control" value="{{ user_info.personal_email or 'Chưa liên kết' }}" disabled>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label>Mật khẩu hiện tại</label>
+                        <div class="pwd-wrapper">
+                            <input type="password" name="current_password" id="curPwd" class="form-control" required placeholder="Nhập mật khẩu đang sử dụng">
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('curPwd', this)" title="Hiện/Ẩn mật khẩu">👁️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Mật khẩu mới (Tối thiểu 12 ký tự)</label>
+                            <div class="pwd-wrapper">
+                                <input type="password" name="new_password" id="newPwd" class="form-control" required minlength="12" placeholder="Ít nhất 12 ký tự" oninput="evalPwdStrength(this.value)">
+                                <button type="button" class="toggle-pwd" onclick="togglePwd('newPwd', this)" title="Hiện/Ẩn mật khẩu">👁️</button>
+                            </div>
+                            <div class="strength-meter"><div class="strength-bar" id="pwdStrengthBar"></div></div>
+                            <small id="pwdStrengthText" style="font-size: 11.5px; color: #64748b; display: block; margin-top: 5px;">Độ dài tối thiểu: 12 ký tự</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Xác nhận mật khẩu mới</label>
+                            <div class="pwd-wrapper">
+                                <input type="password" name="confirm_password" id="cfmPwd" class="form-control" required minlength="12" placeholder="Nhập lại mật khẩu mới" oninput="checkMatch()">
+                                <button type="button" class="toggle-pwd" onclick="togglePwd('cfmPwd', this)" title="Hiện/Ẩn mật khẩu">👁️</button>
+                            </div>
+                            <small id="pwdMatchText" style="font-size: 11.5px; display: none; margin-top: 5px;"></small>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                        <button type="submit" class="btn-modern btn-primary">💾 Cập nhật Mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        function switchPageTab(evt, tabId) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabId === 'TabInfo' ? 'info' : 'settings');
+            window.history.pushState({}, '', url);
+
+            var contents = document.getElementsByClassName("page-tab-content");
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+            
+            var links = document.getElementsByClassName("page-tab-link");
+            for (var i = 0; i < links.length; i++) {
+                links[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function togglePwd(id, btn) {
+            const el = document.getElementById(id);
+            const isPwd = el.type === 'password';
+            el.type = isPwd ? 'text' : 'password';
+            btn.textContent = isPwd ? '🙈' : '👁️';
+        }
+
+        function evalPwdStrength(pwd) {
+            const bar = document.getElementById('pwdStrengthBar');
+            const txt = document.getElementById('pwdStrengthText');
+            let score = 0;
+            if (pwd.length >= 12) score += 40;
+            if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 20;
+            if (/[0-9]/.test(pwd)) score += 20;
+            if (/[^A-Za-z0-9]/.test(pwd)) score += 20;
+
+            bar.style.width = score + '%';
+            if (pwd.length < 12) {
+                bar.style.backgroundColor = '#ef4444';
+                txt.textContent = `Cần thêm ${12 - pwd.length} ký tự nữa`;
+                txt.style.color = '#ef4444';
+            } else if (score < 80) {
+                bar.style.backgroundColor = '#f59e0b';
+                txt.textContent = 'Độ mạnh: Khá (Hợp lệ)';
+                txt.style.color = '#d97706';
+            } else {
+                bar.style.backgroundColor = '#10b981';
+                txt.textContent = 'Độ mạnh: Rất an toàn ✓';
+                txt.style.color = '#059669';
+            }
+            checkMatch();
+        }
+
+        function checkMatch() {
+            const p1 = document.getElementById('newPwd').value;
+            const p2 = document.getElementById('cfmPwd').value;
+            const txt = document.getElementById('pwdMatchText');
+            if (!p2) {
+                txt.style.display = 'none';
+                return;
+            }
+            txt.style.display = 'block';
+            if (p1 === p2) {
+                txt.textContent = '✓ Mật khẩu xác nhận đã khớp';
+                txt.style.color = '#059669';
+            } else {
+                txt.textContent = '✕ Mật khẩu xác nhận chưa khớp';
+                txt.style.color = '#dc2626';
+            }
+        }
+    </script>
+</body>
+</html>

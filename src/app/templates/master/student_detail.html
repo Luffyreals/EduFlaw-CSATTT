@@ -1,0 +1,841 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+{# =====================================================================
+   TÍNH TOÁN THỐNG KÊ HỌC TẬP TOÀN KHÓA TRỰC TIẾP TỪ GROUPED_GRADES
+===================================================================== #}
+{% set stats = namespace(total_subjects=0, total_credits=0, passed_credits=0, sum_10=0.0, sum_4=0.0, scored_credits=0) %}
+{% if grouped_grades %}
+    {% for term, term_grades in grouped_grades.items() %}
+        {% for g in term_grades %}
+            {% set c = g.credits | int(3) %}
+            {% set stats.total_subjects = stats.total_subjects + 1 %}
+            {% set stats.total_credits = stats.total_credits + c %}
+            {% if g.score is not none %}
+                {% set stats.scored_credits = stats.scored_credits + c %}
+                {% set stats.sum_10 = stats.sum_10 + (g.score | float * c) %}
+                {% set stats.sum_4 = stats.sum_4 + ((g.score_4 | float(0.0)) * c) %}
+                {% if (g.score | float) >= 4.0 %}
+                    {% set stats.passed_credits = stats.passed_credits + c %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+{% set gpa_10 = (stats.sum_10 / stats.scored_credits) | round(2) if stats.scored_credits > 0 else 0.0 %}
+{% set gpa_4 = (stats.sum_4 / stats.scored_credits) | round(2) if stats.scored_credits > 0 else 0.0 %}
+{% set standing = 'Xuất sắc' if gpa_4 >= 3.6 else ('Giỏi' if gpa_4 >= 3.2 else ('Khá' if gpa_4 >= 2.5 else ('Trung bình' if gpa_4 >= 2.0 else ('Yếu' if stats.scored_credits > 0 else 'Chưa xếp loại')))) %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Sinh viên - EduFlaw Master</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap;
+            margin-bottom: 22px; 
+            background: white; 
+            padding: 18px 24px; 
+            border-radius: 14px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        
+        .btn-modern { 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            text-decoration: none;
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+        .btn-danger-outline { background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48; width: 100%; justify-content: center; }
+        .btn-danger-outline:hover { background: #ffe4e6; border-color: #f43f5e; }
+
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .kpi-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .detail-container { 
+            display: grid; 
+            grid-template-columns: 340px 1fr; 
+            gap: 24px; 
+            align-items: start; 
+        }
+        @media (max-width: 1100px) {
+            .detail-container { grid-template-columns: 1fr; }
+        }
+        
+        .profile-sidebar { 
+            background: white; 
+            border-radius: 14px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); 
+            border: 1px solid #f1f5f9; 
+            overflow: hidden;
+            position: sticky; 
+            top: 20px; 
+        }
+        .sidebar-banner {
+            height: 82px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .avatar-lg { 
+            width: 96px; 
+            height: 96px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 38px; 
+            font-weight: 800; 
+            margin: -48px auto 12px auto; 
+            border: 4px solid white;
+            box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.4); 
+        }
+        .sidebar-body {
+            padding: 0 24px 24px 24px;
+            text-align: center;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0 18px 0;
+        }
+        .pill-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .info-list {
+            text-align: left;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 14px;
+        }
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 9px 0; 
+            border-bottom: 1px dashed #e2e8f0; 
+            font-size: 13px; 
+            color: #64748b; 
+            gap: 10px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row strong { color: #0f172a; text-align: right; word-break: break-word; }
+
+        .advisor-card {
+            margin-top: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            text-align: left;
+        }
+        
+        .main-content-tabs { 
+            background: white; 
+            border-radius: 14px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); 
+            border: 1px solid #f1f5f9; 
+            padding: 28px; 
+            min-height: 580px; 
+            min-width: 0;
+        }
+        
+        .page-tabs { 
+            display: inline-flex; 
+            background: #f1f5f9; 
+            padding: 5px; 
+            border-radius: 12px; 
+            margin-bottom: 25px; 
+            overflow-x: auto; 
+            max-width: 100%; 
+            gap: 4px;
+        }
+        .page-tab-link { 
+            padding: 10px 18px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: #64748b; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            font-size: 13px; 
+            border: none; 
+            background: transparent; 
+            white-space: nowrap; 
+        }
+        .page-tab-link:hover { color: #0f172a; background: #e2e8f0; }
+        .page-tab-link.active { background: white; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .tab-content { display: none; animation: fadeIn 0.25s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .section-heading {
+            margin: 0 0 16px 0;
+            color: #0f172a;
+            font-size: 15.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .form-group label { 
+            display: block; 
+            font-weight: 600; 
+            color: #475569; 
+            margin-bottom: 6px; 
+            font-size: 12.5px; 
+        }
+        .form-control { 
+            width: 100%; 
+            padding: 10.5px 14px; 
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            background: #f8fafc; 
+            outline: none; 
+            transition: 0.2s; 
+            font-family: inherit; 
+            font-size: 13.5px; 
+            color: #0f172a;
+            font-weight: 500;
+        }
+        .form-control:focus { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.12); 
+        }
+        .form-control:disabled, .form-control[readonly] { 
+            background: #f1f5f9;
+            color: #64748b; 
+            cursor: not-allowed; 
+            border-color: #e2e8f0;
+        }
+
+        .grade-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0 12px;
+            min-width: 260px;
+        }
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 9px 8px;
+            width: 100%;
+            font-size: 13px;
+        }
+
+        .table-container { 
+            border-radius: 10px; 
+            border: 1px solid #e2e8f0; 
+            overflow: auto; 
+            max-height: 560px; 
+        }
+        .table-container::-webkit-scrollbar { width: 6px; height: 8px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .table-custom { width: 100%; border-collapse: collapse; min-width: 980px; text-align: left; }
+        .table-custom th { 
+            background: #f8fafc; 
+            padding: 12px 10px; 
+            color: #475569; 
+            font-weight: 700; 
+            font-size: 12px; 
+            border-bottom: 2px solid #e2e8f0; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            white-space: nowrap;
+        }
+        .table-custom td { 
+            padding: 11px 10px; 
+            border-bottom: 1px solid #f1f5f9; 
+            color: #334155; 
+            font-size: 13px; 
+            vertical-align: middle; 
+        }
+        .table-custom tbody tr:hover { background-color: #f8fafc; }
+        .semester-header { 
+            background-color: #f0f9ff !important; 
+            color: #0369a1 !important; 
+            font-weight: 700 !important; 
+            font-size: 13.5px !important; 
+            padding: 11px 15px !important; 
+        }
+        .badge-grade { 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            display: inline-block; 
+            min-width: 30px;
+            text-align: center;
+            color: white; 
+        }
+
+        .quick-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .tag-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tag-btn:hover { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; }
+    </style>
+</head>
+<body>
+
+    {{ ui.render_sidebar('students') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        <div class="action-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn-modern btn-outline" onclick="window.history.back()">🔙 Trở lại</button>
+                <div>
+                    <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 21px;">
+                        Hồ sơ Sinh viên: <span style="color: #0ea5e9;">{{ profile.full_name | default('Chưa cập nhật') }}</span>
+                    </h2>
+                    <p style="margin: 0; color: #64748b; font-size: 13.5px;">
+                        Mã SV: <strong>{{ profile.student_code | default('---') }}</strong> • Lớp hành chính: <strong>{{ profile.class_name | default('---') }}</strong> • Ngành: <strong>{{ profile.major | default('---') }}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                {% if profile.class_name and profile.major %}
+                <a href="/master/students?{{ {'major': profile.major, 'class_name': profile.class_name, 'cohort': profile.cohort} | urlencode }}" class="btn-modern btn-outline">
+                    🏫 Xem Lớp {{ profile.class_name }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="kpi-strip">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #e0f2fe; color: #0284c7;">🎯</div>
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600;">GPA Tích lũy (Hệ 4 / Hệ 10)</div>
+                    <div style="font-size: 20px; font-weight: 800; color: #0f172a;">
+                        {{ gpa_4 }} <span style="font-size: 13px; color: #64748b; font-weight: 600;">/ 4.0 ({{ gpa_10 }})</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #dcfce7; color: #16a34a;">📚</div>
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600;">Tín chỉ Tích lũy</div>
+                    <div style="font-size: 20px; font-weight: 800; color: #0f172a;">
+                        {{ stats.passed_credits }} <span style="font-size: 13px; color: #64748b; font-weight: 500;">/ {{ stats.total_credits }} TC ({{ stats.total_subjects }} môn)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: #fef3c7; color: #d97706;">🏅</div>
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600;">Xếp loại Học lực</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #b45309;">{{ standing }}</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: {% if profile.tuition_status == 'Còn nợ' %}#fee2e2; color: #dc2626{% else %}#ecfdf5; color: #059669{% endif %};">💰</div>
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600;">Tình trạng Học phí</div>
+                    <div style="font-size: 16px; font-weight: 800; color: {% if profile.tuition_status == 'Còn nợ' %}#dc2626{% else %}#059669{% endif %};">
+                        {{ profile.tuition_status | default('Hoàn thành') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-container">
+            <div class="profile-sidebar">
+                <div class="sidebar-banner"></div>
+                <div class="avatar-lg">
+                    {{ profile.full_name.strip().split()[-1][0] | upper if profile.full_name else 'S' }}
+                </div>
+                
+                <div class="sidebar-body">
+                    <h3 style="color: #0f172a; margin: 0 0 4px 0; font-size: 19px; font-weight: 800;">
+                        {{ profile.full_name | default('Chưa cập nhật') }}
+                    </h3>
+                    <div style="color: #0ea5e9; font-weight: 700; font-size: 14px;">
+                        {{ profile.student_code | default('---') }}
+                    </div>
+                    
+                    {% set status = profile.status | default('Đang học') %}
+                    {% set role_cls = profile.class_role | default('Thành viên') %}
+                    <div class="badge-row">
+                        <span class="pill-badge" style="
+                            {% if status == 'Đang học' or status == 'Đã tốt nghiệp' %} background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+                            {% elif status == 'Bảo lưu' %} background: #fffbeb; color: #b45309; border: 1px solid #fde68a;
+                            {% else %} background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; {% endif %}">
+                            ● {{ status }}
+                        </span>
+                        <span class="pill-badge" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd;">
+                            {% if role_cls in ['Lớp trưởng', 'Lớp phó'] %}👑{% else %}🎓{% endif %} {{ role_cls }}
+                        </span>
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-row"><span>Lớp hành chính:</span> <strong style="color: #0ea5e9;">{{ profile.class_name or '---' }}</strong></div>
+                        <div class="info-row"><span>Khóa đào tạo:</span> <strong>{{ (profile.cohort ~ 'CQ') if profile.cohort else '---' }}</strong></div>
+                        <div class="info-row"><span>Chuyên ngành:</span> <strong>{{ profile.major or '---' }}</strong></div>
+                        <div class="info-row"><span>Giới tính:</span> <strong>{{ profile.gender or '---' }}</strong></div>
+                        <div class="info-row"><span>Ngày sinh:</span> <strong>{{ profile.date_of_birth or '---' }}</strong></div>
+                        <div class="info-row"><span>Số CCCD:</span> <strong>{{ profile.id_card or 'Chưa cập nhật' }}</strong></div>
+                        <div class="info-row"><span>Điện thoại:</span> <strong>{{ profile.phone_number or 'Chưa cập nhật' }}</strong></div>
+                        <div class="info-row"><span>Email trường:</span> <strong>{{ profile.username or '---' }}</strong></div>
+                        <div class="info-row"><span>Gmail cá nhân:</span> <strong style="color: #059669;">{{ profile.personal_email or 'Chưa liên kết' }}</strong></div>
+                    </div>
+
+                    <div class="advisor-card">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">
+                            👨‍🏫 Cố vấn học tập phụ trách
+                        </div>
+                        {% if profile.advisor_name or profile.advisor_email %}
+                            <div style="font-weight: 700; color: #0f172a; font-size: 13.5px;">{{ profile.advisor_name or 'Giảng viên Cố vấn' }}</div>
+                            <div style="font-size: 12px; color: #0ea5e9;">{{ profile.advisor_email or '' }}</div>
+                        {% else %}
+                            <div style="font-size: 12.5px; color: #94a3b8; font-style: italic;">Chưa phân công cố vấn</div>
+                        {% endif %}
+                    </div>
+
+                    <div style="margin-top: 22px; border-top: 1px solid #f1f5f9; padding-top: 18px; display: flex; flex-direction: column; gap: 10px;">
+                        <form action="/master/students/reset_password" method="POST" data-student="{{ profile.full_name }} - {{ profile.student_code }}" onsubmit="return confirm('🔑 Cấp mật khẩu tạm thời mới cho sinh viên [' + this.dataset.student + ']?\n\nMật khẩu hiện tại và Gmail đã liên kết sẽ bị gỡ; sinh viên phải kích hoạt lại tài khoản khi đăng nhập.');">
+                            {{ ui.render_csrf_field() }}
+                            <input type="hidden" name="username" value="{{ profile.username }}">
+                            <button type="submit" class="btn-modern btn-outline" style="width: 100%;">
+                                🔑 Cấp lại mật khẩu tạm thời
+                            </button>
+                        </form>
+                        <form action="/master/students/delete" method="POST" data-student="{{ profile.full_name }} - {{ profile.student_code }}" onsubmit="return confirm('⚠️ CẢNH BÁO XÓA VĨNH VIỄN:\n\nBạn có chắc chắn muốn xóa hồ sơ sinh viên [' + this.dataset.student + '] cùng toàn bộ dữ liệu điểm số liên quan khỏi hệ thống?');">
+                            {{ ui.render_csrf_field() }}
+                            <input type="hidden" name="username" value="{{ profile.username }}">
+                            <button type="submit" class="btn-modern btn-danger-outline">
+                                🗑️ Xóa vĩnh viễn Hồ sơ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content-tabs">
+                <div class="page-tabs">
+                    <button type="button" class="page-tab-link active" onclick="openTab(event, 'TabChung')">👤 Lý lịch & Học vụ</button>
+                    <button type="button" class="page-tab-link" onclick="openTab(event, 'TabDiem')">📊 Bảng điểm Toàn khóa ({{ stats.total_subjects }})</button>
+                    <button type="button" class="page-tab-link" onclick="openTab(event, 'TabTaiChinh')">💰 Học phí & Tài chính</button>
+                    <button type="button" class="page-tab-link" onclick="openTab(event, 'TabThanhTich')">🏆 Khen thưởng & Kỷ luật</button>
+                </div>
+
+                <div id="TabChung" class="tab-content active">
+                    <form action="/master/students/update" method="POST">
+                        {{ ui.render_csrf_field() }}
+                        <input type="hidden" name="username" value="{{ profile.username }}">
+                        
+                        <div class="section-heading">
+                            <span>1. Thông tin Cá nhân & Định danh Công dân</span>
+                            <span style="font-size: 12px; color: #0ea5e9; font-weight: 600;">Quyền Master: Cho phép chỉnh sửa toàn bộ</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Họ và tên sinh viên *</label>
+                                <input type="text" class="form-control" name="full_name" value="{{ profile.full_name or '' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Ngày tháng năm sinh</label>
+                                <input type="date" class="form-control" name="dob" value="{{ profile.date_of_birth or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <select class="form-control" name="gender">
+                                    <option value="Nam" {% if profile.gender == 'Nam' %}selected{% endif %}>Nam</option>
+                                    <option value="Nữ" {% if profile.gender == 'Nữ' %}selected{% endif %}>Nữ</option>
+                                    <option value="Khác" {% if profile.gender == 'Khác' %}selected{% endif %}>Khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Số định danh cá nhân (CCCD)</label>
+                                <input type="text" class="form-control" name="id_card" value="{{ profile.id_card or '' }}" placeholder="Nhập 12 chữ số CCCD">
+                            </div>
+                            <div class="form-group">
+                                <label>Quốc tịch</label>
+                                <input type="text" class="form-control" name="nationality" value="{{ profile.nationality or 'Việt Nam' }}">
+                            </div>
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label>Dân tộc</label>
+                                    <input type="text" class="form-control" name="ethnicity" value="{{ profile.ethnicity or 'Kinh' }}">
+                                </div>
+                                <div>
+                                    <label>Tôn giáo</label>
+                                    <input type="text" class="form-control" name="religion" value="{{ profile.religion or 'Không' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-heading">
+                            <span>2. Thông tin Học vụ & Phân lớp</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Mã sinh viên *</label>
+                                <input type="text" class="form-control" name="student_code" value="{{ profile.student_code or '' }}" readonly title="Mã sinh viên gắn với tài khoản đăng nhập, không sửa được">
+                            </div>
+                            <div class="form-group">
+                                <label>Trạng thái học vụ</label>
+                                <select class="form-control" name="status">
+                                    {% set cur_status = profile.status or 'Đang học' %}
+                                    <option value="Đang học" {% if cur_status == 'Đang học' %}selected{% endif %}>🟢 Đang học</option>
+                                    <option value="Bảo lưu" {% if cur_status == 'Bảo lưu' %}selected{% endif %}>🟡 Bảo lưu</option>
+                                    <option value="Đã tốt nghiệp" {% if cur_status == 'Đã tốt nghiệp' %}selected{% endif %}>🎓 Đã tốt nghiệp</option>
+                                    <option value="Buộc thôi học" {% if cur_status == 'Buộc thôi học' %}selected{% endif %}>🔴 Buộc thôi học</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Chức vụ trong lớp</label>
+                                <select class="form-control" name="class_role">
+                                    {% set cur_role = profile.class_role or 'Thành viên' %}
+                                    <option value="Thành viên" {% if cur_role == 'Thành viên' %}selected{% endif %}>Thành viên</option>
+                                    <option value="Lớp trưởng" {% if cur_role == 'Lớp trưởng' %}selected{% endif %}>👑 Lớp trưởng</option>
+                                    <option value="Lớp phó" {% if cur_role == 'Lớp phó' %}selected{% endif %}>👑 Lớp phó</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Lớp hành chính</label>
+                                <input type="text" class="form-control" value="{{ profile.class_name or '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Khóa đào tạo</label>
+                                <input type="text" class="form-control" value="{{ (profile.cohort ~ 'CQ') if profile.cohort else '---' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Ngành đào tạo</label>
+                                <input type="text" class="form-control" value="{{ profile.major or '---' }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="section-heading">
+                            <span>3. Thông tin Liên hệ & Hộ khẩu Thường trú</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Tài khoản Email Học vụ</label>
+                                <input type="text" class="form-control" disabled value="{{ profile.username or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Gmail Cá nhân (Nhận OTP)</label>
+                                <input type="text" class="form-control" disabled value="{{ profile.personal_email or 'Chưa xác thực Gmail' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại liên hệ</label>
+                                <input type="text" class="form-control" name="phone_number" value="{{ profile.phone_number or '' }}" placeholder="Nhập SĐT sinh viên">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2" style="margin-bottom: 10px;">
+                            <div class="form-group">
+                                <label>Quê quán (Theo hộ khẩu)</label>
+                                <input type="text" class="form-control" name="hometown" value="{{ profile.hometown or '' }}" placeholder="Ví dụ: Quận Hà Đông, TP. Hà Nội">
+                            </div>
+                            <div class="form-group">
+                                <label>Địa chỉ cư trú hiện tại</label>
+                                <input type="text" class="form-control" name="current_address" value="{{ profile.current_address or '' }}" placeholder="Nhập nơi ở hiện tại...">
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                            <button type="submit" class="btn-modern btn-success">💾 Lưu toàn bộ thông tin</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="TabDiem" class="tab-content">
+                    <div class="grade-toolbar">
+                        <div>
+                            <h4 style="margin: 0 0 4px 0; color: #0f172a; font-size: 16px;">Bảng điểm học tập tích lũy</h4>
+                            <span style="font-size: 12.5px; color: #64748b;">Bao gồm chi tiết các đầu điểm thành phần, điểm thi và quy đổi thang điểm 4.</span>
+                        </div>
+
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" id="gradeSearchInput" onkeyup="filterStudentGrades()" placeholder="Lọc theo tên môn hoặc mã lớp HP...">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="table-custom" id="studentGradesTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 4%; text-align: center;">TT</th>
+                                    <th style="width: 13%;">Mã Lớp HP</th>
+                                    <th style="width: 23%;">Tên Học Phần</th>
+                                    <th style="width: 5%; text-align: center;">TC</th>
+                                    <th style="width: 6%; text-align: center;" title="Chuyên cần">CC</th>
+                                    <th style="width: 6%; text-align: center;" title="Bài tập lớn">BTL</th>
+                                    <th style="width: 6%; text-align: center;" title="Trung bình kiểm tra">TBKT</th>
+                                    <th style="width: 6%; text-align: center;" title="Thi giữa kỳ">TGK</th>
+                                    <th style="width: 6%; text-align: center;" title="Thực hành">TH</th>
+                                    <th style="width: 7%; text-align: center;" title="Thi kết thúc học phần Lần 1">Thi L1</th>
+                                    <th style="width: 7%; text-align: center;" title="Thi kết thúc học phần Lần 2">Thi L2</th>
+                                    <th style="width: 7%; text-align: center; background: #f1f5f9;">Hệ 10</th>
+                                    <th style="width: 7%; text-align: center; background: #f1f5f9;">Hệ 4</th>
+                                    <th style="width: 7%; text-align: center; background: #f1f5f9;">Chữ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if grouped_grades %}
+                                    {% for term, term_grades in grouped_grades.items() %}
+                                        {# Tính GPA riêng của học kỳ này #}
+                                        {% set sem_ns = namespace(tc=0, pts4=0.0, pts10=0.0) %}
+                                        {% for item in term_grades %}
+                                            {% if item.score is not none %}
+                                                {% set c = item.credits | int(3) %}
+                                                {% set sem_ns.tc = sem_ns.tc + c %}
+                                                {% set sem_ns.pts10 = sem_ns.pts10 + (item.score | float * c) %}
+                                                {% set sem_ns.pts4 = sem_ns.pts4 + ((item.score_4 | float(0.0)) * c) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% set sem_gpa4 = (sem_ns.pts4 / sem_ns.tc) | round(2) if sem_ns.tc > 0 else '--' %}
+                                        {% set sem_gpa10 = (sem_ns.pts10 / sem_ns.tc) | round(2) if sem_ns.tc > 0 else '--' %}
+
+                                        <tr class="semester-row">
+                                            <td colspan="14" class="semester-header">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                                    <span>📌 {{ term }}</span>
+                                                    <span style="font-size: 12px; background: white; padding: 3px 10px; border-radius: 20px; border: 1px solid #bae6fd;">
+                                                        TB Học kỳ: Hệ 4: <strong>{{ sem_gpa4 }}</strong> | Hệ 10: <strong>{{ sem_gpa10 }}</strong> ({{ term_grades | length }} học phần)
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% for grade in term_grades %}
+                                        <tr class="grade-item-row">
+                                            <td style="text-align: center; color: #94a3b8;">{{ loop.index }}</td>
+                                            <td style="font-weight: 600; color: #0ea5e9;">{{ grade.class_code or '---' }}</td>
+                                            <td style="font-weight: 600; color: #0f172a;">{{ grade.subject }}</td>
+                                            <td style="text-align: center; color: #475569;">{{ grade.credits }}</td>
+                                            <td style="text-align: center;">{{ grade.score_cc if grade.score_cc is not none else '--' }}</td>
+                                            <td style="text-align: center;">{{ grade.score_bttl if grade.score_bttl is not none else '--' }}</td>
+                                            <td style="text-align: center;">{{ grade.score_tbkt if grade.score_tbkt is not none else '--' }}</td>
+                                            <td style="text-align: center;">{{ grade.score_tgk if grade.score_tgk is not none else '--' }}</td>
+                                            <td style="text-align: center;">{{ grade.score_tnth if grade.score_tnth is not none else '--' }}</td>
+                                            <td style="text-align: center; font-weight: 600;">{{ grade.score_thi if grade.score_thi is not none else '--' }}</td>
+                                            <td style="text-align: center;">{{ grade.score_thi_2 if grade.score_thi_2 is not none else '--' }}</td>
+                                            <td style="text-align: center; font-weight: 700; color: #0f172a; background: #f8fafc;">{{ grade.score if grade.score is not none else '--' }}</td>
+                                            <td style="text-align: center; font-weight: 700; color: #0ea5e9; background: #f8fafc;">{{ grade.score_4 if grade.score_4 is not none else '--' }}</td>
+                                            <td style="text-align: center; background: #f8fafc;">
+                                                {% if grade.letter and grade.letter != '--' %}
+                                                    <span class="badge-grade" style="background-color: {{ grade.color }};">{{ grade.letter }}</span>
+                                                {% else %}
+                                                    <span style="color: #94a3b8;">--</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="14" style="text-align: center; color: #64748b; padding: 60px 20px;">
+                                            <div style="font-size: 36px; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                                            Sinh viên chưa có dữ liệu điểm học phần nào trong hệ thống.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="TabTaiChinh" class="tab-content">
+                    <form action="/master/students/update" method="POST">
+                        {{ ui.render_csrf_field() }}
+                        <input type="hidden" name="username" value="{{ profile.username }}">
+                        
+                        <div class="section-heading">
+                            <span>💰 Quản lý Trạng thái Học phí & Công nợ</span>
+                        </div>
+
+                        <div style="background: {% if profile.tuition_status == 'Còn nợ' %}#fef2f2; border: 1px solid #fecaca{% else %}#ecfdf5; border: 1px solid #a7f3d0{% endif %}; padding: 18px 20px; border-radius: 12px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <div style="font-size: 12.5px; color: #475569; margin-bottom: 4px;">Trạng thái công nợ hiện tại của sinh viên:</div>
+                                <div style="font-size: 18px; font-weight: 800; color: {% if profile.tuition_status == 'Còn nợ' %}#dc2626{% else %}#059669{% endif %};">
+                                    {% if profile.tuition_status == 'Còn nợ' %}
+                                        🔴 Đang còn nợ học phí học kỳ
+                                    {% else %}
+                                        🟢 Đã hoàn thành nghĩa vụ học phí (Không có dư nợ)
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="max-width: 440px; margin-bottom: 24px;">
+                            <label>Cập nhật tình trạng đóng học phí</label>
+                            <select class="form-control" name="tuition_status">
+                                <option value="Hoàn thành" {% if profile.tuition_status == 'Hoàn thành' %}selected{% endif %}>🟢 Hoàn thành (Không có dư nợ)</option>
+                                <option value="Còn nợ" {% if profile.tuition_status == 'Còn nợ' %}selected{% endif %}>🔴 Còn nợ học phí</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-modern btn-primary">💾 Lưu Trạng thái Tài chính</button>
+                    </form>
+                </div>
+                <div id="TabThanhTich" class="tab-content">
+                    <form action="/master/students/update" method="POST">
+                        {{ ui.render_csrf_field() }}
+                        <input type="hidden" name="username" value="{{ profile.username }}">
+                        
+                        <div class="section-heading">
+                            <span>🏆 Hồ sơ Khen thưởng, Học bổng & Kỷ luật</span>
+                        </div>
+
+                        <div style="margin-bottom: 8px; font-size: 12.5px; color: #64748b;">Chèn nhanh mẫu ghi chú học vụ:</div>
+                        <div class="quick-tags">
+                            <button type="button" class="tag-btn" onclick="appendNote('Đạt Học bổng Khuyến khích học tập; ')">🏅 Học bổng KKHT</button>
+                            <button type="button" class="tag-btn" onclick="appendNote('Sinh viên Giỏi cấp Trường; ')">🌟 Sinh viên Giỏi</button>
+                            <button type="button" class="tag-btn" onclick="appendNote('Cán bộ lớp hoàn thành xuất sắc nhiệm vụ; ')">👑 Cán bộ lớp Xuất sắc</button>
+                            <button type="button" class="tag-btn" onclick="appendNote('Cảnh cáo học vụ mức 1; ')">⚠️ Cảnh cáo học vụ</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nội dung ghi nhận trên hồ sơ sinh viên</label>
+                            <textarea class="form-control" id="disciplinaryNoteArea" name="disciplinary_note" rows="7" placeholder="Nhập quyết định khen thưởng, học bổng hoặc ghi chú kỷ luật của sinh viên..." style="resize: vertical;">{{ profile.disciplinary_note or '' }}</textarea>
+                        </div>
+
+                        <div style="text-align: right; margin-top: 20px;">
+                            <button type="submit" class="btn-modern btn-success">💾 Lưu Ghi chú Hồ sơ</button>
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("page-tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.classList.add("active");
+        }
+
+        function filterStudentGrades() {
+            const kw = document.getElementById('gradeSearchInput').value.toUpperCase();
+            const rows = document.querySelectorAll('#studentGradesTable .grade-item-row');
+            rows.forEach(row => {
+                const text = row.innerText.toUpperCase();
+                row.style.display = text.indexOf(kw) > -1 ? '' : 'none';
+            });
+        }
+
+        function appendNote(text) {
+            const area = document.getElementById('disciplinaryNoteArea');
+            area.value = (area.value ? area.value.trim() + '\n' : '') + text;
+            area.focus();
+        }
+    </script>
+</body>
+</html>

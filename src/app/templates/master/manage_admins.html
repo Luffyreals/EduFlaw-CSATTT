@@ -1,0 +1,518 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Giảng viên - Master</title>
+    {{ ui.render_common_css() }}
+    <style>
+        /* CSS Tổng quan & Layout */
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 16px; 
+            flex-wrap: wrap; 
+            gap: 14px; 
+            background: white; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        
+        /* Modern Buttons */
+        .btn-modern { 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 12.5px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            white-space: nowrap;
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .btn-action-sm {
+            padding: 6px 11px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Thanh tìm kiếm & Bộ lọc */
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .filter-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .filter-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-box { 
+            display: flex; 
+            align-items: center; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 0 14px; 
+            min-width: 280px; 
+            max-width: 380px;
+            flex: 1;
+            transition: 0.2s; 
+        }
+        .search-box:focus-within { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1); 
+        }
+        .search-box .icon { color: #94a3b8; font-size: 14px; margin-right: 8px; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; padding: 9px 0; font-size: 13px; color: #334155; }
+
+        .filter-select {
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            font-size: 13px;
+            color: #334155;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .filter-select:focus { border-color: #0ea5e9; background: white; }
+
+        .total-badge {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* Khung bảng cuộn cố định & Sticky Header */
+        .table-wrapper-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .table-container { 
+            max-height: calc(100vh - 295px); 
+            min-height: 360px;
+            overflow-y: auto; 
+            overflow-x: auto; 
+        }
+        .table-container::-webkit-scrollbar { height: 7px; width: 7px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .table-custom { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 920px; }
+        .table-custom thead th { 
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f8fafc; 
+            color: #475569; 
+            font-weight: 700; 
+            font-size: 12.5px; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 12px 12px; 
+            border-bottom: 2px solid #e2e8f0; 
+            text-align: left; 
+            white-space: nowrap; 
+        }
+        .table-custom td { 
+            padding: 9px 12px; 
+            border-bottom: 1px solid #f1f5f9; 
+            color: #334155; 
+            font-size: 13px; 
+            vertical-align: middle; 
+        }
+        .table-custom tbody tr { transition: background-color 0.15s; }
+        .table-custom tbody tr:hover { background-color: #f0f9ff; }
+
+        /* Avatar mini & Thông tin phụ */
+        .admin-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .admin-mini-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Thanh phân trang phía dưới bảng */
+        .pagination-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .pagination-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        /* Modals Modern */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #fff; margin: 5vh auto; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: zoomIn 0.2s ease-out; }
+        @keyframes zoomIn { from {transform: scale(0.95); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        .modal-header { padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; background: white; }
+        .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; }
+        .close-btn { color: #94a3b8; font-size: 24px; cursor: pointer; transition: 0.2s; line-height: 1; }
+        .close-btn:hover { color: #ef4444; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #475569; }
+        .form-control { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.2s; background: #f8fafc; }
+        .form-control:focus { border-color: #0ea5e9; background: white; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('admins') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        <!-- Header Action Bar -->
+        <div class="action-bar">
+            <div>
+                <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 20px;">👔 Quản lý Giảng viên & Cố vấn</h2>
+                <p style="margin: 0; color: #64748b; font-size: 13.5px;">Quản lý tài khoản đăng nhập, trạng thái hoạt động và hồ sơ của đội ngũ Admin.</p>
+            </div>
+            
+            <button class="btn-modern btn-success" onclick="document.getElementById('addAdminModal').style.display='block'">
+                <span style="font-size: 15px;">➕</span> Cấp tài khoản mới
+            </button>
+        </div>
+
+        <!-- Tìm kiếm và lọc phía máy chủ: form GET, đổi bộ lọc sẽ quay về trang 1 -->
+        <form method="GET" action="/master/admins" class="action-bar" style="padding: 12px 18px;">
+            <div class="filter-group">
+                <div class="filter-left">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="search" name="q" value="{{ filters.q }}" maxlength="100" placeholder="Tìm theo tên, email hoặc số điện thoại... (Enter)">
+                    </div>
+
+                    <select name="status" class="filter-select auto-submit">
+                        <option value="">Tất cả Trạng thái</option>
+                        <option value="1" {% if filters.status == 1 %}selected{% endif %}>Đang hoạt động</option>
+                        <option value="0" {% if filters.status == 0 %}selected{% endif %}>Đã khóa</option>
+                    </select>
+                    <button type="submit" class="btn-modern btn-primary">Tìm</button>
+                </div>
+
+                <div class="filter-right">
+                    <select name="per_page" class="filter-select auto-submit" title="Số dòng mỗi trang">
+                        {% for size in page_sizes %}
+                        <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} dòng / trang</option>
+                        {% endfor %}
+                    </select>
+                    <span class="total-badge">Tổng: {{ total_records }} GV</span>
+                </div>
+            </div>
+        </form>
+
+        <!-- Khung Bảng có thanh cuộn cố định & Phân trang -->
+        <div class="table-wrapper-card">
+            <div class="table-container" id="adminTableScroll">
+                <table class="table-custom" id="adminTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 6%; text-align: center; border-right: 1px solid #f1f5f9;">STT</th>
+                            <th style="width: 24%;">Tài khoản (Email)</th>
+                            <th style="width: 28%;">Họ và tên Giảng viên</th>
+                            <th style="width: 14%; text-align: center;">Trạng thái</th>
+                            <th style="width: 28%; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if admins_list %}
+                            {% for admin in admins_list %}
+                            <tr>
+                                <td style="text-align: center; color: #94a3b8; font-size: 12px; border-right: 1px solid #f1f5f9;">{{ (current_page - 1) * per_page + loop.index }}</td>
+                                <td style="font-weight: 600;">
+                                    <a href="/master/admin/detail?user_id={{ admin.user_id }}" style="color: #0ea5e9; text-decoration: none; transition: 0.2s;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                        {{ admin.email }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="admin-name-cell">
+                                        <span class="admin-mini-avatar">
+                                            {{ admin.full_name.strip().split()[-1][0] | upper if admin.full_name else 'G' }}
+                                        </span>
+                                        <div>
+                                            <div style="font-weight: 700; color: #0f172a;">
+                                                {{ admin.full_name if admin.full_name else '<span style="color:#cbd5e1; font-weight:normal; font-style:italic;">Chưa cập nhật</span>'|safe }}
+                                            </div>
+                                            {% if admin.phone_number %}
+                                            <div style="font-size: 11px; color: #64748b;">📞 {{ admin.phone_number }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;">
+                                    {% if admin.is_active %}
+                                        <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; white-space: nowrap;">Đang hoạt động</span>
+                                    {% else %}
+                                        <span style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; white-space: nowrap;">Đã khóa</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                        <button class="btn-modern btn-outline btn-action-sm" title="Sửa hồ sơ" data-user-id="{{ admin.user_id }}" data-email="{{ admin.email }}" data-full-name="{{ admin.full_name or '' }}" data-id-card="{{ admin.id_card or '' }}" data-phone="{{ admin.phone_number or '' }}" data-dob="{{ admin.date_of_birth or '' }}" data-gender="{{ admin.gender or 'Nam' }}" data-address="{{ admin.address or '' }}" onclick="openAdminModalFromButton(this)">
+                                            ✏️ Sửa
+                                        </button>
+                                        
+                                        <button class="btn-modern btn-outline btn-action-sm" title="Cấp mật khẩu tạm thời mới" data-user-id="{{ admin.user_id }}" data-email="{{ admin.email }}" onclick="confirmResetPassword(this.dataset.userId, this.dataset.email)">
+                                            🔑 Reset
+                                        </button>
+                                        
+                                        {% if admin.is_active %}
+                                            <button class="btn-modern btn-danger btn-action-sm" title="Khóa tài khoản" data-user-id="{{ admin.user_id }}" data-email="{{ admin.email }}" onclick="confirmToggleStatus(this.dataset.userId, this.dataset.email, 0)">
+                                                🔒 Khóa
+                                            </button>
+                                        {% else %}
+                                            <button class="btn-modern btn-success btn-action-sm" title="Mở khóa tài khoản" data-user-id="{{ admin.user_id }}" data-email="{{ admin.email }}" onclick="confirmToggleStatus(this.dataset.userId, this.dataset.email, 1)">
+                                                🔓 Mở khóa
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                                    <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">📭</div>
+                                    <div style="font-size: 15px;">{% if filters.q or filters.status is not none %}Không tìm thấy giảng viên nào khớp với bộ lọc.{% else %}Chưa có tài khoản Giảng viên nào trong hệ thống.{% endif %}</div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-footer">
+                <div class="pagination-info">
+                    {% if total_records %}
+                    Hiển thị <strong>{{ (current_page - 1) * per_page + 1 }} – {{ (current_page - 1) * per_page + admins_list|length }}</strong> trong tổng số <strong>{{ total_records }}</strong> giảng viên
+                    {% else %}
+                    Không có giảng viên nào.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {{ ui.render_pagination(current_page, total_pages, request.endpoint, query_params) }}
+    </div>
+
+    <!-- ===================== CÁC MODALS ===================== -->
+
+    <!-- MODAL HỒ SƠ GIẢNG VIÊN -->
+    <div id="adminProfileModal" class="modal">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h3>Hồ sơ Giảng viên</h3>
+                <span class="close-btn" onclick="document.getElementById('adminProfileModal').style.display='none'">&times;</span>
+            </div>
+            <form action="/master/admins/update" method="POST" style="padding: 25px;">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="user_id" id="modal_user_id">
+                
+                <div class="form-group">
+                    <label>Tài khoản (Email định danh)</label>
+                    <input type="text" id="modal_email" class="form-control" disabled style="color: #64748b;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Họ và tên Giảng viên</label>
+                        <input type="text" name="full_name" id="modal_full_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số CCCD / Mã định danh</label>
+                        <input type="text" name="id_card" id="modal_id_card" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày sinh</label>
+                        <input type="date" name="dob" id="modal_dob" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Giới tính</label>
+                        <select name="gender" id="modal_gender" class="form-control">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="text" name="phone_number" id="modal_phone" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Địa chỉ liên hệ</label>
+                    <input type="text" name="address" id="modal_address" class="form-control">
+                </div>
+
+                <div style="text-align: right; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('adminProfileModal').style.display='none'">Đóng</button>
+                    <button type="submit" class="btn-modern btn-primary">💾 Lưu Hồ sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL KHỞI TẠO TÀI KHOẢN GIẢNG VIÊN -->
+    <div id="addAdminModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h3>➕ Cấp Tài khoản Giảng viên</h3>
+                <span class="close-btn" onclick="document.getElementById('addAdminModal').style.display='none'">&times;</span>
+            </div>
+            <form action="/master/admins/add" method="POST" style="padding: 25px;">
+                {{ ui.render_csrf_field() }}
+                <div class="form-group">
+                    <label>Tài khoản (Email định danh)</label>
+                    <input type="email" name="email" class="form-control" placeholder="VD: gv_nguyenvana@eduflaw.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Họ và tên Giảng viên</label>
+                    <input type="text" name="full_name" class="form-control" placeholder="VD: Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <small style="color: #64748b; font-size: 12px; display: block;">* Hệ thống tự sinh mật khẩu tạm thời ngẫu nhiên và chỉ hiển thị một lần sau khi tạo. Giảng viên bắt buộc liên kết Gmail và đặt mật khẩu mới ở lần đăng nhập đầu tiên.</small>
+                </div>
+                
+                <div style="text-align: right; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('addAdminModal').style.display='none'">Hủy</button>
+                    <button type="submit" class="btn-modern btn-success">💾 Tạo Tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        const csrfToken = {{ csrf_token() | tojson }};
+
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+
+        function openAdminModal(userId, email, fullName, idCard, phone, dob, gender, address) {
+            document.getElementById('modal_user_id').value = userId;
+            document.getElementById('modal_email').value = email;
+            document.getElementById('modal_full_name').value = fullName;
+            document.getElementById('modal_id_card').value = idCard;
+            document.getElementById('modal_phone').value = phone;
+            document.getElementById('modal_dob').value = dob;
+            document.getElementById('modal_gender').value = gender;
+            document.getElementById('modal_address').value = address;
+            
+            document.getElementById('adminProfileModal').style.display = 'block';
+        }
+
+        // Đọc dữ liệu từ data-* (đã được Jinja escape) thay vì chèn chuỗi trực tiếp vào onclick để tránh XSS
+        function openAdminModalFromButton(btn) {
+            const d = btn.dataset;
+            openAdminModal(d.userId, d.email, d.fullName, d.idCard, d.phone, d.dob, d.gender, d.address);
+        }
+
+        function submitPostForm(action, data) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = action;
+            
+            for (const key in data) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = data[key];
+                form.appendChild(input);
+            }
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function confirmToggleStatus(userId, email, status) {
+            let msg = status === 0 
+                ? `⚠️ CẢNH BÁO BẢO MẬT:\n\nBạn có chắc chắn muốn KHÓA tài khoản [${email}]?\nThao tác này sẽ tước quyền đăng nhập và gỡ Giảng viên khỏi toàn bộ các lớp phụ trách!` 
+                : `Bạn có muốn MỞ KHÓA cho tài khoản [${email}] không?`;
+                
+            if(confirm(msg)) {
+                submitPostForm('/master/admins/toggle_status', {user_id: userId, status: status});
+            }
+        }
+
+        function confirmResetPassword(userId, email) {
+            if(confirm(`🔑 BẢO MẬT:\n\nBạn có chắc chắn muốn ĐẶT LẠI mật khẩu của [${email}] bằng một mật khẩu tạm thời ngẫu nhiên mới không?`)) {
+                submitPostForm('/master/admins/reset_password', {user_id: userId});
+            }
+        }
+
+        // Đổi bộ lọc hoặc số dòng mỗi trang thì gửi lại form tìm kiếm (quay về trang 1)
+        document.querySelectorAll('.auto-submit').forEach(function (selectEl) {
+            selectEl.addEventListener('change', function () { this.form.submit(); });
+        });
+    </script>
+</body>
+</html>

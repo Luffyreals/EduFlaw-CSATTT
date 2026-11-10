@@ -1,0 +1,241 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Giảng viên - EduFlaw Master</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 25px; background: white; padding: 20px; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+        
+        .btn-modern { padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-decoration: none;}
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .detail-container { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+        @media (max-width: 1100px) { .detail-container { grid-template-columns: 1fr; } }
+        
+        .profile-sidebar { background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; overflow: hidden; position: sticky; top: 20px; }
+        .sidebar-banner { height: 86px; background: linear-gradient(135deg, #701a24 0%, #4a0d15 100%); }
+        .avatar-lg { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #9f1239 0%, #701a24 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 800; margin: -48px auto 14px auto; border: 4px solid white; box-shadow: 0 8px 16px -4px rgba(112, 26, 36, 0.4); position: relative; z-index: 2; }
+        .sidebar-body { padding: 0 24px 24px 24px; text-align: center; }
+
+        .badge-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 18px 0; }
+        .pill-badge { padding: 4px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        
+        .info-list { text-align: left; border-top: 1px solid #f1f5f9; padding-top: 14px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #64748b; gap: 10px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row strong { color: #0f172a; text-align: right; word-break: break-word; }
+
+        .main-content-tabs { background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; padding: 28px; min-height: 550px; }
+        
+        .page-tabs { display: inline-flex; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 25px; overflow-x: auto; max-width: 100%; gap: 4px; }
+        .page-tab-link { padding: 10px 18px; cursor: pointer; font-weight: 600; color: #64748b; border-radius: 8px; transition: all 0.2s; font-size: 13px; border: none; background: transparent; white-space: nowrap; }
+        .page-tab-link:hover { color: #0f172a; background: #e2e8f0; }
+        .page-tab-link.active { background: white; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .tab-content { display: none; animation: fadeIn 0.25s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .section-heading { margin: 0 0 16px 0; color: #0f172a; font-size: 15.5px; font-weight: 700; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .form-group label { display: block; font-weight: 600; color: #475569; margin-bottom: 6px; font-size: 12.5px; }
+        .form-control { width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: #f8fafc; outline: none; transition: 0.2s; font-family: inherit; font-size: 13.5px; color: #0f172a; font-weight: 500;}
+        .form-control:focus { border-color: #0ea5e9; background: white; box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+        .form-control:disabled, .form-control[readonly] { background: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
+
+        .assignment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+        .assignment-item { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0ea5e9; border-radius: 10px; padding: 14px 16px; transition: 0.2s; cursor: pointer; }
+        .assignment-item:hover { background: white; border-color: #bae6fd; border-left-color: #0284c7; box-shadow: 0 6px 12px -3px rgba(14, 165, 233, 0.12); transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    {{ ui.render_sidebar('admins') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+        <div class="action-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn-modern btn-outline" onclick="window.location.href='/master/admins'">🔙 Trở lại Danh sách</button>
+                <div>
+                    <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 21px;">
+                        Hồ sơ Giảng viên: <span style="color: #701a24;">{{ profile.full_name | default('Chưa cập nhật') }}</span>
+                    </h2>
+                    <p style="margin: 0; color: #64748b; font-size: 13.5px;">Tài khoản đăng nhập: <strong>{{ profile.username }}</strong></p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <form action="/master/admins/reset_password" method="POST" onsubmit="return confirm('Cấp mật khẩu tạm thời ngẫu nhiên mới cho giảng viên này?');">
+                    {{ ui.render_csrf_field() }}
+                    <input type="hidden" name="user_id" value="{{ target_user_id }}">
+                    <button type="submit" class="btn-modern btn-outline">🔑 Reset Mật khẩu</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="detail-container">
+            <div class="profile-sidebar">
+                <div class="sidebar-banner"></div>
+                <div class="avatar-lg">
+                    {{ profile.full_name.strip().split()[-1][0] | upper if profile.full_name else 'A' }}
+                </div>
+                
+                <div class="sidebar-body">
+                    <h3 style="color: #0f172a; margin: 0 0 4px 0; font-size: 19px; font-weight: 800;">
+                        {{ profile.full_name | default('Chưa cập nhật tên') }}
+                    </h3>
+                    <div style="color: #0ea5e9; font-weight: 600; font-size: 13px;">{{ profile.username }}</div>
+                    
+                    <div class="badge-row">
+                        <span class="pill-badge" style="background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3;">👔 GIẢNG VIÊN</span>
+                        {% if profile.is_active %}
+                            <span class="pill-badge" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">● Đang hoạt động</span>
+                        {% else %}
+                            <span class="pill-badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">● Đã khóa</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-row"><span>Số CCCD:</span> <strong>{{ profile.id_card | default('Chưa cập nhật') }}</strong></div>
+                        <div class="info-row"><span>Giới tính:</span> <strong>{{ profile.gender | default('---') }}</strong></div>
+                        <div class="info-row"><span>Ngày sinh:</span> <strong>{{ profile.date_of_birth | default('---') }}</strong></div>
+                        <div class="info-row"><span>Điện thoại:</span> <strong style="color: #0ea5e9;">{{ profile.phone_number | default('Chưa cập nhật') }}</strong></div>
+                        <div class="info-row"><span>Gmail cá nhân:</span> <strong style="color: #059669;">{{ profile.personal_email or 'Chưa liên kết' }}</strong></div>
+                    </div>
+                    <div style="margin-top: 22px; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                        <form action="/master/admins/toggle_status" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn thay đổi trạng thái hoạt động của giảng viên này?');">
+                            {{ ui.render_csrf_field() }}
+                            <input type="hidden" name="user_id" value="{{ target_user_id }}">
+                            <input type="hidden" name="status" value="{{ 0 if profile.is_active else 1 }}">
+                            <button type="submit" class="btn-modern {% if profile.is_active %}btn-danger{% else %}btn-success{% endif %}" style="width: 100%; justify-content: center;">
+                                {% if profile.is_active %}🔒 Khóa Tài khoản{% else %}🔓 Mở khóa Tài khoản{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content-tabs">
+                
+                <div class="page-tabs">
+                    <button class="page-tab-link active" onclick="openTab(event, 'TabChung')">👤 Cập nhật Hồ sơ</button>
+                    <button class="page-tab-link" onclick="openTab(event, 'TabCongTac')">📚 Phân công Giảng dạy & Cố vấn</button>
+                </div>
+
+                <div id="TabChung" class="tab-content active">
+                    <form action="/master/admins/update" method="POST">
+                        {{ ui.render_csrf_field() }}
+                        <input type="hidden" name="user_id" value="{{ target_user_id }}">
+                        
+                        <div class="section-heading"><span>1. Định danh Cán bộ</span></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Họ và tên giảng viên</label><input type="text" class="form-control" name="full_name" value="{{ profile.full_name | default('') }}" required></div>
+                            <div class="form-group"><label>Số CCCD / Mã định danh</label><input type="text" class="form-control" name="id_card" value="{{ profile.id_card | default('') }}"></div>
+                            <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" name="dob" value="{{ profile.date_of_birth | default('') }}"></div>
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <select class="form-control" name="gender">
+                                    <option value="Nam" {% if profile.gender == 'Nam' %}selected{% endif %}>Nam</option>
+                                    <option value="Nữ" {% if profile.gender == 'Nữ' %}selected{% endif %}>Nữ</option>
+                                    <option value="Khác" {% if profile.gender == 'Khác' %}selected{% endif %}>Khác</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="section-heading" style="margin-top: 10px;"><span>2. Thông tin Liên hệ</span></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Tài khoản Hệ thống</label><input type="text" class="form-control" disabled value="{{ profile.username }}"></div>
+                            <div class="form-group"><label>Gmail cá nhân (Nhận OTP)</label><input type="text" class="form-control" disabled value="{{ profile.personal_email or 'Chưa xác thực Gmail' }}"></div>
+                            <div class="form-group"><label>Số điện thoại</label><input type="text" class="form-control" name="phone_number" value="{{ profile.phone_number | default('') }}"></div>
+                            <div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ văn phòng / Nơi cư trú</label><input type="text" class="form-control" name="address" value="{{ profile.address | default('') }}"></div>
+                        </div>
+
+                        <div style="text-align: right; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                            <button type="submit" class="btn-modern btn-success">💾 Lưu Hồ sơ Giảng viên</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="TabCongTac" class="tab-content">
+                    
+                    <div class="section-heading">
+                        <span>👨‍🎓 Lớp Hành chính làm Cố vấn Học tập ({{ advisor_classes | length if advisor_classes else 0 }})</span>
+                    </div>
+                    {% if advisor_classes %}
+                        <div class="assignment-grid" style="margin-bottom: 30px;">
+                            {% for cls in advisor_classes %}
+                            <div class="assignment-item" data-href="/master/students?{{ {'major': cls.major, 'class_name': cls.class_name, 'cohort': cls.cohort} | urlencode }}" onclick="window.location.href=this.dataset.href">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <strong style="color: #0ea5e9; font-size: 15px;">{{ cls.class_name }}</strong>
+                                    <span style="background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">{{ cls.cohort }}CQ</span>
+                                </div>
+                                <div style="font-size: 12.5px; color: #475569; margin-bottom: 6px;">Ngành: <strong>{{ cls.major }}</strong></div>
+                                <div style="font-size: 12px; color: #64748b;">👥 Sĩ số: <strong>{{ cls.student_count }} SV</strong></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; color: #94a3b8; padding: 20px; font-size: 13.5px; background: #f8fafc; border-radius: 10px; margin-bottom: 30px;">
+                            Chưa phân công làm Cố vấn học tập cho lớp nào.
+                        </div>
+                    {% endif %}
+
+                    <div class="section-heading">
+                        <span>📝 Lớp Học phần đang Giảng dạy ({{ lecturer_classes | length if lecturer_classes else 0 }})</span>
+                    </div>
+                    {% if lecturer_classes %}
+                        <div class="assignment-grid">
+                            {% for c in lecturer_classes %}
+                            <div class="assignment-item" style="border-left-color: #701a24;" onclick="window.location.href='/master/grades?credit_class_id={{ c.id }}'">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+                                    <strong style="color: #0f172a; font-size: 14px; line-height: 1.35;">{{ c.subject_name }}</strong>
+                                    <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; flex-shrink: 0;">{{ c.credits }} TC</span>
+                                </div>
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">
+                                    Mã lớp HP: <strong style="color: #0ea5e9;">{{ c.class_code }}</strong>
+                                </div>
+                                <div style="font-size: 12px; color: #475569; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                                    <span>Học kỳ {{ c.semester }} - {{ c.year }}</span>
+                                    <strong style="color: #10b981;">{{ c.enrolled_students }} SV</strong>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; color: #94a3b8; padding: 20px; font-size: 13.5px; background: #f8fafc; border-radius: 10px;">
+                            Chưa phân công giảng dạy lớp học phần nào.
+                        </div>
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("page-tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

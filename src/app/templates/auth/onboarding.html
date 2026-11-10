@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kích hoạt & Hoàn thiện Hồ sơ - EduFlaw</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js" integrity="sha256-+0Qf8IHMJWuYlZ2lQDBrF1+2aigIRZXEdSvegtELo2I=" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 15% 15%, rgba(112, 26, 36, 0.45) 0px, transparent 50%),
+                radial-gradient(at 85% 85%, rgba(14, 165, 233, 0.18) 0px, transparent 50%);
+            padding: 24px;
+            color: #0f172a;
+        }
+
+        .onboarding-container {
+            width: 100%;
+            max-width: 1040px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            display: grid;
+            grid-template-columns: 1fr 1.45fr;
+            overflow: hidden;
+            animation: cardAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(15px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .sidebar-panel {
+            background: linear-gradient(145deg, #701a24 0%, #450a11 60%, #1e0508 100%);
+            color: #ffffff;
+            padding: 42px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-pill {
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 26px;
+        }
+
+        .account-pill .lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #fecdd3;
+            margin-bottom: 4px;
+        }
+
+        .account-pill .val {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            word-break: break-all;
+        }
+
+        .v-stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .v-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.65;
+            transition: all 0.25s ease;
+        }
+
+        .v-step.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateX(4px);
+        }
+
+        .v-step.done {
+            opacity: 0.9;
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .v-step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .v-step.active .v-step-num {
+            background: #ffffff;
+            color: #701a24;
+        }
+
+        .v-step.done .v-step-num {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .v-step-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .v-step-info p {
+            font-size: 12px;
+            color: #fecdd3;
+            line-height: 1.45;
+        }
+
+        .logout-link {
+            color: #fecdd3;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 28px;
+            opacity: 0.85;
+            transition: 0.2s;
+        }
+        .logout-link:hover { opacity: 1; text-decoration: underline; }
+
+        .content-panel {
+            padding: 40px 44px;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .step-pane { display: none; animation: fadeIn 0.3s ease; }
+        .step-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pane-header { margin-bottom: 22px; }
+        .pane-header .step-tag {
+            display: inline-block;
+            background: #fff1f2;
+            color: #701a24;
+            border: 1px solid #fecdd3;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .pane-header h2 { font-size: 23px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+        .pane-header p { font-size: 13.5px; color: #64748b; line-height: 1.5; }
+
+        .readonly-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            font-size: 12.5px;
+        }
+        .readonly-strip .item-lbl { color: #64748b; margin-bottom: 2px; }
+        .readonly-strip .item-val { font-weight: 700; color: #0f172a; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .full-col { grid-column: 1 / -1; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .form-group label .req { color: #ef4444; }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            font-size: 13.5px;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            border-color: #701a24;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(112, 26, 36, 0.1);
+        }
+
+        .gmail-highlight-box {
+            background: #f0f9ff;
+            border: 1.5px solid #bae6fd;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 4px;
+        }
+        .gmail-highlight-box label { color: #0369a1; font-weight: 700; }
+
+        .otp-inputs {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin: 14px 0;
+        }
+        .otp-digit {
+            width: 100%;
+            height: 56px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            background: #f8fafc;
+            outline: none;
+            transition: 0.2s;
+        }
+        .otp-digit:focus {
+            border-color: #701a24;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(112, 26, 36, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .alert-box {
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+        .btn-action {
+            width: 100%;
+            padding: 13px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+        }
+        .btn-burgundy {
+            background: linear-gradient(135deg, #701a24 0%, #4a0d15 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 20px -4px rgba(112, 26, 36, 0.4);
+        }
+        .btn-burgundy:hover { transform: translateY(-2px); }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.35);
+        }
+        .btn-emerald:hover { transform: translateY(-2px); }
+
+        .btn-outline {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .strength-meter {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .strength-bar { height: 100%; width: 0%; transition: 0.3s; }
+
+        @media (max-width: 860px) {
+            .onboarding-container { grid-template-columns: 1fr; max-width: 520px; }
+            .content-panel { max-height: none; padding: 30px 24px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="onboarding-container">
+        <div class="sidebar-panel">
+            <div>
+                <div class="brand-header">
+                    <div class="brand-title">
+                        <div class="brand-logo">🎓</div>
+                        <span>EduFlaw Activation</span>
+                    </div>
+                </div>
+
+                <div class="account-pill">
+                    <div class="lbl">Tài khoản được cấp ({{ role | upper }})</div>
+                    <div class="val">{{ session.get('username') }}</div>
+                </div>
+
+                <div class="v-stepper">
+                    <div class="v-step active" id="navStep1">
+                        <div class="v-step-num" id="numStep1">1</div>
+                        <div class="v-step-info">
+                            <h4>Bổ sung Hồ sơ & Gmail</h4>
+                            <p>Điền thông tin cá nhân còn thiếu và liên kết hộp thư Gmail cá nhân.</p>
+                        </div>
+                    </div>
+
+                    <div class="v-step" id="navStep2">
+                        <div class="v-step-num" id="numStep2">2</div>
+                        <div class="v-step-info">
+                            <h4>Xác thực Mã OTP</h4>
+                            <p>Nhập mã bảo mật 6 chữ số được gửi trực tiếp về Gmail vừa đăng ký.</p>
+                        </div>
+                    </div>
+
+                    <div class="v-step" id="navStep3">
+                        <div class="v-step-num" id="numStep3">3</div>
+                        <div class="v-step-info">
+                            <h4>Đổi Mật khẩu Mới</h4>
+                            <p>Thay thế mật khẩu tạm thời được cấp bằng mật khẩu cá nhân an toàn.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form action="/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="logout-link" style="background: none; border: none; font: inherit; cursor: pointer;">← Đăng xuất tài khoản</button>
+            </form>
+        </div>
+
+        <div class="content-panel">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert-box alert-error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="step-pane active" id="paneStep1">
+                <div class="pane-header">
+                    <span class="step-tag">Bước 1 / 3 • Thông tin định danh</span>
+                    <h2>Hoàn thiện Hồ sơ Cá nhân</h2>
+                    <p>Vui lòng cập nhật đầy đủ các thông tin cá nhân còn thiếu và địa chỉ Gmail để nhận mã xác thực kích hoạt tài khoản.</p>
+                </div>
+
+                {% if role == 'student' %}
+                <div class="readonly-strip">
+                    <div>
+                        <div class="item-lbl">Mã sinh viên</div>
+                        <div class="item-val">{{ profile.student_code or '---' }}</div>
+                    </div>
+                    <div>
+                        <div class="item-lbl">Lớp hành chính</div>
+                        <div class="item-val" style="color:#0ea5e9;">{{ profile.class_name or '---' }}</div>
+                    </div>
+                    <div>
+                        <div class="item-lbl">Ngành đào tạo</div>
+                        <div class="item-val">{{ profile.major or '---' }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Họ và tên đầy đủ <span class="req">*</span></label>
+                        <input type="text" id="ob_full_name" class="form-control" value="{{ profile.full_name }}" placeholder="VD: Nguyễn Văn A" required {% if role in ['student', 'admin'] and profile.full_name %}readonly{% endif %}>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ngày sinh <span class="req">*</span></label>
+                        <input type="date" id="ob_dob" class="form-control" value="{{ profile.dob }}" required {% if role in ['student', 'admin'] and profile.dob %}readonly{% endif %}>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Giới tính <span class="req">*</span></label>
+                        <select id="ob_gender" class="form-control" {% if role in ['student', 'admin'] and profile.gender_locked %}disabled{% endif %}>
+                            <option value="Nam" {% if profile.gender == 'Nam' %}selected{% endif %}>Nam</option>
+                            <option value="Nữ" {% if profile.gender == 'Nữ' %}selected{% endif %}>Nữ</option>
+                            <option value="Khác" {% if profile.gender == 'Khác' %}selected{% endif %}>Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Số CCCD / Mã định danh <span class="req">*</span></label>
+                        <input type="text" id="ob_id_card" class="form-control" value="{{ profile.id_card }}" placeholder="Nhập 12 số CCCD" required {% if role in ['student', 'admin'] and profile.id_card %}readonly{% endif %}>
+                    </div>
+
+                    <div class="form-group {% if role != 'student' %}full-col{% endif %}">
+                        <label>Số điện thoại liên hệ <span class="req">*</span></label>
+                        <input type="text" id="ob_phone" class="form-control" value="{{ profile.phone_number }}" placeholder="VD: 0912345678" required>
+                    </div>
+
+                    {% if role == 'student' %}
+                    <div class="form-group">
+                        <label>Quê quán <span class="req">*</span></label>
+                        <input type="text" id="ob_hometown" class="form-control" value="{{ profile.hometown }}" placeholder="VD: Hà Nội" required {% if profile.hometown %}readonly{% endif %}>
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group full-col">
+                        <label>Địa chỉ cư trú hiện tại <span class="req">*</span></label>
+                        <input type="text" id="ob_address" class="form-control" value="{{ profile.address }}" placeholder="Nhập số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố..." required>
+                    </div>
+
+                    <div class="form-group full-col gmail-highlight-box">
+                        <label>📩 Địa chỉ Gmail cá nhân (Nhận mã xác thực OTP) <span class="req">*</span></label>
+                        <input type="email" id="ob_personal_email" class="form-control" style="background:#ffffff; margin-top:6px;" value="{{ profile.personal_email }}" placeholder="VD: nguyenvana@gmail.com" required>
+                        <small style="color:#0369a1; font-size:12px; display:block; margin-top:6px;">
+                            * Hệ thống sẽ gửi mã xác thực 6 chữ số về Gmail này để kích hoạt tài khoản và dùng để khôi phục mật khẩu về sau.
+                        </small>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-action btn-burgundy" id="btnStep1Submit" onclick="submitStep1AndSendOtp()">
+                    <span id="btnStep1Text">Lưu thông tin & Nhận mã xác thực Gmail</span>
+                    <span>➔</span>
+                </button>
+            </div>
+
+            <div class="step-pane" id="paneStep2">
+                <div class="pane-header">
+                    <span class="step-tag">Bước 2 / 3 • Xác minh hộp thư</span>
+                    <h2>Xác thực Mã OTP</h2>
+                    <p>Hệ thống đã gửi mã xác thực gồm 6 chữ số tới hộp thư <strong id="displayTargetEmail" style="color:#0f172a;">---</strong>. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam) và nhập mã vào bên dưới.</p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:13px; font-weight:700; color:#334155;">Nhập 6 chữ số xác thực</label>
+                    <span id="otpCountdown" style="font-size:12.5px; font-weight:700; color:#0284c7;">⏳ 05:00</span>
+                </div>
+
+                <div class="otp-inputs">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input type="text" class="otp-digit" maxlength="1" inputmode="numeric">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <button type="button" class="btn-outline" onclick="goToStep(1)">← Sửa lại thông tin / Gmail</button>
+                    <button type="button" onclick="submitStep1AndSendOtp()" style="background:none; border:none; color:#701a24; font-weight:700; font-size:13px; cursor:pointer;">
+                        ↻ Gửi lại mã OTP mới
+                    </button>
+                </div>
+
+                <button type="button" class="btn-action btn-burgundy" id="btnStep2Verify" onclick="verifyStep2Otp()">
+                    <span>Xác minh Mã OTP</span>
+                    <span>➔</span>
+                </button>
+            </div>
+
+            <div class="step-pane" id="paneStep3">
+                <div class="pane-header">
+                    <span class="step-tag" style="background:#ecfdf5; color:#059669; border-color:#a7f3d0;">Bước 3 / 3 • Bảo mật tài khoản</span>
+                    <h2>Thiết lập Mật khẩu Mới</h2>
+                    <p>Gmail của bạn đã được xác minh! Hãy tạo mật khẩu mới (tối thiểu 12 ký tự) để thay thế mật khẩu tạm thời được cấp.</p>
+                </div>
+
+                <form action="/onboarding/complete" method="POST" onsubmit="return validateStep3Password()">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="form-group" style="margin-bottom:18px;">
+                        <label>Mật khẩu mới (Tối thiểu 12 ký tự) <span class="req">*</span></label>
+                        <input type="password" name="new_password" id="ob_new_password" class="form-control" placeholder="Nhập mật khẩu mới an toàn..." required minlength="12" oninput="checkStrength(this.value)">
+                        <div class="strength-meter"><div class="strength-bar" id="obStrengthBar"></div></div>
+                        <small id="obStrengthText" style="font-size:12px; color:#64748b; display:block; margin-top:5px;">Yêu cầu ít nhất 12 ký tự và không trùng mật khẩu tạm thời được cấp.</small>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:18px;">
+                        <label>Xác nhận mật khẩu mới <span class="req">*</span></label>
+                        <input type="password" name="confirm_password" id="ob_confirm_password" class="form-control" placeholder="Nhập lại mật khẩu mới..." required minlength="12">
+                    </div>
+
+                    <button type="submit" class="btn-action btn-emerald">
+                        <span>✅ Hoàn tất Kích hoạt & Vào Hệ thống</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const csrfToken = {{ csrf_token() | tojson }};
+        const currentRole = {{ role | tojson }};
+        const verifiedPersonalEmail = {{ verified_personal_email | tojson }};
+        let timerInterval = null;
+
+        const otpBoxes = document.querySelectorAll('.otp-digit');
+        otpBoxes.forEach((box, idx) => {
+            box.addEventListener('focus', () => box.select());
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace') {
+                    if (!box.value && idx > 0) {
+                        otpBoxes[idx - 1].value = '';
+                        otpBoxes[idx - 1].focus();
+                        e.preventDefault();
+                    }
+                } else if (/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                    box.value = e.key;
+                    if (idx < otpBoxes.length - 1) {
+                        otpBoxes[idx + 1].focus();
+                    }
+                } else if (e.key === 'ArrowLeft' && idx > 0) {
+                    otpBoxes[idx - 1].focus();
+                } else if (e.key === 'ArrowRight' && idx < otpBoxes.length - 1) {
+                    otpBoxes[idx + 1].focus();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    verifyStep2Otp();
+                }
+            });
+
+            box.addEventListener('input', (e) => {
+                const digits = (e.target.value || '').replace(/[^0-9]/g, '');
+                if (digits.length > 1) {
+                    fillOtp(digits);
+                } else {
+                    e.target.value = digits;
+                    if (digits && idx < otpBoxes.length - 1) {
+                        otpBoxes[idx + 1].focus();
+                    }
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').slice(0, 6);
+                fillOtp(pasted);
+            });
+        });
+
+        function fillOtp(code) {
+            const clean = String(code || '').replace(/[^0-9]/g, '').slice(0, 6);
+            for (let i = 0; i < otpBoxes.length; i++) {
+                otpBoxes[i].value = clean[i] || '';
+            }
+            if (clean.length > 0) {
+                otpBoxes[Math.min(clean.length, 5)].focus();
+            }
+        }
+
+        function goToStep(stepNumber) {
+            [1, 2, 3].forEach(n => {
+                document.getElementById('paneStep' + n).classList.toggle('active', n === stepNumber);
+                const nav = document.getElementById('navStep' + n);
+                const num = document.getElementById('numStep' + n);
+                nav.classList.remove('active', 'done');
+                if (n < stepNumber) {
+                    nav.classList.add('done');
+                    num.textContent = '✓';
+                } else if (n === stepNumber) {
+                    nav.classList.add('active');
+                    num.textContent = String(n);
+                } else {
+                    num.textContent = String(n);
+                }
+            });
+        }
+
+        function startOtpTimer(seconds) {
+            clearInterval(timerInterval);
+            let rem = seconds;
+            const el = document.getElementById('otpCountdown');
+            el.style.color = '#0284c7';
+            timerInterval = setInterval(() => {
+                const m = String(Math.floor(rem / 60)).padStart(2, '0');
+                const s = String(rem % 60).padStart(2, '0');
+                el.textContent = `⏳ ${m}:${s}`;
+                if (rem <= 0) {
+                    clearInterval(timerInterval);
+                    el.textContent = '⚠️ Hết hạn';
+                    el.style.color = '#dc2626';
+                }
+                rem--;
+            }, 1000);
+        }
+
+        function submitStep1AndSendOtp() {
+            const payload = {
+                full_name: document.getElementById('ob_full_name').value.trim(),
+                dob: document.getElementById('ob_dob').value.trim(),
+                gender: document.getElementById('ob_gender').value,
+                id_card: document.getElementById('ob_id_card') ? document.getElementById('ob_id_card').value.trim() : '',
+                phone_number: document.getElementById('ob_phone').value.trim(),
+                hometown: document.getElementById('ob_hometown') ? document.getElementById('ob_hometown').value.trim() : '',
+                address: document.getElementById('ob_address').value.trim(),
+                personal_email: document.getElementById('ob_personal_email').value.trim()
+            };
+
+            if (!payload.full_name || !payload.dob || !payload.phone_number || !payload.address || !payload.personal_email) {
+                Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng điền đầy đủ các trường thông tin cá nhân và Gmail.' });
+                return;
+            }
+
+            if (currentRole === 'student' && !payload.hometown) {
+                Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng nhập Quê quán của bạn.' });
+                return;
+            }
+
+            const btn = document.getElementById('btnStep1Submit');
+            const btnText = document.getElementById('btnStep1Text');
+            btn.disabled = true;
+            btnText.textContent = 'Đang lưu hồ sơ & gửi mã OTP...';
+
+            fetch('/auth/api/onboarding/save-and-send-otp', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btnText.textContent = 'Lưu thông tin & Nhận mã xác thực Gmail';
+
+                if (data.success) {
+                    document.getElementById('displayTargetEmail').textContent = data.personal_email;
+                    otpBoxes.forEach(b => b.value = '');
+
+                    goToStep(2);
+                    startOtpTimer(300);
+                    otpBoxes[0].focus();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Đã gửi mã OTP tới Gmail của bạn!', showConfirmButton: false, timer: 3000 });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Không thể tiếp tục', text: data.message });
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btnText.textContent = 'Lưu thông tin & Nhận mã xác thực Gmail';
+                Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể kết nối tới máy chủ.' });
+            });
+        }
+
+        function verifyStep2Otp() {
+            let otpCode = '';
+            otpBoxes.forEach(b => otpCode += (b.value || '').trim());
+            otpCode = otpCode.replace(/[^0-9]/g, '');
+
+            if (otpCode.length !== 6) {
+                Swal.fire({ icon: 'warning', title: 'Chưa đủ 6 số', text: 'Vui lòng nhập đầy đủ 6 chữ số OTP đã gửi tới Gmail của bạn.' });
+                return;
+            }
+
+            const personalEmail = document.getElementById('ob_personal_email').value.trim();
+            const btn = document.getElementById('btnStep2Verify');
+            btn.disabled = true;
+
+            fetch('/auth/api/onboarding/verify-otp', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ personal_email: personalEmail, otp_code: otpCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.success) {
+                    clearInterval(timerInterval);
+                    goToStep(3);
+                    document.getElementById('ob_new_password').focus();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Xác thực Gmail thành công!', showConfirmButton: false, timer: 2500 });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Mã OTP không hợp lệ', text: data.message });
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể xác minh OTP lúc này.' });
+            });
+        }
+
+        function checkStrength(pwd) {
+            const bar = document.getElementById('obStrengthBar');
+            const txt = document.getElementById('obStrengthText');
+            let score = 0;
+            if (pwd.length >= 12) score += 40;
+            if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 20;
+            if (/[0-9]/.test(pwd)) score += 20;
+            if (/[^A-Za-z0-9]/.test(pwd)) score += 20;
+
+            bar.style.width = score + '%';
+            if (pwd.length < 12) {
+                bar.style.backgroundColor = '#ef4444';
+                txt.textContent = `Cần thêm ${12 - pwd.length} ký tự nữa (Tối thiểu 12 ký tự)`;
+                txt.style.color = '#ef4444';
+            } else if (score < 80) {
+                bar.style.backgroundColor = '#f59e0b';
+                txt.textContent = 'Độ mạnh: Khá (Hợp lệ)';
+                txt.style.color = '#d97706';
+            } else {
+                bar.style.backgroundColor = '#10b981';
+                txt.textContent = 'Độ mạnh: Rất an toàn ✓';
+                txt.style.color = '#059669';
+            }
+        }
+
+        function validateStep3Password() {
+            const p1 = document.getElementById('ob_new_password').value;
+            const p2 = document.getElementById('ob_confirm_password').value;
+            if (p1.length < 12) {
+                Swal.fire({ icon: 'warning', title: 'Mật khẩu quá ngắn', text: 'Mật khẩu mới phải có từ 12 ký tự trở lên.' });
+                return false;
+            }
+            if (p1 !== p2) {
+                Swal.fire({ icon: 'error', title: 'Không khớp', text: 'Mật khẩu xác nhận không khớp.' });
+                return false;
+            }
+            return true;
+        }
+
+        // Gmail đã xác thực OTP trong phiên này (vd. mật khẩu ở bước 3 vừa bị từ chối):
+        // ở lại bước 3 thay vì bắt gửi lại OTP (vướng thời gian chờ và giới hạn số lần gửi)
+        if (verifiedPersonalEmail) {
+            document.getElementById('ob_personal_email').value = verifiedPersonalEmail;
+            goToStep(3);
+        }
+    </script>
+</body>
+</html>

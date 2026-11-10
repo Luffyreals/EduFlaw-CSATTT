@@ -1,0 +1,664 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Sinh viên - Admin</title>
+    
+    {{ ui.render_common_css() }}
+    
+    <style>
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        .btn-modern { 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            text-decoration: none;
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .filter-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-box { 
+            display: flex; 
+            align-items: center; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 0 15px; 
+            min-width: 280px; 
+            transition: 0.2s; 
+        }
+        .search-box:focus-within { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1); 
+        }
+        .search-box .icon { color: #94a3b8; font-size: 14px; margin-right: 10px; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; padding: 10px 0; font-size: 13px; color: #334155; }
+
+        .filter-select { 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            outline: none; 
+            font-size: 13px; 
+            color: #334155; 
+            background: #f8fafc; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-weight: 500;
+        }
+        .filter-select:focus { border-color: #0ea5e9; background: white; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .summary-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+        }
+        .advisor-class-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .advisor-class-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: #0ea5e9;
+        }
+        .advisor-class-card:hover {
+            border-color: #bae6fd;
+            box-shadow: 0 12px 20px -5px rgba(14, 165, 233, 0.15);
+            transform: translateY(-3px);
+        }
+        .class-detail-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (min-width: 1100px) {
+            .class-detail-layout {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 15px;
+        }
+        .student-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .student-card:hover {
+            border-color: #0ea5e9;
+            box-shadow: 0 8px 15px -3px rgba(14, 165, 233, 0.12);
+            transform: translateY(-2px);
+        }
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+        .student-avatar.leader {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .role-leader { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .role-member { background: #f1f5f9; color: #64748b; }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(15, 23, 42, 0.45); 
+            backdrop-filter: blur(4px); 
+        }
+        .modal-content { 
+            background-color: #fff; 
+            margin: 6vh auto; 
+            width: 720px; 
+            max-width: 94%;
+            border-radius: 14px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); 
+            overflow: hidden;
+            animation: zoomIn 0.2s ease-out;
+        }
+        @keyframes zoomIn { from {transform: scale(0.95); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        .modal-header { 
+            background: white; 
+            color: #0f172a; 
+            padding: 20px 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .close-btn { color: #94a3b8; font-size: 26px; cursor: pointer; line-height: 1; transition: 0.2s; }
+        .close-btn:hover { color: #ef4444; }
+        
+        .tab-menu { 
+            display: flex; 
+            background: #f8fafc; 
+            border-bottom: 1px solid #e2e8f0; 
+            padding: 10px 25px; 
+            gap: 8px;
+            overflow-x: auto; 
+            white-space: nowrap; 
+        }
+        .tab-link { 
+            flex: 0 0 auto; 
+            background: transparent; 
+            border: none; 
+            outline: none; 
+            cursor: pointer; 
+            padding: 8px 16px; 
+            border-radius: 8px;
+            font-size: 13px; 
+            font-weight: 600; 
+            color: #64748b; 
+            transition: all 0.2s; 
+        }
+        .tab-link:hover { color: #0f172a; background: #e2e8f0; }
+        .tab-link.active { 
+            background-color: white; 
+            color: #701a24; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #475569; }
+        .form-control { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            background: #f8fafc;
+            outline: none;
+            font-size: 14px;
+            color: #0f172a;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .form-control:focus {
+            border-color: #0ea5e9;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+        }
+        .form-control[readonly] {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    {{ ui.render_sidebar('students') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        {% if advisor_classes is defined and not selected_class %}
+            {% set total_managed_students = advisor_classes | sum(attribute='student_count') if advisor_classes else 0 %}
+
+            <div class="action-bar">
+                <div>
+                    <h2 style="margin: 0 0 5px 0; color: #0f172a;">👨‍🎓 Quản lý Lớp Hành chính</h2>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Danh sách các lớp hành chính do bạn trực tiếp làm Cố vấn học tập.</p>
+                </div>
+
+                <div class="filter-group">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="searchClassInput" onkeyup="filterAdvisorClasses()" placeholder="Lọc theo Tên lớp, Khóa hoặc Ngành...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: #e0f2fe; color: #0284c7;">🏫</div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Số lớp cố vấn</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #0f172a;">{{ advisor_classes|length }} <span style="font-size: 13px; font-weight: 500; color: #64748b;">lớp</span></div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon" style="background: #dcfce7; color: #16a34a;">👥</div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Tổng sinh viên quản lý</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #0f172a;">{{ total_managed_students }} <span style="font-size: 13px; font-weight: 500; color: #64748b;">sinh viên</span></div>
+                    </div>
+                </div>
+            </div>
+
+            {% if not advisor_classes %}
+                <div style="background: white; text-align: center; padding: 60px 20px; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                    <div style="font-size: 42px; margin-bottom: 12px; opacity: 0.5;">📭</div>
+                    <div style="color: #475569; font-weight: 600; font-size: 16px; margin-bottom: 5px;">Chưa có lớp phân công</div>
+                    <div style="color: #64748b; font-size: 14px;">Hệ thống ghi nhận bạn chưa được phân công làm cố vấn cho lớp nào trong học kỳ này.</div>
+                </div>
+            {% else %}
+                <div id="advisor-classes-container" class="classes-grid">
+                    {% for cls in advisor_classes %}
+                        <div class="advisor-class-card" 
+                             data-href="/admin/students?{{ {'major': cls.major, 'class_name': cls.class_name, 'cohort': cls.cohort} | urlencode }}" onclick="window.location.href=this.dataset.href">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-weight: 800; color: #0ea5e9; font-size: 18px;">{{ cls.class_name }}</div>
+                                <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 700;">
+                                    Khóa {{ cls.cohort }}CQ
+                                </span>
+                            </div>
+                            <div style="font-size: 13px; color: #475569; margin-bottom: 14px; line-height: 1.4;">
+                                Ngành: <strong style="color: #0f172a;">{{ cls.major }}</strong>
+                            </div>
+                            <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                                <span style="color: #64748b;">👥 Sĩ số lớp:</span>
+                                <strong style="color: #0f172a;">{{ cls.student_count }} sinh viên &rarr;</strong>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        {% elif selected_class %}
+            {% set ns = namespace(leaders=0) %}
+            {% for p in profiles %}
+                {% if p.class_role in ['Lớp trưởng', 'Lớp phó'] %}
+                    {% set ns.leaders = ns.leaders + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="action-bar">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <button type="button" class="btn-modern btn-outline" onclick="window.location.href='/admin/students'">
+                        🔙 Danh sách Lớp
+                    </button>
+                    <div>
+                        <h3 style="margin: 0 0 5px 0; color: #0f172a; font-size: 20px;">
+                            Lớp hành chính: <span style="color: #0ea5e9;">{{ selected_class }}</span>
+                        </h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; color: #64748b; font-size: 13px;">
+                            <span>Ngành: <strong style="color: #334155;">{{ selected_major }}</strong></span>
+                            <span>•</span>
+                            <span>Khóa: <strong style="color: #334155;">{{ selected_cohort }}CQ</strong></span>
+                            <span>•</span>
+                            <span>Hiển thị: <strong style="color: #10b981;">{{ profiles|length }} sinh viên</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="search-box" style="min-width: 240px;">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="searchStudentInClass" onkeyup="filterStudentsInClass()" placeholder="Tìm tên hoặc mã SV...">
+                    </div>
+                    <select id="roleFilterInClass" class="filter-select" onchange="filterStudentsInClass()">
+                        <option value="all">Tất cả vai trò</option>
+                        <option value="leader">👑 Ban cán sự lớp</option>
+                        <option value="member">👤 Thành viên</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="class-detail-layout">
+                <div style="background: white; border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <div id="student-list-container" class="students-grid custom-scroll" style="max-height: 68vh; overflow-y: auto; padding-right: 5px;">
+                        {% for profile in profiles %}
+                            {% set is_leader = profile.class_role in ['Lớp trưởng', 'Lớp phó'] %}
+                            <div class="student-card"
+                                 data-role="{{ 'leader' if is_leader else 'member' }}"
+                                 data-avatar="{{ profile.avatar_url }}"
+                                 data-full-name="{{ profile.full_name }}"
+                                 data-student-code="{{ profile.student_code }}"
+                                 data-username="{{ profile.username }}"
+                                 data-gender="{{ profile.gender }}"
+                                 data-dob="{{ profile.date_of_birth }}"
+                                 data-phone="{{ profile.phone_number }}"
+                                 data-class-role="{{ profile.class_role }}"
+                                 data-status="{{ profile.status }}"
+                                 data-nationality="{{ profile.nationality }}"
+                                 data-ethnicity="{{ profile.ethnicity }}"
+                                 data-religion="{{ profile.religion }}"
+                                 data-id-card="{{ profile.id_card }}"
+                                 data-hometown="{{ profile.hometown }}"
+                                 data-address="{{ profile.current_address }}"
+                                 onclick="openModalFromCard(this)">
+                                
+                                <div class="student-avatar {{ 'leader' if is_leader else '' }}">
+                                    {{ profile.full_name.strip().split()[-1][0] | upper if profile.full_name else 'S' }}
+                                </div>
+                                
+                                <div style="flex: 1; overflow: hidden;">
+                                    <div class="student-name" style="font-weight: 700; color: #0f172a; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; margin-bottom: 3px;">
+                                        {{ profile.full_name }}
+                                    </div>
+                                    <div class="student-code" style="font-size: 12px; color: #64748b; margin-bottom: 6px;">
+                                        {{ profile.student_code }} • {{ profile.gender }}
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                        <span class="role-badge {{ 'role-leader' if is_leader else 'role-member' }}">
+                                            {% if is_leader %}👑{% endif %} {{ profile.class_role or 'Thành viên' }}
+                                        </span>
+                                        {% if profile.status and profile.status != 'Đang học' %}
+                                            <span style="font-size: 11px; font-weight: 600; color: #dc2626; background: #fef2f2; padding: 2px 6px; border-radius: 6px;">
+                                                {{ profile.status }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        {{ ui.render_pagination(current_page, total_pages, request.endpoint, {'major': selected_major, 'class_name': selected_class, 'cohort': selected_cohort}) }}
+                    </div>
+                </div>
+
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; position: sticky; top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <h4 style="margin: 0 0 15px 0; color: #0f172a; font-size: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                        📌 Thông tin Cố vấn Lớp
+                    </h4>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Mã lớp:</span>
+                            <strong style="color: #0f172a;">{{ selected_class }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Ban cán sự:</span>
+                            <strong style="color: #d97706;">{{ ns.leaders }} sinh viên</strong>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                        <div style="font-weight: 700; color: #334155; font-size: 13px; margin-bottom: 6px;">💡 Hướng dẫn thao tác</div>
+                        <p style="color: #64748b; font-size: 12px; line-height: 1.6; margin: 0;">
+                            Nhấp trực tiếp vào thẻ của từng sinh viên ở danh sách bên trái để xem hồ sơ chi tiết, cập nhật SĐT, địa chỉ, trạng thái học vụ hoặc phân công Ban cán sự lớp.
+                        </p>
+                    </div>
+
+                    <a href="/admin/announcements" class="btn-modern btn-primary" style="width: 100%; box-sizing: border-box; justify-content: center;">
+                        📢 Đăng thông báo cho lớp
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👤 Hồ sơ chi tiết sinh viên</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+
+            <div class="tab-menu">
+                <button class="tab-link active" type="button" onclick="switchModalTab(event, 'Modal-Chung')">👤 Thông tin chung</button>
+                <button class="tab-link" type="button" onclick="switchModalTab(event, 'Modal-DiaChi')">📍 Địa chỉ & Liên hệ</button>
+                <button class="tab-link" type="button" onclick="switchModalTab(event, 'Modal-HocVu')">🎓 Học vụ</button>
+            </div>
+
+            <form action="/admin/students/update" method="POST" style="padding: 25px;">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="username" id="modal_username_hidden">
+                
+                <div id="Modal-Chung" class="modal-tab-content" style="display: block;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group"><label>Họ và tên</label><input type="text" name="full_name" class="form-control"></div>
+                        <div class="form-group"><label>Ngày sinh</label><input type="date" name="dob" class="form-control"></div>
+                        <div class="form-group">
+                            <label>Giới tính</label>
+                            <select name="gender" class="form-control">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Số định danh (CCCD)</label><input type="text" name="id_card" class="form-control"></div>
+                        <div class="form-group"><label>Quốc tịch</label><input type="text" name="nationality" class="form-control" value="Việt Nam"></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group"><label>Dân tộc</label><input type="text" name="ethnicity" class="form-control" value="Kinh"></div>
+                            <div class="form-group"><label>Tôn giáo</label><input type="text" name="religion" class="form-control" value="Không"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="Modal-DiaChi" class="modal-tab-content" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group"><label>Email trường cấp</label><input type="email" id="modal_email_display" class="form-control" readonly></div>
+                        <div class="form-group"><label>Số điện thoại</label><input type="text" name="phone_number" class="form-control"></div>
+                    </div>
+                    <div class="form-group"><label>Quê quán</label><input type="text" name="hometown" class="form-control"></div>
+                    <div class="form-group"><label>Địa chỉ thường trú</label><input type="text" name="current_address" class="form-control"></div>
+                </div>
+
+                <div id="Modal-HocVu" class="modal-tab-content" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group"><label>Mã sinh viên (Cố định)</label><input type="text" name="student_code" class="form-control" readonly></div>
+                        <div class="form-group">
+                            <label>Trạng thái học tập</label>
+                            <select name="status" class="form-control">
+                                <option value="Đang học">Đang học</option>
+                                <option value="Bảo lưu">Bảo lưu</option>
+                                <option value="Đã tốt nghiệp">Đã tốt nghiệp</option>
+                                <option value="Buộc thôi học">Buộc thôi học</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Vai trò Ban cán sự trong lớp</label>
+                            <select name="class_role" class="form-control">
+                                <option value="Thành viên">Thành viên</option>
+                                <option value="Lớp trưởng">👑 Lớp trưởng</option>
+                                <option value="Lớp phó">👑 Lớp phó</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 18px;">
+                    <button type="button" class="btn-modern btn-outline" 
+                            style="margin-right: auto; color: #b45309; border-color: #fde68a; background: #fffbeb;" 
+                            onclick="resetStudentPassword()">
+                        🔄 Cấp lại Mật khẩu
+                    </button>
+                    <button type="button" class="btn-modern btn-outline" onclick="closeModal()">Đóng</button>
+                    <button type="submit" class="btn-modern btn-success">💾 Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <form id="resetPwdForm" action="/{{ session.get('role') }}/students/reset_password" method="POST" style="display: none;">
+        {{ ui.render_csrf_field() }}
+        <input type="hidden" name="username" id="reset_pwd_username">
+    </form>
+    <script>
+        function filterAdvisorClasses() {
+            var input = document.getElementById("searchClassInput");
+            var filter = input.value.toUpperCase();
+            var cards = document.getElementsByClassName("advisor-class-card");
+
+            for (var i = 0; i < cards.length; i++) {
+                var txtValue = cards[i].textContent || cards[i].innerText;
+                cards[i].style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+            }
+        }
+        function filterStudentsInClass() {
+            const keyword = document.getElementById("searchStudentInClass").value.toUpperCase();
+            const roleFilter = document.getElementById("roleFilterInClass").value;
+            const cards = document.getElementsByClassName("student-card");
+
+            for (let i = 0; i < cards.length; i++) {
+                const text = cards[i].innerText.toUpperCase();
+                const cardRole = cards[i].getAttribute("data-role");
+
+                const matchKeyword = text.indexOf(keyword) > -1;
+                const matchRole = (roleFilter === "all" || cardRole === roleFilter);
+
+                cards[i].style.display = (matchKeyword && matchRole) ? "flex" : "none";
+            }
+        }
+        
+        function switchModalTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("modal-tab-content");
+            for (i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = "none";
+            tablinks = document.getElementById("studentModal").getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.classList.add("active");
+        }
+
+        function openModal(avatar, fullName, studentCode, username, gender, dob, phone, role, status, nat, eth, rel, id_card, home, addr) {
+            document.querySelector('input[name="full_name"]').value = (fullName && fullName !== 'None') ? fullName : '';
+            document.querySelector('input[name="student_code"]').value = (studentCode && studentCode !== 'None') ? studentCode : '';
+            document.getElementById('modal_username_hidden').value = username;
+            document.getElementById('modal_email_display').value = username;
+            document.querySelector('select[name="gender"]').value = (gender && gender !== 'None') ? gender : 'Nam';
+            document.querySelector('input[name="dob"]').value = (dob && dob !== 'None') ? dob : '';
+            document.querySelector('input[name="phone_number"]').value = (phone && phone !== 'None') ? phone : '';
+            document.querySelector('select[name="class_role"]').value = (role && role !== 'None') ? role : 'Thành viên';
+            
+            document.querySelector('select[name="status"]').value = (status && status !== 'None') ? status : 'Đang học';
+            document.querySelector('input[name="nationality"]').value = (nat && nat !== 'None') ? nat : 'Việt Nam';
+            document.querySelector('input[name="ethnicity"]').value = (eth && eth !== 'None') ? eth : 'Kinh';
+            document.querySelector('input[name="religion"]').value = (rel && rel !== 'None') ? rel : 'Không';
+            document.querySelector('input[name="id_card"]').value = (id_card && id_card !== 'None') ? id_card : '';
+            document.querySelector('input[name="hometown"]').value = (home && home !== 'None') ? home : '';
+            document.querySelector('input[name="current_address"]').value = (addr && addr !== 'None') ? addr : '';
+            
+            document.getElementById("studentModal").getElementsByClassName("tab-link")[0].click();
+            document.getElementById('studentModal').style.display = 'block';
+        }
+
+        // Đọc dữ liệu từ data-* (đã được Jinja escape) thay vì chèn chuỗi trực tiếp vào onclick để tránh XSS
+        function openModalFromCard(card) {
+            const d = card.dataset;
+            openModal(d.avatar, d.fullName, d.studentCode, d.username, d.gender, d.dob, d.phone, d.classRole,
+                      d.status, d.nationality, d.ethnicity, d.religion, d.idCard, d.hometown, d.address);
+        }
+
+        function closeModal() { document.getElementById('studentModal').style.display = 'none'; }
+
+        window.addEventListener('click', function(event) {
+            if (event.target == document.getElementById('studentModal')) { closeModal(); }
+        });
+
+        function resetStudentPassword() {
+            var username = document.getElementById('modal_username_hidden').value;
+            if (!username) return;
+            
+            var confirmMsg = `⚠️ CẢNH BÁO TỪ HỆ THỐNG:\n\nBạn có chắc chắn muốn đặt lại mật khẩu của sinh viên ${username} bằng một mật khẩu tạm thời ngẫu nhiên mới?\n\nMật khẩu tạm chỉ hiển thị một lần để bạn trao cho sinh viên. Quy trình này sẽ yêu cầu sinh viên kích hoạt lại tài khoản và cho phép họ cập nhật địa chỉ Gmail mới ở lần đăng nhập tiếp theo.`;
+            
+            if (confirm(confirmMsg)) {
+                document.getElementById('reset_pwd_username').value = username;
+                document.getElementById('resetPwdForm').submit();
+            }
+        }
+    </script>
+</body>
+</html>

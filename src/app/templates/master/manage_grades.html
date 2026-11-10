@@ -1,0 +1,774 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Điểm số - Master</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 16px; 
+            flex-wrap: wrap; 
+            gap: 14px; 
+            background: white; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        
+        .btn-modern { 
+            padding: 9px 16px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .filter-group { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            width: 100%; 
+            justify-content: space-between;
+        }
+        .filter-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .filter-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-box { 
+            display: flex; 
+            align-items: center; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 0 14px; 
+            min-width: 260px; 
+            max-width: 340px;
+            flex: 1;
+            transition: 0.2s; 
+        }
+        .search-box:focus-within { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1); 
+        }
+        .search-box .icon { 
+            color: #94a3b8; 
+            font-size: 14px; 
+            margin-right: 8px; 
+        }
+        .search-box input { 
+            border: none; 
+            background: transparent; 
+            outline: none; 
+            width: 100%; 
+            padding: 9px 0; 
+            font-size: 13px; 
+            color: #334155; 
+        }
+        
+        .filter-select { 
+            padding: 9px 12px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            outline: none; 
+            font-size: 13px; 
+            color: #334155; 
+            background: #f8fafc; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-weight: 500;
+        }
+        .filter-select:focus { border-color: #0ea5e9; background: white; }
+
+        .total-badge {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* Khung bọc bảng cố định chiều cao + Header ghim cố định */
+        .table-wrapper-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-container { 
+            max-height: calc(100vh - 295px); 
+            min-height: 360px;
+            overflow-y: auto; 
+            overflow-x: auto; 
+        }
+        .table-container::-webkit-scrollbar { height: 7px; width: 7px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .table-custom { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1020px; }
+        .table-custom thead th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 20; 
+            background-color: #f8fafc; 
+            color: #475569; 
+            font-weight: 700; 
+            font-size: 12.5px; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 12px 12px; 
+            border-bottom: 2px solid #e2e8f0; 
+            text-align: left; 
+            white-space: nowrap; 
+        }
+        .table-custom td { 
+            padding: 9px 12px; 
+            border-bottom: 1px solid #f1f5f9; 
+            color: #334155; 
+            font-size: 13px; 
+            vertical-align: middle; 
+        }
+        .table-custom tbody tr { transition: background-color 0.15s; }
+        .table-custom tbody tr:hover { background-color: #f0f9ff; }
+
+        /* Badge lịch học & học kỳ gọn gàng */
+        .sem-pill {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .sched-inline {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .sched-day {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+        .sched-detail {
+            font-size: 12px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* Thanh phân trang cố định ở đáy bảng */
+        .pagination-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .pagination-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .dropdown-btn { background: white; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 6px; cursor: pointer; color: #334155; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; white-space: nowrap; }
+        .dropdown-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+        .row-dropdown-menu { 
+            display: none; 
+            position: fixed; 
+            background: white; 
+            min-width: 190px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0; 
+            z-index: 9999; 
+            text-align: left; 
+            overflow: hidden; 
+            animation: fadeIn 0.1s ease-out; 
+        }
+        .dropdown-item { display: block; padding: 10px 14px; text-decoration: none; color: #334155; font-size: 12.5px; font-weight: 500; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s; }
+        .dropdown-item:hover { background: #f8fafc; color: #0ea5e9; padding-left: 18px; }
+        .dropdown-item.danger:hover { color: #ef4444; background: #fef2f2; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #fff; margin: 5vh auto; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: zoomIn 0.2s ease-out; }
+        @keyframes zoomIn { from {transform: scale(0.95); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(5px);} to {opacity: 1; transform: translateY(0);} }
+        .modal-header { padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; background: white; }
+        .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; }
+        .close-btn { color: #94a3b8; font-size: 24px; cursor: pointer; transition: 0.2s; line-height: 1; }
+        .close-btn:hover { color: #ef4444; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #475569; }
+        .form-control { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.2s; background: #f8fafc; }
+        .form-control:focus { border-color: #0ea5e9; background: white; box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+
+        .modal-scrollable-body { max-height: 70vh; overflow-y: auto; padding: 25px; }
+        .modal-scrollable-body::-webkit-scrollbar { width: 6px; }
+        .modal-scrollable-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('grades') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        {% if not current_class %}
+        <div class="action-bar">
+            <div>
+                <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 20px;">📊 Điều phối Lớp Tín chỉ Toàn trường</h2>
+                <p style="margin: 0; color: #64748b; font-size: 13.5px;">Quản lý mã học phần, thiết lập hệ số điểm và phân công giảng viên chấm điểm.</p>
+            </div>
+            <button class="btn-modern btn-success" onclick="openClassModal()">➕ Tạo Lớp Tín Chỉ</button>
+        </div>
+
+        <!-- Tìm kiếm và lọc phía máy chủ: form GET, đổi bộ lọc sẽ quay về trang 1 -->
+        <form method="GET" action="/master/grades" class="action-bar" style="padding: 12px 18px;">
+            <div class="filter-group">
+                <div class="filter-left">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="search" name="q" value="{{ filters.q }}" maxlength="100" placeholder="Tìm Mã lớp, Tên môn hoặc Giảng viên... (Enter)">
+                    </div>
+
+                    <select name="prefix" class="filter-select auto-submit">
+                        <option value="">Tất cả Khối / Ngành</option>
+                        {% for value, label in prefix_groups %}
+                        <option value="{{ value }}" {% if filters.prefix == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="semester" class="filter-select auto-submit">
+                        <option value="">Tất cả Học kỳ</option>
+                        <option value="1" {% if filters.semester == 1 %}selected{% endif %}>Kỳ 1</option>
+                        <option value="2" {% if filters.semester == 2 %}selected{% endif %}>Kỳ 2</option>
+                        <option value="3" {% if filters.semester == 3 %}selected{% endif %}>Kỳ 3 (Học kỳ phụ)</option>
+                    </select>
+
+                    <select name="year" class="filter-select auto-submit">
+                        <option value="">Tất cả Năm học</option>
+                        {% for y in year_options %}
+                        <option value="{{ y }}" {% if filters.year == y %}selected{% endif %}>Năm {{ y }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-modern btn-primary">Tìm</button>
+                </div>
+
+                <div class="filter-right">
+                    <select name="per_page" class="filter-select auto-submit" title="Số dòng mỗi trang">
+                        {% for size in page_sizes %}
+                        <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} dòng / trang</option>
+                        {% endfor %}
+                    </select>
+                    <span class="total-badge">Tổng: {{ total_records }} lớp</span>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-wrapper-card">
+            <div class="table-container" id="classesTableScroll">
+                <table class="table-custom" id="creditClassesTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 6%; text-align: center;">ID</th>
+                            <th style="width: 16%;">Mã Lớp HP</th>
+                            <th style="width: 22%;">Tên Môn Học</th>
+                            <th style="width: 6%; text-align: center;">TC</th>
+                            <th style="width: 12%;">Học kỳ</th>
+                            <th style="width: 15%;">Lịch học</th>
+                            <th style="width: 14%;">Giảng viên</th>
+                            <th style="width: 9%; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cls in credit_classes %}
+                        <tr>
+                            <td style="text-align: center; color: #94a3b8; font-size: 12px;">#{{ cls.id }}</td>
+                            <td style="font-weight: 700; color: #0ea5e9;">{{ cls.class_code }}</td>
+                            <td style="font-weight: 600; color: #0f172a;">{{ cls.subject_name }}</td>
+                            <td style="text-align: center; color: #475569; font-weight: 600;">{{ cls.credits }}</td>
+                            <td><span class="sem-pill">Kỳ {{ cls.semester }} - Năm {{ cls.year }}</span></td>
+                            <td>
+                                {% if cls.day_of_week %}
+                                    <div class="sched-inline">
+                                        <span class="sched-day">{% if cls.day_of_week == 8 %}CN{% else %}Thứ {{ cls.day_of_week }}{% endif %}</span>
+                                        <span class="sched-detail">Tiết {{ cls.shift }} • {{ ('P.' ~ cls.room) if cls.room else 'Chưa xếp phòng' }}</span>
+                                    </div>
+                                {% else %}
+                                    <span style="background: #f1f5f9; color: #64748b; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">Chưa xếp</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if cls.lecturer_name %}
+                                    <div style="color: #059669; font-weight: 700; font-size: 12.5px; line-height: 1.3;">{{ cls.lecturer_name }}</div>
+                                    <div style="font-size: 11px; color: #64748b;">{{ cls.lecturer_email }}</div>
+                                {% else %}
+                                    <span style="background: #fee2e2; color: #ef4444; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">Chưa phân công</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <button class="dropdown-btn" onclick="toggleRowMenu(event, 'menu-{{ cls.id }}', this)">
+                                    ⚙️ Tùy chọn <span>▼</span>
+                                </button>
+                                
+                                <div id="menu-{{ cls.id }}" class="row-dropdown-menu">
+                                    <a href="/master/grades?credit_class_id={{ cls.id }}" class="dropdown-item">👁️ Xem DSSV Lớp</a>
+                                    <div class="dropdown-item" data-id="{{ cls.id }}" data-code="{{ cls.class_code }}" data-subject="{{ cls.subject_name }}" onclick="openAssignModal(this.dataset.id, this.dataset.code, this.dataset.subject)">👨‍🏫 Phân công GV</div>
+                                    <div class="dropdown-item" data-id="{{ cls.id }}" data-code="{{ cls.class_code }}" onclick="openEnrollmentModal(this.dataset.id, this.dataset.code)">📝 Ghi danh (Excel)</div>
+                                    <a href="/master/grades/export?credit_class_id={{ cls.id }}" class="dropdown-item" style="color: #10b981;">📥 Xuất bảng điểm</a>
+                                    <div class="dropdown-item" data-id="{{ cls.id }}" data-code="{{ cls.class_code }}" data-subject="{{ cls.subject_name }}" data-credits="{{ cls.credits }}" data-semester="{{ cls.semester }}" data-year="{{ cls.year }}" data-cc="{{ cls.weight_cc }}" data-bttl="{{ cls.weight_bttl }}" data-tbkt="{{ cls.weight_tbkt }}" data-tgk="{{ cls.weight_tgk }}" data-tnth="{{ cls.weight_tnth }}" data-thi="{{ cls.weight_thi }}" data-day="{{ cls.day_of_week }}" data-shift="{{ cls.shift }}" data-room="{{ cls.room }}" onclick="const d = this.dataset; openClassModal(d.id, d.code, d.subject, d.credits, d.semester, d.year, d.cc, d.bttl, d.tbkt, d.tgk, d.tnth, d.thi, d.day, d.shift, d.room)">✏️ Sửa Tín chỉ / TKB</div>
+                                    <div class="dropdown-item danger" data-id="{{ cls.id }}" data-code="{{ cls.class_code }}" onclick="confirmDeleteClass(this.dataset.id, this.dataset.code)">🗑️ Xóa lớp học</div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                                <div style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                                Không tìm thấy lớp tín chỉ nào khớp với bộ lọc.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-footer">
+                <div class="pagination-info">
+                    {% if total_records %}
+                    Hiển thị <strong>{{ (current_page - 1) * per_page + 1 }} – {{ (current_page - 1) * per_page + credit_classes|length }}</strong> trong tổng số <strong>{{ total_records }}</strong> lớp tín chỉ
+                    {% else %}
+                    Không có lớp tín chỉ nào.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {{ ui.render_pagination(current_page, total_pages, request.endpoint, query_params) }}
+        
+        {% elif current_class %}
+        <div class="action-bar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn-modern btn-outline" onclick="window.location.href='/master/grades'">🔙 Trở về Danh sách</button>
+                <div>
+                    <h3 style="margin: 0 0 5px 0; color: #0f172a; font-size: 20px;">{{ current_class.subject_name }}</h3>
+                    <div style="font-size: 13px; color: #64748b; display: flex; gap: 15px;">
+                        <span>Mã HP: <strong style="color: #0ea5e9;">{{ current_class.class_code }}</strong></span>
+                        <span>Sĩ số: <strong style="color: #10b981;">{{ students|length }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            <a href="/master/grades/export?credit_class_id={{ current_class.id }}" class="btn-modern btn-success" style="text-decoration: none;">📥 Xuất điểm Excel</a>
+        </div>
+
+        <div class="table-wrapper-card">
+            <div class="table-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center; position: sticky; left: 0; z-index: 22; background: #f8fafc;">STT</th>
+                            <th style="width: 110px; position: sticky; left: 40px; z-index: 22; background: #f8fafc;">Mã SV</th>
+                            <th style="position: sticky; left: 150px; z-index: 22; background: #f8fafc; border-right: 2px solid #e2e8f0;">Họ và Tên</th>
+                            <th style="text-align: center;">Chuyên cần</th>
+                            <th style="text-align: center;">Bài tập lớn</th>
+                            <th style="text-align: center;">TB Kiểm tra</th>
+                            <th style="text-align: center;">Giữa kỳ</th>
+                            <th style="text-align: center;">Thực hành</th>
+                            <th style="text-align: center;">Thi Lần 1</th>
+                            <th style="text-align: center;">Thi Lần 2</th>
+                            <th style="text-align: center; background: #f1f5f9;">Tổng hệ 10</th>
+                            <th style="text-align: center; background: #f1f5f9;">Tổng hệ 4</th>
+                            <th style="text-align: center; background: #f1f5f9;">Điểm chữ</th>
+                            <th style="text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td style="text-align: center; color: #94a3b8; position: sticky; left: 0; z-index: 10; background: white;">{{ loop.index }}</td>
+                            <td style="font-weight: 500; color: #0f172a; position: sticky; left: 40px; z-index: 10; background: white;">{{ student.student_code }}</td>
+                            <td style="position: sticky; left: 150px; z-index: 10; background: white; border-right: 2px solid #e2e8f0;">{{ student.full_name }}</td>
+                            <td style="text-align: center;">{{ student.score_cc if student.score_cc != None else '--' }}</td>
+                            <td style="text-align: center;">{{ student.score_bttl if student.score_bttl != None else '--' }}</td>
+                            <td style="text-align: center;">{{ student.score_tbkt if student.score_tbkt != None else '--' }}</td>
+                            <td style="text-align: center;">{{ student.score_tgk if student.score_tgk != None else '--' }}</td>
+                            <td style="text-align: center;">{{ student.score_tnth if student.score_tnth != None else '--' }}</td>
+                            <td style="text-align: center; font-weight: bold;">{{ student.score_thi if student.score_thi != None else '--' }}</td>
+                            <td style="text-align: center;">{{ student.score_thi_2 if student.score_thi_2 != None else '--' }}</td>
+                            <td style="text-align: center; font-weight: bold; color: #0f172a; background-color: #f8fafc;">{{ student.score if student.score != None else '--' }}</td>
+                            <td style="text-align: center; font-weight: bold; color: #0ea5e9; background-color: #f8fafc;">{{ student.score_4 if student.score_4 != None else '--' }}</td>
+                            <td style="text-align: center; background-color: #f8fafc;">
+                                <span style="background-color: {{ student.color }}; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                    {{ student.letter }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                {% if student.score_cc == None and student.score_bttl == None and student.score_tbkt == None and student.score_tgk == None and student.score_tnth == None and student.score_thi == None and student.score_thi_2 == None and student.score == None %}
+                                <button type="button" class="btn-modern btn-danger" style="padding: 6px 10px; font-size: 12px;" data-class-id="{{ current_class.id }}" data-grade-id="{{ student.grade_id }}" data-student-code="{{ student.student_code }}" data-full-name="{{ student.full_name }}" onclick="confirmUnenroll(this.dataset)">✖ Hủy ghi danh</button>
+                                {% else %}
+                                <span style="color: #cbd5e1;" title="Sinh viên đã có điểm, không thể hủy ghi danh">--</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="14" style="text-align: center; padding: 40px; color: #64748b;">
+                                <div style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                                Chưa có sinh viên nào đăng ký lớp học phần này.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not current_class %}
+    <!-- Modal Phân công Giảng viên (danh sách giảng viên chỉ render một lần cho cả trang) -->
+    <div id="assignLecturerModal" class="modal">
+        <div class="modal-content" style="width: 450px;">
+            <div class="modal-header">
+                <h3>👨‍🏫 Phân công Giảng viên</h3>
+                <span class="close-btn" onclick="document.getElementById('assignLecturerModal').style.display='none'">&times;</span>
+            </div>
+            <form action="/master/grades/assign_lecturer" method="POST" style="padding: 25px;">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="credit_class_id" id="modal_class_id">
+                
+                <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Đang thiết lập cho lớp:</div>
+                    <div id="modal_class_display" style="font-weight: 700; color: #0ea5e9; font-size: 16px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Chọn Tài khoản Giảng viên (Admin)</label>
+                    <select name="lecturer_email" class="form-control" required>
+                        <option value="">-- Click để chọn --</option>
+                        {% for admin in admin_options %}
+                            <option value="{{ admin.email }}">{{ admin.full_name | default('Chưa cập nhật tên') }} ({{ admin.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="text-align: right; margin-top: 25px;">
+                    <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('assignLecturerModal').style.display='none'">Hủy</button>
+                    <button type="submit" class="btn-modern btn-primary">💾 Lưu Phân công</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ghi danh Sinh viên -->
+    <div id="enrollmentModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h3>📝 Ghi danh Sinh viên</h3>
+                <span class="close-btn" onclick="document.getElementById('enrollmentModal').style.display='none'">&times;</span>
+            </div>
+            <form action="/master/grades/enroll" method="POST" enctype="multipart/form-data" style="padding: 25px;">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="credit_class_id" id="enrollment_class_id">
+                
+                <div style="margin-bottom: 20px; color: #0f172a; font-weight: 700; font-size: 15px;" id="enrollment_class_label"></div>
+                
+                <div class="form-group">
+                    <label>1. Tải lên danh sách Excel (Tùy chọn)</label>
+                    <input type="file" name="excel_file" accept=".xlsx, .xls" class="form-control" style="padding: 8px;">
+                    <small style="color: #94a3b8; font-size: 12px; display: block; margin-top: 5px;">* File Excel cần chứa cột mang tên <strong>MaSV</strong> hoặc <strong>Email</strong>.</small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>2. Hoặc nhập tay (Mã sinh viên/Email)</label>
+                    <textarea id="student_identifiers" name="student_identifiers" class="form-control" rows="5" placeholder="VD: B26DCCN001&#10;student@eduflaw.com"></textarea>
+                </div>
+                
+                <div style="background: #fffbeb; border: 1px solid #fef08a; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="font-size: 12px; color: #b45309; margin: 0;">Hệ thống sẽ tự động lọc trùng. Sinh viên đã có trong danh sách sẽ bị bỏ qua.</p>
+                </div>
+                
+                <div style="text-align: right;">
+                    <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('enrollmentModal').style.display='none'">Hủy</button>
+                    <button type="submit" class="btn-modern btn-success">Tiến hành Ghi danh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tạo / Cập nhật Lớp Tín Chỉ -->
+    <div id="classModal" class="modal">
+        <div class="modal-content" style="width: 650px;">
+            <div class="modal-header">
+                <h3 id="classModalTitle">Tạo Lớp Tín Chỉ Mới</h3>
+                <span class="close-btn" onclick="document.getElementById('classModal').style.display='none'">&times;</span>
+            </div>
+            
+            <form action="/master/grades/class/save" method="POST" class="modal-scrollable-body">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="class_id" id="edit_class_id">
+                
+                <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 15px; border-left: 3px solid #0ea5e9; padding-left: 10px;">Thông tin học phần</h4>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Mã Lớp HP</label>
+                        <input type="text" name="class_code" id="edit_class_code" class="form-control" required placeholder="VD: CN301-2026-S1-01">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên Môn Học</label>
+                        <input type="text" name="subject_name" id="edit_subject_name" class="form-control" required placeholder="VD: Lập trình Web">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label>Số Tín chỉ</label>
+                        <input type="number" name="credits" id="edit_credits" class="form-control" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Học kỳ (1,2,3)</label>
+                        <input type="number" name="semester" id="edit_semester" class="form-control" required min="1" max="3">
+                    </div>
+                    <div class="form-group">
+                        <label>Năm học</label>
+                        <input type="number" name="year" id="edit_year" class="form-control" required placeholder="VD: 2026">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+                    <h4 style="margin: 0; color: #334155; font-size: 15px; border-left: 3px solid #f59e0b; padding-left: 10px;">Thiết lập Hệ số Điểm (%)</h4>
+                    <span style="font-size: 12px; color: #ef4444; font-weight: 600;">*Tổng phải bằng 100%</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                    <div class="form-group" style="margin: 0;"><label>Chuyên cần (CC)</label><input type="number" name="weight_cc" id="w_cc" class="form-control" value="10"></div>
+                    <div class="form-group" style="margin: 0;"><label>Bài tập (BTTL)</label><input type="number" name="weight_bttl" id="w_bttl" class="form-control" value="0"></div>
+                    <div class="form-group" style="margin: 0;"><label>Kiểm tra (TBKT)</label><input type="number" name="weight_tbkt" id="w_tbkt" class="form-control" value="20"></div>
+                    <div class="form-group" style="margin: 0;"><label>Giữa kỳ (TGK)</label><input type="number" name="weight_tgk" id="w_tgk" class="form-control" value="0"></div>
+                    <div class="form-group" style="margin: 0;"><label>Thực hành (TNTH)</label><input type="number" name="weight_tnth" id="w_tnth" class="form-control" value="0"></div>
+                    <div class="form-group" style="margin: 0;"><label style="color: #ef4444;">Thi Cuối kỳ</label><input type="number" name="weight_thi" id="w_thi" class="form-control" value="70"></div>
+                </div>
+                
+                <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 15px; border-left: 3px solid #10b981; padding-left: 10px;">Lịch trình & Địa điểm</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Thứ</label>
+                        <select name="day_of_week" id="edit_day" class="form-control">
+                            <option value="">-- Chưa xếp --</option>
+                            <option value="2">Thứ 2</option><option value="3">Thứ 3</option><option value="4">Thứ 4</option>
+                            <option value="5">Thứ 5</option><option value="6">Thứ 6</option><option value="7">Thứ 7</option>
+                            <option value="8">Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tiết học</label>
+                        <input type="text" name="shift" id="edit_shift" class="form-control" placeholder="VD: 1-2">
+                    </div>
+                    <div class="form-group">
+                        <label>Phòng</label>
+                        <input type="text" name="room" id="edit_room" class="form-control" placeholder="VD: A2-101">
+                    </div>
+                </div>
+                
+                <div style="text-align: right; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('classModal').style.display='none'">Hủy</button>
+                    <button type="submit" class="btn-modern btn-primary">💾 Lưu Thông tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        const csrfToken = {{ csrf_token() | tojson }};
+
+        function toggleRowMenu(event, menuId, btnElement) {
+            event.stopPropagation();
+            const menus = document.getElementsByClassName("row-dropdown-menu");
+            for (let i = 0; i < menus.length; i++) {
+                if (menus[i].id !== menuId) menus[i].style.display = "none";
+            }
+
+            const targetMenu = document.getElementById(menuId);
+            const isCurrentlyHidden = (targetMenu.style.display === "none" || targetMenu.style.display === "");
+
+            if (isCurrentlyHidden) {
+                targetMenu.style.display = "block";
+                const rect = btnElement.getBoundingClientRect();
+                const menuHeight = targetMenu.offsetHeight || 230;
+
+                // Tự động bật menu lên phía trên nếu nút bấm nằm sát đáy màn hình
+                if (rect.bottom + menuHeight + 10 > window.innerHeight) {
+                    targetMenu.style.top = Math.max(10, rect.top - menuHeight - 5) + "px";
+                } else {
+                    targetMenu.style.top = (rect.bottom + 5) + "px";
+                }
+                targetMenu.style.right = (window.innerWidth - rect.right) + "px";
+                targetMenu.style.left = "auto";
+            } else {
+                targetMenu.style.display = "none";
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.row-dropdown-menu') && !event.target.closest('.dropdown-btn')) {
+                closeAllMenus();
+            }
+            if (event.target.classList.contains('modal')) event.target.style.display = "none";
+        });
+
+        window.addEventListener('scroll', closeAllMenus, true);
+
+        function closeAllMenus() {
+            const menus = document.getElementsByClassName("row-dropdown-menu");
+            for (let i = 0; i < menus.length; i++) menus[i].style.display = "none";
+        }
+
+        function openAssignModal(classId, classCode, subjectName) {
+            document.getElementById('modal_class_id').value = classId;
+            document.getElementById('modal_class_display').innerText = classCode + ' - ' + subjectName;
+            document.getElementById('assignLecturerModal').style.display = 'block';
+            closeAllMenus();
+        }
+
+        function openEnrollmentModal(classId, classCode) {
+            document.getElementById('enrollment_class_id').value = classId;
+            const enrollmentLabel = document.getElementById('enrollment_class_label');
+            const classCodeSpan = document.createElement('span');
+            classCodeSpan.style.color = '#0ea5e9';
+            classCodeSpan.textContent = classCode;
+            enrollmentLabel.replaceChildren('Lớp học phần: ', classCodeSpan);
+            document.getElementById('student_identifiers').value = '';
+            document.getElementById('enrollmentModal').style.display = 'block';
+            closeAllMenus();
+        }
+
+        function openClassModal(id='', code='', name='', credits='', sem='', year='', cc='10', bttl='0', tbkt='20', tgk='0', tnth='0', thi='70', day='', shift='', room='') {
+            document.getElementById('classModalTitle').innerText = id ? "✏️ Cập nhật Lớp Tín Chỉ" : "➕ Tạo Lớp Tín Chỉ Mới";
+            document.getElementById('edit_class_id').value = id;
+            document.getElementById('edit_class_code').value = code;
+            document.getElementById('edit_subject_name').value = name;
+            document.getElementById('edit_credits').value = credits;
+            document.getElementById('edit_semester').value = sem;
+            document.getElementById('edit_year').value = year;
+            
+            document.getElementById('w_cc').value = cc !== 'None' ? cc : 0;
+            document.getElementById('w_bttl').value = bttl !== 'None' ? bttl : 0;
+            document.getElementById('w_tbkt').value = tbkt !== 'None' ? tbkt : 0;
+            document.getElementById('w_tgk').value = tgk !== 'None' ? tgk : 0;
+            document.getElementById('w_tnth').value = tnth !== 'None' ? tnth : 0;
+            document.getElementById('w_thi').value = thi !== 'None' ? thi : 0;
+
+            document.getElementById('edit_day').value = (day && day !== 'None') ? day : '';
+            document.getElementById('edit_shift').value = (shift && shift !== 'None') ? shift : '';
+            document.getElementById('edit_room').value = (room && room !== 'None') ? room : '';
+            
+            document.getElementById('classModal').style.display = 'block';
+            closeAllMenus();
+        }
+
+        function confirmDeleteClass(classId, classCode) {
+            closeAllMenus();
+            if(confirm(`⚠️ BẠN CÓ CHẮC MUỐN XÓA LỚP TÍN CHỈ [${classCode}]?\n\nLưu ý: Hệ thống sẽ chặn lệnh xóa nếu lớp này đã có dữ liệu điểm sinh viên.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/master/grades/class/delete';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'class_id';
+                input.value = classId;
+                form.appendChild(input);
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Hủy ghi danh sinh viên chưa có điểm; tên/mã sinh viên là dữ liệu động nên chỉ dùng titleText/text
+        function confirmUnenroll(data) {
+            Swal.fire({
+                icon: 'warning',
+                titleText: 'Hủy ghi danh sinh viên?',
+                text: `${data.studentCode} - ${data.fullName} sẽ bị gỡ khỏi lớp học phần này. Chỉ gỡ được khi sinh viên chưa có điểm.`,
+                showCancelButton: true,
+                confirmButtonText: 'Hủy ghi danh',
+                cancelButtonText: 'Đóng',
+                confirmButtonColor: '#ef4444',
+                focusCancel: true
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/master/grades/unenroll';
+                [['credit_class_id', data.classId], ['grade_id', data.gradeId], ['csrf_token', csrfToken]].forEach(function ([name, value]) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+
+        // Đổi bộ lọc hoặc số dòng mỗi trang thì gửi lại form tìm kiếm (quay về trang 1)
+        document.querySelectorAll('.auto-submit').forEach(function (selectEl) {
+            selectEl.addEventListener('change', function () { this.form.submit(); });
+        });
+    </script>
+</body>
+</html>

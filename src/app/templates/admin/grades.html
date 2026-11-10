@@ -1,0 +1,853 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+{# =====================================================================
+   MACRO PHÂN TÍCH CA HỌC: Đổi Kíp -> Tiết, Tính Giờ (từ 07:00) & Số buổi
+===================================================================== #}
+{% macro render_schedule_details(day_of_week, shift, room) %}
+    {% if day_of_week %}
+        {% set raw_shift = (shift | string).strip() if shift else '' %}
+        {% set sessions = raw_shift.replace('/', ';').split(';') if raw_shift else [''] %}
+        {% set ns = namespace(total_periods=0, valid_sessions=0) %}
+
+        <div class="schedule-box">
+            {% for s in sessions %}
+                {% set clean_s = s.replace('Tiết', '').replace('tiết', '').replace('Kíp', '').replace('kíp', '').replace(',', '-').replace(' ', '').strip() %}
+                {% set parts = clean_s.split('-') %}
+                {% set start_p = parts[0] | int(0) %}
+                {% set end_p = parts[-1] | int(0) %}
+                
+                {% if start_p > 0 %}
+                    {% set end_p = end_p if end_p >= start_p else start_p %}
+                    {% set period_count = end_p - start_p + 1 %}
+                    {% set ns.total_periods = ns.total_periods + period_count %}
+                    {% set ns.valid_sessions = ns.valid_sessions + 1 %}
+                    {% set start_hour = "%02d:00" | format(start_p + 6) %}
+                    {% set end_hour = "%02d:50" | format(end_p + 6) %}
+
+                    <div class="schedule-row">
+                        <span class="badge-item badge-day">
+                            📅 {% if day_of_week == 8 %}Chủ Nhật{% else %}Thứ {{ day_of_week }}{% endif %}
+                        </span>
+                        <span class="badge-item badge-period">
+                            📚 Tiết {{ start_p }}{% if end_p > start_p %}–{{ end_p }}{% endif %}
+                        </span>
+                        <span class="badge-item badge-time">
+                            🕒 {{ start_hour }} – {{ end_hour }}
+                        </span>
+                        <span class="badge-item badge-room">
+                            📍 {{ ('P.' ~ room) if room else 'Chưa xếp phòng' }}
+                        </span>
+                    </div>
+                {% else %}
+                    {% set ns.valid_sessions = ns.valid_sessions + 1 %}
+                    <div class="schedule-row">
+                        <span class="badge-item badge-day">
+                            📅 {% if day_of_week == 8 %}Chủ Nhật{% else %}Thứ {{ day_of_week }}{% endif %}
+                        </span>
+                        <span class="badge-item badge-period">
+                            📚 Tiết {{ raw_shift or '?' }}
+                        </span>
+                        <span class="badge-item badge-room">
+                            📍 {{ ('P.' ~ room) if room else 'Chưa xếp phòng' }}
+                        </span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="schedule-box">
+            <span class="badge-item badge-unscheduled">📅 Chưa xếp lịch giảng dạy</span>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Nhập Điểm Học Phần - EduFlaw</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            border: 1px solid #f1f5f9; 
+        }
+        .weekly-summary-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-mini-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .summary-mini-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .day-filter-strip {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .day-pill {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .day-pill:hover { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; }
+        .day-pill.active { background: #0ea5e9; color: white; border-color: #0ea5e9; box-shadow: 0 2px 6px rgba(14,165,233,0.25); }
+        .day-pill .count-dot {
+            background: rgba(15, 23, 42, 0.08);
+            color: inherit;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        .day-pill.active .count-dot { background: rgba(255,255,255,0.25); color: white; }
+
+        .view-toggle-group {
+            display: inline-flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .view-toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .view-toggle-btn.active {
+            background: white;
+            color: #0f172a;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        .btn-modern { 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            text-decoration: none;
+        }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .filter-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-box { 
+            display: flex; 
+            align-items: center; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 0 15px; 
+            min-width: 260px; 
+            transition: 0.2s; 
+        }
+        .search-box:focus-within { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1); 
+        }
+        .search-box .icon { color: #94a3b8; font-size: 14px; margin-right: 10px; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; padding: 10px 0; font-size: 13px; color: #334155; }
+        
+        .filter-select { 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            outline: none; 
+            font-size: 13px; 
+            color: #334155; 
+            background: #f8fafc; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-weight: 500;
+        }
+        .filter-select:focus { border-color: #0ea5e9; background: white; }
+
+        .classes-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+            gap: 18px; 
+            margin-bottom: 30px;
+        }
+        .day-section-header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+            border-left: 4px solid #701a24;
+            border-radius: 8px;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-top: 10px;
+        }
+        .day-section-header:first-child { margin-top: 0; }
+        .day-section-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lecturer-class-card { 
+            border: 1px solid #e2e8f0; 
+            padding: 20px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: white; 
+            transition: all 0.25s ease; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .lecturer-class-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: #0ea5e9;
+        }
+        .lecturer-class-card:hover { 
+            border-color: #bae6fd;
+            box-shadow: 0 12px 20px -5px rgba(14, 165, 233, 0.15); 
+            transform: translateY(-3px);
+        }
+
+        .schedule-box {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .schedule-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .badge-item {
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-day { background: #e0f2fe; color: #0369a1; }
+        .badge-period { background: #fef3c7; color: #b45309; }
+        .badge-time { background: #dcfce7; color: #15803d; }
+        .badge-room { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+        .badge-unscheduled { background: #f1f5f9; color: #94a3b8; font-weight: 500; }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            background: white;
+        }
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .grade-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 1200px; 
+            font-size: 13px;
+        }
+        .grade-table th, .grade-table td { 
+            border: 1px solid #f1f5f9; 
+            padding: 10px 8px; 
+            text-align: center; 
+            vertical-align: middle; 
+            white-space: nowrap; 
+        }
+        
+        .grade-table thead th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            background-color: #f8fafc; 
+            color: #475569; 
+            font-weight: 700;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .grade-table thead tr:nth-child(2) th { top: 41px; }
+        
+        .sticky-col-1 { position: sticky; left: 0; z-index: 11; background-color: #ffffff !important; width: 45px; }
+        .sticky-col-2 { position: sticky; left: 45px; z-index: 11; background-color: #ffffff !important; width: 115px; }
+        .sticky-col-3 { position: sticky; left: 160px; z-index: 11; background-color: #ffffff !important; border-right: 2px solid #e2e8f0 !important; }
+        
+        .grade-table thead th.sticky-col-1, 
+        .grade-table thead th.sticky-col-2, 
+        .grade-table thead th.sticky-col-3 { 
+            z-index: 13; 
+            background-color: #f8fafc !important;
+        }
+
+        .grade-table tbody tr:hover td { background-color: #f8fafc !important; }
+        .text-left { text-align: left !important; padding-left: 12px !important; }
+        
+        .input-micro { 
+            width: 58px; 
+            padding: 7px 6px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            outline: none; 
+            text-align: center; 
+            font-weight: 600; 
+            font-size: 13px; 
+            color: #0f172a;
+            background: #ffffff;
+            transition: all 0.2s; 
+            -moz-appearance: textfield;
+        }
+        .input-micro::-webkit-outer-spin-button,
+        .input-micro::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .input-micro:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); background: #f0f9ff; }
+        .input-micro[readonly] { background: #f1f5f9 !important; border-color: transparent !important; color: #94a3b8; cursor: not-allowed; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
+        .modal-content { background: #fff; margin: 10vh auto; width: 480px; max-width: 92%; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: zoomIn 0.2s ease-out; }
+        @keyframes zoomIn { from {transform: scale(0.95); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        .modal-header { padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .close-btn { cursor: pointer; font-size: 24px; color: #94a3b8; line-height: 1; transition: 0.2s; }
+        .close-btn:hover { color: #ef4444; }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('grades') }}
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+        
+        {% if lecturer_classes is defined and not current_class %}
+            {# Tính toán thống kê tổng số buổi dạy & số tiết trong tuần #}
+            {% set stats = namespace(total_sessions=0, total_periods=0, unscheduled=0) %}
+            {% for cls in lecturer_classes %}
+                {% if cls.day_of_week %}
+                    {% set raw_s = (cls.shift | string).strip() if cls.shift else '' %}
+                    {% set s_list = raw_s.replace('/', ';').split(';') if raw_s else [''] %}
+                    {% set stats.total_sessions = stats.total_sessions + (s_list | length) %}
+                    {% for s in s_list %}
+                        {% set c_s = s.replace('Tiết', '').replace('tiết', '').replace('Kíp', '').replace('kíp', '').replace(',', '-').replace(' ', '').strip() %}
+                        {% set p_parts = c_s.split('-') %}
+                        {% set sp = p_parts[0] | int(0) %}
+                        {% set ep = p_parts[-1] | int(0) %}
+                        {% if sp > 0 %}
+                            {% set ep = ep if ep >= sp else sp %}
+                            {% set stats.total_periods = stats.total_periods + (ep - sp + 1) %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% set stats.unscheduled = stats.unscheduled + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="action-bar">
+                <div>
+                    <h2 style="margin: 0 0 5px 0; color: #0f172a;">🎓 Quản Lý Điểm Học Phần & Lịch Giảng Dạy</h2>
+                    <p style="color: #64748b; margin: 0; font-size: 14px;">Các lớp học phần (Tín chỉ) do giảng viên trực tiếp phụ trách giảng dạy và chấm điểm.</p>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="searchSubjectInput" onkeyup="filterLecturerClasses()" placeholder="Tìm theo tên môn hoặc mã lớp...">
+                    </div>
+                    
+                    <select id="semesterSubjectFilter" class="filter-select" onchange="filterLecturerClasses()">
+                        <option value="all">Tất cả Học kỳ</option>
+                        <option value="1">Học kỳ 1</option>
+                        <option value="2">Học kỳ 2</option>
+                        <option value="3">Học kỳ phụ (3)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="weekly-summary-bar">
+                <div class="summary-mini-card">
+                    <div class="summary-mini-icon" style="background: #e0f2fe; color: #0284c7;">📚</div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Tổng lớp phụ trách</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ lecturer_classes | length }} <span style="font-size: 13px; font-weight: 500; color: #64748b;">lớp</span></div>
+                    </div>
+                </div>
+                <div class="summary-mini-card">
+                    <div class="summary-mini-icon" style="background: #fef3c7; color: #d97706;">🗓️</div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Tổng số buổi dạy</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ stats.total_sessions }} <span style="font-size: 13px; font-weight: 500; color: #64748b;">buổi/tuần</span></div>
+                    </div>
+                </div>
+                <div class="summary-mini-card">
+                    <div class="summary-mini-icon" style="background: #dcfce7; color: #16a34a;">⏱️</div>
+                    <div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Thời lượng lên lớp</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ stats.total_periods }} <span style="font-size: 13px; font-weight: 500; color: #64748b;">tiết/tuần</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar" style="padding: 14px 20px; margin-bottom: 20px;">
+                <div class="day-filter-strip" id="dayFilterStrip">
+                    <button type="button" class="day-pill active" data-day="all" onclick="selectDayFilter(this)">
+                        Tất cả <span class="count-dot">{{ lecturer_classes | length }}</span>
+                    </button>
+                    {% for d in [2, 3, 4, 5, 6, 7, 8] %}
+                        {% set day_classes = lecturer_classes | selectattr('day_of_week', 'equalto', d) | list %}
+                        {% if day_classes | length > 0 %}
+                        <button type="button" class="day-pill" data-day="{{ d }}" onclick="selectDayFilter(this)">
+                            {% if d == 8 %}Chủ Nhật{% else %}Thứ {{ d }}{% endif %}
+                            <span class="count-dot">{{ day_classes | length }}</span>
+                        </button>
+                        {% endif %}
+                    {% endfor %}
+                    {% if stats.unscheduled > 0 %}
+                    <button type="button" class="day-pill" data-day="unscheduled" onclick="selectDayFilter(this)">
+                        Chưa xếp lịch <span class="count-dot">{{ stats.unscheduled }}</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="view-toggle-group">
+                    <button type="button" class="view-toggle-btn active" id="btnGroupDay" onclick="toggleLayoutMode('grouped')">📅 Nhóm theo Thứ</button>
+                    <button type="button" class="view-toggle-btn" id="btnFlatGrid" onclick="toggleLayoutMode('grid')">⏹️ Xem dạng Lưới</button>
+                </div>
+            </div>
+
+            <div id="lecturer-classes-container" class="classes-grid">
+                {% if lecturer_classes %}
+                    {# Lặp qua từng Thứ trong tuần (2 -> 8) và nhóm Chưa xếp lịch (0) #}
+                    {% for d in [2, 3, 4, 5, 6, 7, 8, 0] %}
+                        {% set day_ns = namespace(items=[]) %}
+                        {% for item in lecturer_classes %}
+                            {% if (d > 0 and item.day_of_week == d) or (d == 0 and not item.day_of_week) %}
+                                {% set day_ns.items = day_ns.items + [item] %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if day_ns.items | length > 0 %}
+                            <div class="day-section-header" data-day-header="{{ d if d > 0 else 'unscheduled' }}">
+                                <div class="day-section-title">
+                                    {% if d == 8 %}
+                                        🌞 Chủ Nhật
+                                    {% elif d > 0 %}
+                                        📌 Thứ {{ d }}
+                                    {% else %}
+                                        ⏳ Chưa xếp lịch trong tuần
+                                    {% endif %}
+                                </div>
+                                <span style="font-size: 12px; font-weight: 700; color: #701a24; background: #fce7f3; padding: 4px 12px; border-radius: 20px;">
+                                    {{ day_ns.items | length }} lớp học phần
+                                </span>
+                            </div>
+
+                            {% for cls in day_ns.items %}
+                                {# Tính số buổi và số tiết của từng lớp #}
+                                {% set raw_shift = (cls.shift | string).strip() if cls.shift else '' %}
+                                {% set sessions = raw_shift.replace('/', ';').split(';') if raw_shift else [] %}
+                                {% set card_ns = namespace(sessions_count=(sessions | length if cls.day_of_week and raw_shift else (1 if cls.day_of_week else 0)), periods_count=0) %}
+                                {% for s in sessions %}
+                                    {% set clean_s = s.replace('Tiết', '').replace('tiết', '').replace('Kíp', '').replace('kíp', '').replace(',', '-').replace(' ', '').strip() %}
+                                    {% set parts = clean_s.split('-') %}
+                                    {% set sp = parts[0] | int(0) %}
+                                    {% set ep = parts[-1] | int(0) %}
+                                    {% if sp > 0 %}
+                                        {% set ep = ep if ep >= sp else sp %}
+                                        {% set card_ns.periods_count = card_ns.periods_count + (ep - sp + 1) %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                <div class="lecturer-class-card" 
+                                     data-day="{{ cls.day_of_week if cls.day_of_week else 'unscheduled' }}"
+                                     onclick="window.location.href='/admin/grades?credit_class_id={{ cls.id }}'">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+                                            <div class="subject-name" style="font-weight: 700; color: #0f172a; font-size: 17px; line-height: 1.35;">
+                                                {{ cls.subject_name }}
+                                            </div>
+                                            <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                                                {% if card_ns.sessions_count > 0 %}
+                                                <span style="background: #f3e8ff; color: #7e22ce; padding: 4px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">
+                                                    {{ card_ns.sessions_count }} buổi/tuần{% if card_ns.periods_count > 0 %} ({{ card_ns.periods_count }} tiết){% endif %}
+                                                </span>
+                                                {% endif %}
+                                                <span style="background: #e0f2fe; color: #0369a1; padding: 4px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">
+                                                    {{ cls.credits }} TC
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="class-code" style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                                            Mã học phần: <strong style="color: #0ea5e9;">{{ cls.class_code }}</strong>
+                                        </div>
+
+                                        {{ render_schedule_details(cls.day_of_week, cls.shift, cls.room) }}
+                                    </div>
+
+                                    <div class="semester-info" style="font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Học kỳ {{ cls.semester }} - Năm học {{ cls.year }}</span>
+                                        <strong style="color: #10b981;">👥 {{ cls.enrolled_students }} SV</strong>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div style="grid-column: 1 / -1; background: white; padding: 60px 20px; text-align: center; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                        <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">📭</div>
+                        <div style="color: #64748b; font-size: 15px;">Bạn chưa được phân công giảng dạy lớp học phần nào.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% elif current_class %}
+            <div class="action-bar">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <button type="button" class="btn-modern btn-outline" onclick="window.location.href='/admin/grades'">
+                        🔙 Danh sách lớp
+                    </button>
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; color: #0f172a; font-size: 20px;">
+                            {{ current_class.subject_name }} 
+                            <span style="color: #0ea5e9; font-size: 16px;">({{ current_class.class_code }})</span>
+                        </h3>
+                        <div style="font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span>Học kỳ {{ current_class.semester }} - Năm {{ current_class.year }}</span>
+                            <span>•</span>
+                            <span>Số tín chỉ: <strong>{{ current_class.credits }} TC</strong></span>
+                            <span>•</span>
+                            <span>Sĩ số: <strong>{{ students|length }} SV</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="search-box" style="min-width: 240px;">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="searchStudentGradeInput" onkeyup="filterStudentRows()" placeholder="Tìm nhanh Mã SV, Họ tên...">
+                    </div>
+
+                    <button type="button" class="btn-modern btn-outline" onclick="window.location.href='/admin/grades/export?credit_class_id={{ current_class.id }}'">
+                        📥 Xuất Excel
+                    </button>
+                    
+                    <button type="button" class="btn-modern btn-success" onclick="document.getElementById('reasonModal').style.display='block'">
+                        💾 Lưu Toàn Bộ Bảng Điểm
+                    </button>
+                </div>
+            </div>
+
+            <form action="/admin/grades/add" method="POST">
+                {{ ui.render_csrf_field() }}
+                <input type="hidden" name="credit_class_id" value="{{ current_class.id }}">
+                
+                <div class="table-container">
+                    <table class="grade-table" id="gradeSheetTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="sticky-col-1">STT</th>
+                                <th rowspan="2" class="text-left sticky-col-2">Mã SV</th>
+                                <th rowspan="2" class="text-left sticky-col-3">Họ và Tên</th>
+                                <th colspan="5">Điểm thành phần (Có hệ số)</th>
+                                <th colspan="2">Điểm Thi</th>
+                                <th rowspan="2" style="width: 80px; background: #f1f5f9;">Tổng kết<br><span style="font-size:11px; font-weight:normal; color:#64748b;">(hệ 10)</span></th>
+                                <th rowspan="2" style="width: 80px; background: #f1f5f9;">Tổng kết<br><span style="font-size:11px; font-weight:normal; color:#64748b;">(hệ 4)</span></th>
+                                <th rowspan="2" style="width: 80px; background: #f1f5f9;">Điểm chữ</th>
+                            </tr>
+                            <tr>
+                                <th title="Chuyên cần">CC <br><span style="font-size: 11px; color: #0ea5e9;">{{ current_class.weight_cc }}%</span></th>
+                                <th title="Bài tập lớn">BTTL <br><span style="font-size: 11px; color: #0ea5e9;">{{ current_class.weight_bttl }}%</span></th>
+                                <th title="Trung bình kiểm tra">TBKT <br><span style="font-size: 11px; color: #0ea5e9;">{{ current_class.weight_tbkt }}%</span></th>
+                                <th title="Thi giữa kỳ">TGK <br><span style="font-size: 11px; color: #0ea5e9;">{{ current_class.weight_tgk }}%</span></th>
+                                <th title="Thực hành">TNTH <br><span style="font-size: 11px; color: #0ea5e9;">{{ current_class.weight_tnth }}%</span></th>
+                                <th title="Thi Cuối kỳ">Lần 1 <br><span style="font-size: 11px; color: #10b981;">{{ current_class.weight_thi }}%</span></th>
+                                <th title="Thi Lần 2">Lần 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr class="student-grade-row">
+                                <td class="sticky-col-1" style="color: #94a3b8; font-weight: 500;">{{ loop.index }}</td>
+                                <td class="text-left sticky-col-2" style="font-weight: 600; color: #0f172a;">{{ student.student_code }}</td>
+                                <td class="text-left sticky-col-3" style="font-weight: 500; color: #334155;">{{ student.full_name }}</td>
+                                
+                                <td><input type="number" name="cc_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_cc if student.score_cc != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_cc')" {% if current_class.weight_cc == 0 %} readonly {% endif %}></td>
+                                <td><input type="number" name="bttl_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_bttl if student.score_bttl != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_bttl')" {% if current_class.weight_bttl == 0 %} readonly {% endif %}></td>
+                                <td><input type="number" name="tbkt_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_tbkt if student.score_tbkt != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_tbkt')" {% if current_class.weight_tbkt == 0 %} readonly {% endif %}></td>
+                                <td><input type="number" name="tgk_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_tgk if student.score_tgk != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_tgk')" {% if current_class.weight_tgk == 0 %} readonly {% endif %}></td>
+                                <td><input type="number" name="tnth_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_tnth if student.score_tnth != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_tnth')" {% if current_class.weight_tnth == 0 %} readonly {% endif %}></td>
+                                
+                                <td><input type="number" name="thi_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_thi if student.score_thi != None else '' }}" style="border-color: #10b981;" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_thi')"></td>
+                                <td><input type="number" name="thi2_{{ student.grade_id }}" class="input-micro" step="0.1" min="0" max="10" value="{{ student.score_thi_2 if student.score_thi_2 != None else '' }}" oninput="handleScoreChange(this, '{{ student.grade_id }}', 'score_thi_2')"></td>
+                                
+                                <td id="score10_{{ student.grade_id }}" style="font-weight: 700; color: #0f172a; background-color: #f8fafc;">
+                                    {{ student.score if student.score != None else '--' }}
+                                </td>
+                                <td id="score4_{{ student.grade_id }}" style="font-weight: 700; color: #0ea5e9; background-color: #f8fafc;">
+                                    {{ student.score_4 if student.score_4 != None else '--' }}
+                                </td>
+                                <td style="background-color: #f8fafc;">
+                                    <span id="letter_{{ student.grade_id }}" style="background-color: {{ student.color }}; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; display: inline-block; min-width: 28px;">
+                                        {{ student.letter }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="13" style="text-align: center; padding: 50px 20px; color: #64748b;">
+                                    <div style="font-size: 36px; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                                    Chưa có sinh viên nào đăng ký lớp học phần này.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="reasonModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 style="margin:0; color:#0f172a; font-size:18px; font-weight: 700;">📝 Xác nhận cập nhật điểm</h3>
+                            <span class="close-btn" onclick="document.getElementById('reasonModal').style.display='none'">&times;</span>
+                        </div>
+                        
+                        <div style="padding: 25px;">
+                            <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px 15px; border-radius:8px; margin-bottom:18px; font-size:13px; color:#b45309; line-height: 1.5;">
+                                <strong>Lưu ý:</strong> Mọi thay đổi điểm số sẽ được ghi vào <i>Nhật ký Kiểm toán</i> của Nhà trường. Nếu đây là lần nhập điểm đầu tiên, bạn không cần ghi lý do.
+                            </div>
+                            
+                            <label style="display:block; margin-bottom:8px; font-weight:600; color:#475569; font-size:13px;">Lý do chỉnh sửa điểm (nếu có):</label>
+                            <textarea name="reason" rows="3" placeholder="VD: Chấm phúc khảo, nhập nhầm điểm thi..." style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit; font-size: 14px; background: #f8fafc; box-sizing: border-box; resize:vertical;"></textarea>
+                            
+                            <div style="text-align:right; margin-top:25px; border-top: 1px solid #e2e8f0; padding-top: 18px;">
+                                <button type="button" class="btn-modern btn-outline" style="margin-right: 10px;" onclick="document.getElementById('reasonModal').style.display='none'">Hủy</button>
+                                <button type="submit" class="btn-modern btn-success">💾 Xác nhận Lưu</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        const csrfToken = {{ csrf_token() | tojson }};
+        let selectedDay = 'all';
+        let currentLayoutMode = 'grouped';
+
+        function selectDayFilter(btn) {
+            const pills = document.querySelectorAll('.day-pill');
+            pills.forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            selectedDay = btn.getAttribute('data-day');
+            filterLecturerClasses();
+        }
+
+        function toggleLayoutMode(mode) {
+            currentLayoutMode = mode;
+            document.getElementById('btnGroupDay').classList.toggle('active', mode === 'grouped');
+            document.getElementById('btnFlatGrid').classList.toggle('active', mode === 'grid');
+            filterLecturerClasses();
+        }
+
+        function filterLecturerClasses() {
+            const searchInput = document.getElementById("searchSubjectInput").value.toUpperCase();
+            const semesterFilter = document.getElementById("semesterSubjectFilter").value;
+            const cards = document.getElementsByClassName("lecturer-class-card");
+            const headers = document.querySelectorAll(".day-section-header");
+
+            const visibleCountByDay = {};
+
+            for (let i = 0; i < cards.length; i++) {
+                const subjectName = cards[i].querySelector(".subject-name").innerText.toUpperCase();
+                const classCode = cards[i].querySelector(".class-code").innerText.toUpperCase();
+                const semesterInfo = cards[i].querySelector(".semester-info").innerText;
+                const cardDay = cards[i].getAttribute("data-day");
+
+                const matchSearch = (subjectName.indexOf(searchInput) > -1 || classCode.indexOf(searchInput) > -1);
+                const matchSemester = (semesterFilter === "all" || semesterInfo.indexOf("Học kỳ " + semesterFilter) > -1);
+                const matchDay = (selectedDay === "all" || cardDay === selectedDay);
+
+                if (matchSearch && matchSemester && matchDay) {
+                    cards[i].style.display = "";
+                    visibleCountByDay[cardDay] = (visibleCountByDay[cardDay] || 0) + 1;
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+
+            headers.forEach(header => {
+                const dayKey = header.getAttribute("data-day-header");
+                if (currentLayoutMode === 'grid') {
+                    header.style.display = "none";
+                } else {
+                    header.style.display = (visibleCountByDay[dayKey] > 0) ? "flex" : "none";
+                }
+            });
+        }
+
+        function filterStudentRows() {
+            const keyword = document.getElementById("searchStudentGradeInput").value.toUpperCase();
+            const rows = document.getElementsByClassName("student-grade-row");
+
+            for (let i = 0; i < rows.length; i++) {
+                const codeText = rows[i].children[1].textContent.toUpperCase();
+                const nameText = rows[i].children[2].textContent.toUpperCase();
+                rows[i].style.display = (codeText.indexOf(keyword) > -1 || nameText.indexOf(keyword) > -1) ? "" : "none";
+            }
+        }
+        
+        const debounceTimers = {};
+
+        function handleScoreChange(inputElement, gradeId, fieldName) {
+            const timerKey = `${gradeId}_${fieldName}`;
+            clearTimeout(debounceTimers[timerKey]);
+            
+            let val = parseFloat(inputElement.value);
+            
+            if (inputElement.value === '') {
+                inputElement.style.borderColor = "#cbd5e1";
+                inputElement.style.backgroundColor = "white";
+            } 
+            else if (isNaN(val) || val < 0 || val > 10) {
+                inputElement.style.borderColor = "#ef4444";
+                inputElement.style.backgroundColor = "#fef2f2";
+                return;
+            } else {
+                inputElement.style.borderColor = "#0ea5e9";
+                inputElement.style.backgroundColor = "#f0f9ff";
+            }
+            
+            debounceTimers[timerKey] = setTimeout(() => {
+                saveScore(inputElement, gradeId, fieldName, inputElement.value);
+            }, 800);
+        }
+
+        function saveScore(inputElement, gradeId, fieldName, value) {
+            fetch('/admin/grades/api/auto-save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    grade_id: gradeId,
+                    field: fieldName,
+                    value: value === '' ? null : value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    inputElement.style.borderColor = "#10b981";
+                    inputElement.style.backgroundColor = "white";
+
+                    const score10El = document.getElementById(`score10_${gradeId}`);
+                    const score4El = document.getElementById(`score4_${gradeId}`);
+                    const letterEl = document.getElementById(`letter_${gradeId}`);
+
+                    if (score10El) score10El.textContent = (data.score !== null && data.score !== undefined) ? data.score : '--';
+                    if (score4El) score4El.textContent = (data.score_4 !== null && data.score_4 !== undefined) ? data.score_4 : '--';
+                    if (letterEl) {
+                        letterEl.textContent = data.letter || '--';
+                        if (data.color) letterEl.style.backgroundColor = data.color;
+                    }
+
+                    if (typeof showSystemToast === "function") {
+                        showSystemToast('success', 'Đã lưu điểm tự động');
+                    }
+                } else {
+                    if (typeof showSystemToast === "function") {
+                        showSystemToast('error', data.message || 'Lưu điểm thất bại!');
+                    }
+                    inputElement.style.borderColor = "#ef4444";
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi AJAX Auto-save:", error);
+                if (typeof showSystemToast === "function") {
+                    showSystemToast('error', 'Lỗi kết nối máy chủ!');
+                }
+                inputElement.style.borderColor = "#ef4444"; 
+            });
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Script shell PHẢI dùng LF, nếu không container Linux báo "no such file or directory" (lỗi CRLF của Windows).
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+# Script PowerShell dùng CRLF (quy ước Windows)
+*.ps1 text eol=crlf

@@ -1,0 +1,283 @@
+<!-- Import file Macro -->
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard - EduFlaw</title>
+    
+    {{ ui.render_common_css() }}
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha256-dEAdc43T4D7l37O2hBIQ/ixOrYqWDEARykugt4qf2PM=" crossorigin="anonymous"></script>
+
+    <style>
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 25px;
+            margin-top: 20px;
+        }
+        @media (min-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 2fr 1fr; 
+            }
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            border-radius: 12px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .modern-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+        .card-header-title {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .announcement-feed {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .announcement-feed::-webkit-scrollbar { width: 6px; }
+        .announcement-feed::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .announcement-feed::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .ann-item {
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border-left: 4px solid #0ea5e9;
+            margin-bottom: 15px;
+            transition: 0.2s;
+        }
+        .ann-item:hover { background: #f0f9ff; transform: translateX(3px); }
+        .ann-title { font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 5px; }
+        .ann-meta { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+        .ann-content { font-size: 13px; color: #475569; line-height: 1.5; white-space: pre-wrap; }
+
+        .timetable-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .tkb-item {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #ffffff;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .tkb-item:hover {
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+            transform: translateY(-2px);
+        }
+        .tkb-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+
+    {{ ui.render_sidebar('dashboard') }}
+    
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        <div class="hero-card">
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                    🎓
+                </div>
+                <div>
+                    <h2 style="margin: 0 0 5px 0; font-size: 24px;">Xin chào, {{ session.get('display_name', session.get('username')) }}!</h2>
+                    <p style="margin: 0; color: #e0f2fe; font-size: 14px; opacity: 0.9;">
+                        Tài khoản: <strong>{{ session.get('username') }}</strong> | Trạng thái: Đang theo học
+                    </p>
+                </div>
+            </div>
+            
+            <div style="text-align: right; background: rgba(0,0,0,0.15); padding: 15px 25px; border-radius: 12px; backdrop-filter: blur(5px);">
+                <div style="color: #e0f2fe; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">GPA Tích Lũy</div>
+                <div style="font-size: 36px; font-weight: 800; line-height: 1;">
+                    {{ gpa_data.gpa_4 if gpa_data else '0.0' }}
+                </div>
+                <div style="color: #6ee7b7; font-size: 13px; font-weight: 600; margin-top: 5px;">
+                    ✓ Hoàn thành {{ gpa_data.total_passed_credits if gpa_data else '0' }} Tín chỉ
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <div class="layout-left" style="display: flex; flex-direction: column; gap: 25px;">
+                <div class="modern-card">
+                    <h3 class="card-header-title">📈 Phân tích Xu hướng Học lực</h3>
+                    <div style="height: 280px; width: 100%;">
+                        <canvas id="gpaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="modern-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 class="card-header-title" style="margin: 0;">📅 Lịch lên lớp / Thời khóa biểu</h3>
+                        <a href="/student/schedule" style="font-size: 13px; color: #0ea5e9; text-decoration: none; font-weight: 600;">Xem dạng lưới &rarr;</a>
+                    </div>
+                    
+                    {% if timetable %}
+                        <div class="timetable-grid">
+                            {% for item in timetable %}
+                            <div class="tkb-item">
+                                <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ item.subject_name }}">{{ item.subject_name }}</div>
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">{{ item.class_code }}</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; font-weight: 600;">
+                                    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px;">
+                                        {% if item.day_of_week == 8 %}CN{% else %}Thứ {{ item.day_of_week }}{% endif %}
+                                    </span>
+                                    <span style="background: #fef3c7; color: #b45309; padding: 4px 8px; border-radius: 4px;">Kíp {{ item.shift }}</span>
+                                    <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px;">{{ ('P.' ~ item.room) if item.room else 'Chưa xếp phòng' }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 30px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                            <div style="font-size: 30px; margin-bottom: 10px;">🏝️</div>
+                            <div style="color: #64748b; font-size: 14px;">Chưa có lịch học/giảng dạy nào được xếp trong kỳ này.</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (Bảng tin thông báo) -->
+            <div class="layout-right">
+                <div class="modern-card" style="height: 100%;">
+                    <h3 class="card-header-title">🔔 Bảng tin Học vụ</h3>
+                    
+                    <div class="announcement-feed">
+                        {% if announcements %}
+                            {% for ann in announcements %}
+                                <div class="ann-item">
+                                    <div class="ann-title">{{ ann.title }}</div>
+                                    <div class="ann-meta">
+                                        🕒 {{ ann.created_at.strftime('%d/%m/%Y %H:%M') }} • 👤 {{ ann.author_name }}
+                                        {% if ann.target_class %}<br>🏷️ Dành riêng cho lớp: <strong>{{ ann.target_class }}</strong>{% endif %}
+                                    </div>
+                                    <div class="ann-content">{{ ann.content }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                                <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">📭</div>
+                                <p style="margin: 0; font-size: 14px;">Không có thông báo mới nào.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById('gpaChart');
+            // GPA tích lũy thật sau từng học kỳ (tính ở controller), không phải số liệu mẫu
+            const trend = {{ (gpa_trend or []) | tojson }};
+            if (!trend.length) {
+                const note = document.createElement('p');
+                note.textContent = 'Chưa có học kỳ nào có điểm để vẽ biểu đồ.';
+                note.style.cssText = 'color:#64748b;text-align:center;margin:40px 0;';
+                canvas.replaceWith(note);
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            const labels = trend.map(item => item.label);
+            const gpaData = trend.map(item => item.gpa);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'GPA tích lũy (hệ 4)',
+                        data: gpaData,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.15)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0ea5e9',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.4 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 4.0,
+                            ticks: { 
+                                stepSize: 1,
+                                color: '#64748b',
+                                font: { size: 11 }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            ticks: { color: '#64748b', font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 13 },
+                            bodyFont: { size: 14, weight: 'bold' },
+                            padding: 10,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

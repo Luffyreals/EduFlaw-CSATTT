@@ -1,0 +1,174 @@
+{% import "layouts/ui_macros.html" as ui %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Nhật ký Sửa điểm - Master</title>
+    {{ ui.render_common_css() }}
+    <style>
+        .content { color: #334155; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+        
+        .btn-modern { padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .search-box { 
+            display: flex; 
+            align-items: center; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 0 15px; 
+            min-width: 300px; 
+            transition: 0.2s; 
+        }
+        .search-box:focus-within { 
+            border-color: #0ea5e9; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1); 
+        }
+        .search-box .icon { color: #94a3b8; font-size: 14px; margin-right: 10px; }
+        .search-box input { border: none; background: transparent; outline: none; width: 100%; padding: 10px 0; font-size: 13px; color: #334155; }
+
+        .table-container { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; overflow-x: auto; margin-bottom: 30px; }
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 12px 12px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .table-custom { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        .table-custom th { background-color: #f8fafc; color: #475569; font-weight: 600; font-size: 13px; padding: 15px 20px; border-bottom: 2px solid #e2e8f0; text-align: left; white-space: nowrap; }
+        .table-custom td { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 13px; vertical-align: middle; line-height: 1.5; }
+        .table-custom tbody tr { transition: background-color 0.2s; }
+        .table-custom tbody tr:hover { background-color: #f8fafc; }
+
+        .badge { padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; display: inline-block; }
+        .filter-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .filter-select { padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; color: #334155; background: #f8fafc; cursor: pointer; font-weight: 500; }
+        .filter-select:focus { border-color: #0ea5e9; background: white; }
+        .btn-primary { background: #0ea5e9; color: white; }
+        .total-badge { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; padding: 7px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+        .score-change-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+    {{ ui.render_sidebar('dashboard') }}
+
+    <div class="content">
+        {{ ui.render_topbar(session) }}
+
+        <div class="action-bar">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-modern btn-outline" onclick="window.history.back()">
+                    🔙 Quay lại
+                </button>
+                <div>
+                    <h2 style="margin: 0 0 5px 0; color: #0f172a;">📜 Nhật ký Kiểm toán Điểm số</h2>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Theo dõi và giám sát lịch sử chỉnh sửa điểm trên toàn hệ thống.</p>
+                </div>
+            </div>
+            
+            <form method="GET" action="/master/audit_logs" class="filter-group">
+                <div class="search-box">
+                    <span class="icon">🔍</span>
+                    <input type="search" name="q" value="{{ filters.q }}" maxlength="100" placeholder="Tìm theo SV, Lớp, Môn, Người sửa, Lý do... (Enter)">
+                </div>
+                <select name="field" class="filter-select auto-submit" title="Lọc theo đầu điểm">
+                    <option value="">Tất cả đầu điểm</option>
+                    {% for option in field_options %}
+                    <option value="{{ option }}" {% if filters.field == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <select name="per_page" class="filter-select auto-submit" title="Số dòng mỗi trang">
+                    {% for size in page_sizes %}
+                    <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} dòng / trang</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-modern btn-primary">Tìm</button>
+                <span class="total-badge">Tổng: {{ total_records }} lượt sửa</span>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="table-custom" id="logTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Thời gian</th>
+                        <th style="width: 25%;">Thông tin Học vụ</th>
+                        <th style="width: 15%;">Trường Dữ liệu</th>
+                        <th style="width: 15%;">Biến động Điểm</th>
+                        <th style="width: 15%;">Người thực hiện</th>
+                        <th style="width: 15%;">Lý do / Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                        <tr>
+                            <td style="color: #64748b; font-weight: 500;">
+                                <div style="color: #0f172a;">{{ log.modified_at.strftime('%H:%M:%S') if log.modified_at else '---' }}</div>
+                                <div style="font-size: 11px;">{{ log.modified_at.strftime('%d/%m/%Y') if log.modified_at else '---' }}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 700; color: #0ea5e9; font-size: 14px; margin-bottom: 3px;">{{ log.student_name }}</div>
+                                <div style="font-size: 12px; color: #64748b; display: flex; gap: 8px;">
+                                    <span>{{ log.student_code }}</span>
+                                    <span style="color: #cbd5e1;">|</span>
+                                    <span style="font-weight: 600; color: #475569;">{{ log.class_code }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+                                    {{ log.field_name }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="score-change-box">
+                                    <span style="color: #ef4444; font-weight: bold; text-decoration: line-through;">{{ log.old_score if log.old_score != None else 'Trống' }}</span>
+                                    <span style="color: #94a3b8; font-size: 12px;">➔</span>
+                                    <span style="color: #10b981; font-weight: bold;">{{ log.new_score if log.new_score != None else 'Trống' }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: #0f172a; margin-bottom: 3px;">
+                                    {% if log.master_modifier_name %}
+                                        {{ log.master_modifier_name }} 
+                                        <span style="background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 5px;">MASTER</span>
+                                    {% else %}
+                                        {{ log.modifier_name or log.modifier_email or 'Tài khoản đã xóa' }}
+                                    {% endif %}
+                                </div>
+                                <div style="font-size: 11px; color: #64748b;">ID: {{ log.modified_by }}</div>
+                            </td>
+                            <td style="color: #475569; font-style: italic; font-size: 12px;">
+                                {% if log.reason %}{{ log.reason }}{% else %}<span style="color:#cbd5e1;">Không có ghi chú</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                                <div style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">📭</div>
+                                <div style="font-size: 15px;">{% if filters.q or filters.field %}Không có lượt sửa điểm nào khớp với bộ lọc.{% else %}Hệ thống chưa ghi nhận bất kỳ lịch sử thay đổi điểm nào.{% endif %}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {{ ui.render_pagination(current_page, total_pages, request.endpoint, query_params) }}
+    </div>
+
+    {{ ui.render_topbar_scripts() }}
+
+    <script>
+        // Bộ lọc dạng select tự gửi form (tìm kiếm/phân trang chạy phía máy chủ)
+        document.querySelectorAll('.auto-submit').forEach(function (selectEl) {
+            selectEl.addEventListener('change', function () { this.form.submit(); });
+        });
+    </script>
+</body>
+</html>

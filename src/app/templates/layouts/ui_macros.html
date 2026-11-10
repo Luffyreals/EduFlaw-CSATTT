@@ -1,0 +1,287 @@
+{% macro render_common_css() %}
+    {# Thiếu thẻ này điện thoại hiển thị trang ở bề rộng 980px rồi thu nhỏ, chữ rất nhỏ #}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: #f1f5f9; height: 100vh; overflow: hidden; }
+        .content { padding: 30px; flex-grow: 1; overflow-y: auto; transition: margin-left 0.3s ease; }
+        
+        .sidebar { 
+            width: 250px; 
+            color: white; 
+            padding: 20px 0; 
+            flex-shrink: 0; 
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: width 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar.theme-master { background: #0f172a; } 
+        .sidebar.theme-admin { background: #701a24; }  
+        .sidebar.theme-student { background: #617d93; } 
+
+        .sidebar.collapsed { width: 70px; }
+
+        .toggle-btn { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 20px; text-align: left; margin-bottom: 20px; transition: 0.2s; }
+        .sidebar.theme-admin .toggle-btn:hover { color: #0ea5e9; }
+        .sidebar.theme-student .toggle-btn:hover { color: #94a3b8; }
+        .sidebar.theme-master .toggle-btn:hover { color: #38bdf8; }
+        .sidebar.collapsed .toggle-btn { text-align: center; padding: 10px 0; }
+
+        .sidebar-logo-text { font-size: 20px; font-weight: bold; padding: 0 20px; margin-bottom: 20px; white-space: nowrap; opacity: 1; transition: opacity 0.2s ease; }
+        .sidebar.collapsed .sidebar-logo-text { opacity: 0; pointer-events: none; }
+
+        .menu-btn { 
+            display: flex; align-items: center; padding: 12px 20px; margin: 5px 10px; 
+            background: transparent; color: rgba(255,255,255,0.8); text-decoration: none; 
+            border-radius: 8px; transition: background-color 0.2s, color 0.2s; white-space: nowrap; position: relative;
+        }
+        .menu-btn .icon { font-size: 20px; min-width: 30px; text-align: center; margin-right: 15px; }
+        .menu-btn .text { font-weight: 500; opacity: 1; transition: opacity 0.2s ease; }
+
+        .sidebar.collapsed .menu-btn { padding: 12px 0; justify-content: center; margin: 5px 10px; }
+        .sidebar.collapsed .menu-btn .icon { margin-right: 0; }
+        .sidebar.collapsed .menu-btn .text { opacity: 0; width: 0; display: none; }
+
+        .sidebar.theme-master .menu-btn.active { background: #1e293b; color: white; border-left: 4px solid #38bdf8; }
+        .sidebar.theme-master .menu-btn:hover { background: #334155; color: white; }
+
+        .sidebar.theme-admin .menu-btn.active { background: #4a0d15; color: white; border-left: 4px solid #0ea5e9; }
+        .sidebar.theme-admin .menu-btn:hover { background: #111827; color: white; }
+        
+        .sidebar.theme-student .menu-btn.active { background: #3d5262; color: white; border-left: 4px solid #0ea5e9; }
+        .sidebar.theme-student .menu-btn:hover { background: #2c3e50; color: white; }
+
+        .sidebar.collapsed .menu-btn::after {
+            content: attr(title); position: absolute; left: 70px; background: #1e293b; color: white;
+            padding: 5px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; opacity: 0;
+            pointer-events: none; transition: opacity 0.2s ease, left 0.2s ease; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .sidebar.collapsed .menu-btn:hover::after { opacity: 1; left: 65px; }
+
+        .topbar { display: flex; justify-content: flex-end; align-items: center; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; position: relative; }
+        .profile-menu { position: relative; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+        .avatar-master { background: #0f172a; }
+        .avatar-admin { background: #0ea5e9; }
+        .avatar-student { background: #617d93; }
+
+        .dropdown-content { display: none; position: absolute; right: 0; top: 50px; background-color: white; min-width: 280px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-radius: 8px; border: 1px solid #e2e8f0; z-index: 1000; overflow: hidden; }
+        .dropdown-content.show { display: block; animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dropdown-header { padding: 15px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+        .dropdown-item { padding: 12px 15px; text-decoration: none; display: flex; align-items: center; gap: 10px; color: #475569; font-weight: 500; }
+        .dropdown-item:hover { background-color: #f1f5f9; color: #0f172a; }
+        .dropdown-item.logout { color: #ef4444; border-top: 1px solid #e2e8f0; }
+        .dropdown-item.logout:hover { background-color: #fef2f2; }
+
+        /* Điện thoại / màn hình hẹp: sidebar thu gọn sẵn (render_sidebar), nội dung quá rộng cuộn trong khung thay vì vỡ bố cục */
+        @media (max-width: 768px) {
+            .content { padding: 16px 12px; min-width: 0; overflow-x: auto; }
+            .sidebar.collapsed { width: 56px; }
+            .sidebar.collapsed .menu-btn { margin: 5px 6px; }
+            .sidebar:not(.collapsed) { position: fixed; top: 0; bottom: 0; left: 0; z-index: 1100; }
+            .dropdown-content { min-width: 0; width: min(280px, calc(100vw - 24px)); }
+        }
+    </style>
+{% endmacro %}
+
+
+{% macro render_sidebar(active_page) %}
+    {% set role = session.get('role', 'student') %}
+    {% set theme_class = 'theme-' ~ role %}
+    
+    <div class="sidebar {{ theme_class }}" id="mainSidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+        <div class="sidebar-logo-text">
+            EduFlaw {{ role|capitalize }}
+        </div>
+        
+        {% if role == 'student' %}
+            <a href="/student" class="menu-btn {% if active_page == 'dashboard' %}active{% endif %}" title="Trang chủ">
+               <span class="icon">🏠</span><span class="text">Trang chủ</span>
+            </a>
+            <a href="/student/schedule" class="menu-btn {% if active_page == 'schedule' %}active{% endif %}" title="Thời khóa biểu">
+               <span class="icon">📅</span><span class="text">Thời khóa biểu</span>
+            </a>
+            <a href="/student/grades" class="menu-btn {% if active_page == 'grades' %}active{% endif %}" title="Bảng điểm">
+               <span class="icon">📊</span><span class="text">Bảng điểm</span>
+            </a>
+            <a href="/student/class" class="menu-btn {% if active_page == 'class' %}active{% endif %}" title="Lớp hành chính">
+                <span class="icon">🏫</span><span class="text">Lớp hành chính</span> 
+            </a>
+            <a href="/student/credit-classes" class="menu-btn {% if active_page == 'credit_classes' %}active{% endif %}" title="Lớp tín chỉ">
+                <span class="icon">📚</span><span class="text">Lớp tín chỉ</span> 
+            </a>
+        {% elif role == 'admin' %}
+            <a href="/admin" class="menu-btn {% if active_page == 'dashboard' %}active{% endif %}" title="Trang chủ Admin">
+               <span class="icon">🏠</span><span class="text">Trang chủ Admin</span>
+            </a>
+            <a href="/admin/students" class="menu-btn {% if active_page == 'students' %}active{% endif %}" title="Lớp Phụ trách">
+               <span class="icon">👨‍🎓</span><span class="text">Lớp hành chính</span>
+            </a>
+            <a href="/admin/grades" class="menu-btn {% if active_page == 'grades' %}active{% endif %}" title="Nhập điểm">
+               <span class="icon">📝</span><span class="text">Lớp tín chỉ</span>
+            </a>
+            <a href="/admin/announcements" class="menu-btn {% if active_page == 'announcements' %}active{% endif %}" title="Bảng tin">
+               <span class="icon">📢</span><span class="text">Bảng tin</span>
+            </a>
+        {% elif role == 'master' %}
+            <a href="/master" class="menu-btn {% if active_page == 'dashboard' %}active{% endif %}" title="Trang chủ Master">
+               <span class="icon">🏠</span><span class="text">Trang chủ Master</span>
+            </a>
+            <a href="/master/students" class="menu-btn {% if active_page == 'students' %}active{% endif %}" title="Lớp hành chính">
+               <span class="icon">👨‍🎓</span><span class="text">Lớp hành chính </span>
+            </a>
+            <a href="/master/grades" class="menu-btn {% if active_page == 'grades' %}active{% endif %}" title="Lớp tín chỉ">
+               <span class="icon">📊</span><span class="text">Lớp tín chỉ </span>
+            </a>
+            <a href="/master/admins" class="menu-btn {% if active_page == 'admins' %}active{% endif %}" title="Quản lý giảng viên">
+               <span class="icon">👔</span><span class="text">Quản lý giảng viên</span>
+            </a>
+            <a href="/master/announcements" class="menu-btn {% if active_page == 'announcements' %}active{% endif %}" title="Bảng tin Toàn trường">
+               <span class="icon">📢</span><span class="text">Bảng tin</span>
+            </a>
+        {% endif %}
+    </div>
+    <script>
+        // Màn hình hẹp: thu gọn sidebar ngay khi dựng trang (trước khi vẽ) để nội dung có chỗ hiển thị
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            document.getElementById('mainSidebar').classList.add('collapsed');
+        }
+    </script>
+{% endmacro %}
+
+{% macro render_topbar(session_data) %}
+    {% set role = session_data.get('role', 'student') %}
+    {% set avatar_class = 'avatar-' ~ role %}
+    
+    {% set display_name = session_data.get('display_name', session_data.get('username', 'User')) %}
+    {% set display_initial = session_data.get('display_initial', 'U') %}
+    
+    <div class="topbar">
+        <div class="profile-menu" onclick="toggleProfileMenu(event)">
+            <div class="profile-avatar {{ avatar_class }}">{{ display_initial }}</div>
+            <div style="font-weight: 600; color: #0f172a;">{{ display_name }} ▾</div>
+            
+            <div id="profileDropdown" class="dropdown-content">
+                <div class="dropdown-header">
+                    <div class="profile-avatar {{ avatar_class }}" style="width: 50px; height: 50px; font-size: 20px;">
+                        {{ display_initial }}
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; color: #0f172a; font-size: 16px;">
+                            {{ display_name }}
+                        </div>
+                        <div style="font-size: 13px; color: #64748b;">
+                            Vai trò: {{ role|capitalize }}
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/{{ role }}/profile?tab=info" class="dropdown-item">👤 Hồ sơ cá nhân</a>
+                <a href="/{{ role }}/profile?tab=settings" class="dropdown-item">⚙️ Cài đặt bảo mật</a>
+                <form action="/logout" method="POST" style="margin: 0;">
+                    {{ render_csrf_field() }}
+                    <button type="submit" class="dropdown-item logout" style="width: 100%; background: none; border: none; border-top: 1px solid #e2e8f0; font: inherit; cursor: pointer;">🚪 Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+
+{% macro render_topbar_scripts() %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js" integrity="sha256-+0Qf8IHMJWuYlZ2lQDBrF1+2aigIRZXEdSvegtELo2I=" crossorigin="anonymous"></script>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        function showSystemToast(type, message) {
+            // titleText hiển thị dạng văn bản; "title" của SweetAlert2 sẽ render HTML
+            Toast.fire({ icon: type, titleText: message });
+        }
+
+        function toggleProfileMenu(event) {
+            event.stopPropagation();
+            document.getElementById("profileDropdown").classList.toggle("show");
+        }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {# tojson escape đúng ngữ cảnh JavaScript (chặn \, xuống dòng, thẻ đóng script) thay vì escape kiểu HTML.
+                           Comment Jinja không xuất ra HTML: không được viết thẻ đóng script nguyên văn trong comment JS,
+                           trình duyệt sẽ coi đó là kết thúc khối script và in phần còn lại ra trang. #}
+                        showSystemToast({{ category | tojson }} === 'error' ? 'error' : 'success', {{ message | tojson }});
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        });
+    </script>
+{% endmacro %}
+
+{% macro render_csrf_field() %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% endmacro %}
+
+
+{% macro render_pagination(current_page, total_pages, endpoint, query_params={}) %}
+    {% if total_pages > 1 %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 30px;">
+        
+        {% if current_page > 1 %}
+            {% set prev_params = query_params.copy() %}
+            {% set _ = prev_params.update({'page': current_page - 1}) %}
+            <a href="{{ url_for(endpoint, **prev_params) }}" style="padding: 8px 15px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #475569; text-decoration: none; font-weight: 500; transition: 0.2s;">&laquo; Trước</a>
+        {% else %}
+            <span style="padding: 8px 15px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; color: #94a3b8; font-weight: 500; cursor: not-allowed;">&laquo; Trước</span>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+    
+            {% if p == 1 or p == total_pages or (p >= current_page - 2 and p <= current_page + 2) %}
+                {% set page_params = query_params.copy() %}
+                {% set _ = page_params.update({'page': p}) %}
+                
+                <a href="{{ url_for(endpoint, **page_params) }}" 
+                   style="padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: 500; transition: 0.2s;
+                   {% if p == current_page %} background: #0ea5e9; color: white; border: 1px solid #0ea5e9;
+                   {% else %} background: white; color: #475569; border: 1px solid #cbd5e1; {% endif %}">
+                   {{ p }}
+                </a>
+            {% elif p == current_page - 3 or p == current_page + 3 %}
+                <span style="padding: 8px 5px; color: #94a3b8;">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+            {% set next_params = query_params.copy() %}
+            {% set _ = next_params.update({'page': current_page + 1}) %}
+            <a href="{{ url_for(endpoint, **next_params) }}" style="padding: 8px 15px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #475569; text-decoration: none; font-weight: 500; transition: 0.2s;">Tiếp &raquo;</a>
+        {% else %}
+            <span style="padding: 8px 15px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; color: #94a3b8; font-weight: 500; cursor: not-allowed;">Tiếp &raquo;</span>
+        {% endif %}
+        
+    </div>
+    {% endif %}
+{% endmacro %}
