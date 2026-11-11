@@ -51,7 +51,7 @@ def enforce_onboarding_gate():
         'auth.login',
         'static'
     }
-    if request.endpoint in allowed_endpoints:
+    if request.endpoint in allowed_endpoints or request.blueprint == 'pentest':
         return None
 
     return redirect(url_for('auth.onboarding'))

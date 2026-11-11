@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng Dẫn Sử Dụng, Các Bước Demo &amp; Lời Thuyết Trình — EduFlaw</title>
+<style>
+  @page {
+    size: A4;
+    margin: 9mm 11mm 9mm 11mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: #0f172a;
+    line-height: 1.38;
+    font-size: 10.7px;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Header */
+  .header-box {
+    border-bottom: 2.5px solid #701a24;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .header-left h1 {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #701a24;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+  }
+  .header-left h2 {
+    font-size: 10.2px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 9.6px;
+    color: #475569;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+  .header-right strong { color: #0f172a; }
+
+  /* Section & Subsection Titles */
+  .sec-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #701a24;
+    border-left: 3.5px solid #701a24;
+    padding-left: 6px;
+    margin: 8px 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+  }
+  .part-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 7px 9px;
+    margin-bottom: 7px;
+    background: #ffffff;
+    break-inside: avoid;
+  }
+  .part-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 3px;
+  }
+  .part-title {
+    font-size: 11.4px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+  .part-time {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    font-size: 9.2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+  }
+  .b-red    { background: #fee2e2; color: #991b1b; }
+  .b-purple { background: #f3e8ff; color: #6b21a8; }
+  .b-amber  { background: #fef3c7; color: #92400e; }
+  .b-blue   { background: #e0f2fe; color: #075985; }
+  .b-green  { background: #dcfce7; color: #166534; }
+  .b-slate  { background: #e2e8f0; color: #1e293b; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 7px;
+    font-size: 10px;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 3.5px 6px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f8fafc;
+    color: #1e293b;
+    font-weight: 700;
+  }
+  tr:nth-child(even) td { background: #fcfdff; }
+
+  /* Lists & Boxes */
+  .steps {
+    margin: 2px 0 4px 0;
+    padding-left: 16px;
+  }
+  .steps li { margin-bottom: 2px; }
+
+  .speech-box {
+    background: #fdf2f4;
+    border: 1px solid #fecdd3;
+    border-left: 3px solid #be123c;
+    border-radius: 4px;
+    padding: 4.5px 8px;
+    margin-top: 4px;
+  }
+  .speech-label {
+    font-weight: 800;
+    color: #9f1239;
+    font-size: 9.2px;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+    display: block;
+  }
+  .speech-text {
+    font-style: italic;
+    color: #1f2937;
+    line-height: 1.35;
+  }
+
+  .tip-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 3px solid #0284c7;
+    border-radius: 4px;
+    padding: 5px 8px;
+    margin-bottom: 7px;
+    font-size: 10px;
+  }
+  .tip-box strong { color: #0369a1; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .mini-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 6px 8px;
+    background: #f8fafc;
+    break-inside: avoid;
+  }
+  .mini-card h4 {
+    margin: 0 0 3px 0;
+    font-size: 10.5px;
+    color: #701a24;
+    font-weight: 800;
+  }
+  .mini-card ul {
+    margin: 0;
+    padding-left: 14px;
+    font-size: 9.9px;
+  }
+  .mini-card li { margin-bottom: 2px; }
+
+  .qa-list {
+    display: grid;
+    gap: 4px;
+  }
+  .qa-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 4px 7px;
+    background: #ffffff;
+    font-size: 9.9px;
+    break-inside: avoid;
+  }
+  .qa-item strong.q { color: #701a24; }
+
+  code {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 0.5px 3.5px;
+    border-radius: 3px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9.5px;
+    color: #0f172a;
+  }
+  .btn-ui {
+    display: inline-block;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 0px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 9.7px;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+  .footer-note {
+    border-top: 1px solid #cbd5e1;
+    padding-top: 4px;
+    margin-top: 6px;
+    font-size: 9px;
+    color: #64748b;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== TRANG 1: CÁCH SỬ DỤNG & TỔNG QUAN ==================== -->
+<div class="header-box">
+  <div class="header-left">
+    <h1>Hướng Dẫn Sử Dụng, Kịch Bản Demo &amp; Lời Thuyết Trình</h1>
+    <h2>Hệ thống Quản lý Đào tạo EduFlaw (Web Pentest Console + Thanh nổi Web App) · Chuẩn OWASP Top 10:2025</h2>
+  </div>
+  <div class="header-right">
+    <div><strong>Nhóm 7 — Khóa D24 (PTIT Hà Nội)</strong></div>
+    <div>GVHD: <strong>ThS. Đỗ Xuân Chợ</strong></div>
+    <div>Tài liệu thực hành &amp; bảo vệ ngắn gọn</div>
+  </div>
+</div>
+
+<h2 class="sec-title">1. Cách Khởi Chạy Nhanh (4 File Launcher Tại Thư Mục Gốc)</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 24%;">File khởi chạy</th>
+      <th style="width: 19%;">Khi nào dùng</th>
+      <th style="width: 57%;">Chức năng &amp; Phím tắt điều khiển</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>3_RESET_CSDL_DEMO.bat</code></td>
+      <td><strong>Chạy trước buổi demo</strong></td>
+      <td>Xóa sạch &amp; nạp lại MySQL <code>eduflaw_db</code> chuẩn (20 SV, 5 GV, đặt lại mật khẩu mẫu và mở hết khóa đăng nhập cũ).</td>
+    </tr>
+    <tr>
+      <td><code>4_CHAY_KIEM_THU_PENTEST.bat</code></td>
+      <td><strong>Demo chính (Khuyên dùng)</strong></td>
+      <td>Tự bật Flask tại cổng <code>5000</code> (nếu chưa chạy) và mở thẳng <code>http://127.0.0.1:5000/pentest?toolbar=1</code>. Phím trên cửa sổ console: <code>[O]</code> Mở lại <code>/pentest</code>, <code>[W]</code> Mở <code>/login</code>, <code>[C]</code> Chế độ Terminal CLI log cũ, <code>[Q]</code> Thoát. <em>(Truyền tham số <code>--cli</code> hoặc <code>1..7</code> nếu muốn chạy thuần Terminal).</em></td>
+    </tr>
+    <tr>
+      <td><code>1_CHAY_WEB_DEMO.bat</code></td>
+      <td>Mở Web App thông thường</td>
+      <td>Khởi động Web App tại <code>http://127.0.0.1:5000/login</code> (có sẵn nút đăng nhập 1-click và link sang <code>/demo</code>, <code>/pentest?toolbar=1</code>).</td>
+    </tr>
+    <tr>
+      <td><code>2_MO_LAB_THUYET_TRINH.bat</code></td>
+      <td>Minh họa Slide lý thuyết</td>
+      <td>Mở phòng Lab mô phỏng trực quan 4 lỗ hổng (<code>demo/index.html</code> hoặc <code>/demo</code>). Phím tắt: <code>1–4</code> chọn bài, <code>V</code> đổi Vulnerable/Secure, <code>S</code> quét lại, <code>Enter</code> chạy mô phỏng.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="sec-title">2. Tài Khoản Demo Chuẩn &amp; 2 Khu Vực Thao Tác Trực Tiếp Trên Web App</h2>
+<div class="two-col">
+  <div class="mini-card">
+    <h4>🔑 5 Tài Khoản Chuẩn (Dùng Nút 1-Click Không Cần Gõ)</h4>
+    <table>
+      <thead>
+        <tr><th>Vai trò</th><th>Tài khoản</th><th>Mật khẩu</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Master</strong></td><td><code>master@eduflaw.com</code></td><td><code>tung12345678</code></td></tr>
+        <tr><td><strong>Giảng viên 1</strong></td><td><code>gv.001@eduflaw.com</code></td><td><code>EduFlaw@2026</code></td></tr>
+        <tr><td><strong>Giảng viên 2</strong></td><td><code>gv.002@eduflaw.com</code></td><td><code>EduFlaw@2026</code></td></tr>
+        <tr><td><strong>Sinh viên 1</strong></td><td><code>b24dcat001@eduflaw.com</code></td><td><code>EduFlaw@2026</code></td></tr>
+        <tr><td><strong>Sinh viên 2</strong></td><td><code>b24dcat002@eduflaw.com</code></td><td><code>EduFlaw@2026</code></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:9.3px;color:#475569;">* Mã SV tương ứng của SV1/SV2 là <code>B24DCAT001</code> / <code>B24DCAT002</code> (họ tên được tạo ngẫu nhiên mỗi lần reset CSDL).</div>
+  </div>
+
+  <div class="mini-card">
+    <h4>Cấu Trúc Giao Diện <code>/pentest</code> &amp; Thanh Nổi Web App</h4>
+    <ul>
+      <li><strong>Thanh trên (Header <code>/pentest</code>):</strong> Chip trạng thái MySQL, bộ đếm <code>Tiến độ: 0/6 bài</code>, công tắc <span class="btn-ui">✓ Thanh nổi Web App: ĐANG BẬT</span>, nút <span class="btn-ui">⚡ Chạy Tất Cả 6 Bài</span> và hàng nút <strong>Đổi vai trò thật 1-Click</strong> (<code>👑 Master</code>, <code>👨‍🏫 GV1</code>, <code>👨‍🏫 GV2</code>, <code>SV1</code>, <code>SV2</code>, <code>🚪 Đăng xuất</code>) kèm <span class="btn-ui">Mở trang vai trò hiện tại ↗</span>.</li>
+      <li><strong>6 Tab kiểm thử + Nhật ký dưới:</strong> Mỗi tab chạy request/SQL thật và có nút nhảy sang trang Web thật để kiểm chứng bằng mắt thường; mọi thao tác ghi log vào khung <strong>Nhật ký Thực thi Trực tiếp</strong>.</li>
+      <li><strong>Thanh Pentest Nổi (góc dưới phải các trang Web thật):</strong> Đứng ngay tại <code>/student/grades</code>, <code>/admin/grades</code>, <code>/master</code> vẫn đổi vai trò 1-click và bấm ngay 3 đòn A01 (<span class="btn-ui">🎯 Thử IDOR ?student_id=2</span>, <span class="btn-ui">🚀 Thử vào /master</span>, <span class="btn-ui">✏️ GV2 sửa lớp GV1</span>), <span class="btn-ui">🔓 Mở khóa A07</span> hoặc <span class="btn-ui">📊 Bảng Pentest Đầy Đủ ↗</span>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="tip-box">
+  <strong>Cơ chế an toàn của chế độ Pentest:</strong> Route <code>/pentest</code> và Thanh Pentest nổi chỉ hoạt động ở môi trường cục bộ (<code>localhost</code>) khi <code>APP_ENV</code> khác <code>production</code>; nếu cấu hình <code>production</code> hệ thống trả về <code>HTTP 404</code>, truy cập từ IP ngoài máy chủ trả <code>HTTP 403</code>.
+</div>
+
+<h2 class="sec-title">3. Lộ Trình Trình Diễn Đề Xuất (Ngắn Gọn ~8–10 Phút)</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 15%;">Phần</th>
+      <th style="width: 30%;">Nội dung chính</th>
+      <th style="width: 35%;">Thao tác chính trên màn hình</th>
+      <th style="width: 20%;">Thời lượng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Mở đầu</strong></td><td>Khởi động &amp; giới thiệu Thanh nổi trên Web thật</td><td>Mở <code>4_CHAY_KIEM_THU_PENTEST.bat</code> -> đổi sang <code>SV1</code> -> mở Web thật</td><td>~1 phút</td></tr>
+    <tr><td><strong>Phần 1 (Bài 1)</strong></td><td><strong>OWASP A01:</strong> IDOR ngang, Leo thang dọc, Chéo GV</td><td>Thanh nổi Web thật + Tab <code>Bài 1 · OWASP A01</code></td><td>~2 phút</td></tr>
+    <tr><td><strong>Phần 2 (Bài 2)</strong></td><td><strong>OWASP A03:</strong> Chuỗi cung ứng SRI &amp; <code>requirements.txt</code></td><td>Tab <code>Bài 2 · OWASP A03</code> + mở F12 Console xem chặn SRI</td><td>~1.5 phút</td></tr>
+    <tr><td><strong>Phần 3 (Bài 3)</strong></td><td><strong>OWASP A07:</strong> Brute-Force &amp; Khóa kép 60s (429)</td><td>Tab <code>Bài 3 · OWASP A07</code> -> chạy 7 lần -> <code>Mở Khóa Nhanh</code></td><td>~1.5 phút</td></tr>
+    <tr><td><strong>Phần 4 &amp; 5</strong></td><td><strong>OWASP A10</strong> (23 payload Fail-Closed) &amp; <strong>Quét 69 Endpoints</strong></td><td>Tab <code>Bài 4 · OWASP A10</code> &amp; Tab <code>Bài 5 · Attack Surface</code></td><td>~1.5 phút</td></tr>
+    <tr><td><strong>Phần 6 (Chốt)</strong></td><td><strong>DB Forensic:</strong> CCCD AES-256-GCM &amp; Sửa điểm thật ghi Audit Log</td><td>Tab <code>Bài 6</code> -> vào <code>/admin/grades</code> sửa điểm GV1 -> soi lại DB</td><td>~2 phút</td></tr>
+  </tbody>
+</table>
+
+<div class="footer-note">Trang 1/4 · Tài liệu hướng dẫn sử dụng &amp; demo trực tiếp EduFlaw (Nhóm 7 — D24 PTIT)</div>
+<div class="page-break"></div>
+
+<!-- ==================== TRANG 2: MỞ ĐẦU + PHẦN 1 (A01) + PHẦN 2 (A03) ==================== -->
+<h2 class="sec-title" style="margin-top:0;">4. Kịch Bản Demo Từng Phần &amp; Lời Thuyết Trình (Phần Mở Đầu, Bài 1 &amp; Bài 2)</h2>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-slate">Mở đầu</span> Khởi Động Hệ Thống &amp; Kết Nối Trực Tiếp Lên Web App</h3>
+    <span class="part-time">⏱ ~1 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Nhấp đúp <code>4_CHAY_KIEM_THU_PENTEST.bat</code>. Khi trình duyệt tự mở <code>http://127.0.0.1:5000/pentest?toolbar=1</code>, chỉ chip xanh <code>● MySQL OK</code> và nút <span class="btn-ui">✓ Thanh nổi Web App: ĐANG BẬT</span>.</li>
+    <li>Trên hàng <strong>Đổi vai trò thật 1-Click</strong>, bấm <span class="btn-ui">SV1</span> -> bấm <span class="btn-ui">Mở trang vai trò hiện tại ↗</span> để mở thẳng giao diện Sinh viên thật kèm <strong>Thanh Pentest Trực Tiếp</strong> ở góc dưới phải màn hình.</li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"Kính thưa Thầy/Cô, để kiểm chứng bảo mật một cách trực quan nhất thay vì chỉ đọc log khô khan, nhóm em tích hợp Bảng điều khiển Pentest và Thanh công cụ nổi trực tiếp vào Web App EduFlaw khi chạy ở môi trường cục bộ. Thanh công cụ này chỉ bật ở local dev và tự động khóa 404 ở môi trường production. Em vừa chuyển sang phiên Sinh viên 1 thật trên trình duyệt để bắt đầu kiểm thử từng lỗ hổng theo chuẩn OWASP Top 10:2025."</div>
+  </div>
+</div>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-red">Phần 1 · Bài 1</span> OWASP A01:2025 — Kiểm Soát Truy Cập, Chống IDOR &amp; Phân Quyền 3 Cấp</h3>
+    <span class="part-time">⏱ ~2 phút</span>
+  </div>
+  <ol class="steps">
+    <li><strong>1.1 Chống IDOR ngang (đọc trộm điểm SV khác):</strong> Trên <strong>Thanh nổi</strong> ở trang Web thật, bấm <span class="btn-ui">🎯 Thử IDOR ?student_id=2</span>. Trình duyệt đi tới URL <code>/student/grades?student_id=2</code> bằng phiên <code>SV1</code> nhưng bảng điểm hiển thị vẫn là của <code>SV1</code>. Tiếp tục bấm <span class="btn-ui">📊 Bảng Pentest Đầy Đủ ↗</span>, tại mục <code>1.1</code> chọn preset <code>9999</code> hoặc <code>' OR 1=1--</code> rồi bấm <span class="btn-ui">🚀 Gửi Request IDOR Thật</span> -> kết quả báo <code>AN TOÀN</code>, <code>Rò rỉ sinh viên khác: 0</code>.</li>
+    <li><strong>1.2 Chống leo thang dọc (<code>/master</code>, <code>/admin</code>):</strong> Ở mục <code>1.2</code> bấm <span class="btn-ui">Quét Route Quản Trị bằng SV1</span> -> toàn bộ 6 route quản trị đều trả <code>HTTP 302</code> và gắn nhãn <code>CHẶN THÀNH CÔNG</code>. Sau đó bấm <span class="btn-ui">Mở thử /master bằng SV1 trên Web App ↗</span> (hoặc bấm <span class="btn-ui">🚀 Thử vào /master</span> trên Thanh nổi) -> trình duyệt bị đẩy ngược về <code>/student</code> ngay lập tức.</li>
+    <li><strong>1.3 Chống can thiệp chéo giữa Giảng viên:</strong> Tại mục <code>1.3</code> bấm <span class="btn-ui">✏️ Gửi API Sửa Điểm Lén (GV2)</span> (hoặc bấm <span class="btn-ui">✏️ GV2 sửa lớp GV1</span> trên Thanh nổi) -> gửi <code>POST /admin/grades/api/auto-save</code> dưới phiên <code>gv.002</code> với <code>grade_id</code> của lớp <code>gv.001</code> -> máy chủ từ chối với <strong>HTTP 403</strong>. <em>(Lưu ý giải thích nhanh: nếu GV2 mở <code>/admin/grades</code> bình thường thì hệ thống lọc sẵn nên không thấy lớp của GV1; API guard là lớp chốt chặn thứ hai nếu kẻ xấu tự sửa request).</em></li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"Ở trọng tâm A01:2025, em kiểm chứng cả 3 chiều phân quyền trực tiếp trên phiên thật. Chiều ngang: dù truyền ?student_id=2 hay 9999 trên URL, hàm xem điểm chỉ lấy danh tính từ cookie session['user_id'] đã ký số HMAC-SHA256 nên không bao giờ xem nhầm điểm bạn khác. Chiều dọc: 6/6 route của Master và Giảng viên được bảo vệ bằng decorator @role_required, đẩy sinh viên về trang cá nhân với mã 302 thay vì xác nhận route tồn tại. Cuối cùng là chiều chéo vai trò: khi Giảng viên 2 cố gửi API sửa lén điểm lớp của Giảng viên 1, máy chủ kiểm tra ràng buộc lecturer_id == user_id và từ chối ngay với HTTP 403 Forbidden."</div>
+  </div>
+</div>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-purple">Phần 2 · Bài 2</span> OWASP A03:2025 — Chuỗi Cung Ứng Phần Mềm, W3C SRI &amp; Dependency Pinning</h3>
+    <span class="part-time">⏱ ~1.5 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Chuyển sang tab <strong>Bài 2 · OWASP A03</strong>. Bấm <span class="btn-ui">🔎 Kiểm Toán SRI &amp; Requirements</span>. Chỉ mục <code>2.1</code>: công cụ bóc tách thẻ <code>&lt;script&gt;</code> tải <code>SweetAlert2</code> trên <code>/login</code>, tính SHA-256 thực tế từ CDN jsDelivr (khớp 100% với <code>integrity</code> đã ghim) và mô phỏng chèn thêm mã độc <code>navigator.sendBeacon(...)</code> làm mã băm sai lệch hoàn toàn. Bảng <code>2.3</code> bên dưới xác nhận <strong>10/10 gói Python</strong> trong <code>src/requirements.txt</code> đều ghim cứng phiên bản bằng toán tử <code>==</code>.</li>
+    <li>Mở DevTools trình duyệt (<strong>F12 -> tab Console</strong>). Tại mục <code>2.2</code> bấm <span class="btn-ui">✅ Nạp Script với SRI ĐÚNG</span> -> trình duyệt nạp thành công (<code>onload()</code>). Ngay sau đó bấm <span class="btn-ui">⛔ Nạp Script với SRI SAI 1 KÝ TỰ</span> (đổi ký tự cuối <code>I=</code> thành <code>X=</code>) -> trong Console lập tức hiện lỗi đỏ chặn thực thi, giao diện báo <code>onerror()</code> bảo vệ thành công. <em>(Hoặc bấm <code>Mở /login để test DevTools F12 ↗</code> nếu muốn sửa trực tiếp trong tab Elements và nhấn <code>Ctrl + F5</code>).</em></li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"A03:2025 là hạng mục mới về rủi ro Chuỗi cung ứng phần mềm. Ở phía trình duyệt, EduFlaw gắn chuẩn W3C Subresource Integrity kèm crossorigin='anonymous' cho thư viện tải từ CDN. Như Thầy/Cô thấy khi em bấm giả lập sai đúng 1 ký tự cuối của chuỗi SHA-256, trình duyệt lập tức kích hoạt lỗi đỏ trên Console và tiêu diệt file script trước khi nó kịp chạy — chặn kịch bản CDN bị tin tặc cấy mã đánh cắp phiên đăng nhập. Ở phía backend, 10/10 thư viện trong requirements.txt đều được khóa cứng phiên bản bằng toán tử ==."</div>
+  </div>
+</div>
+
+<div class="footer-note">Trang 2/4 · Tiếp theo Trang 3: Bài 3 (A07 Brute-Force), Bài 4 (A10 Fail-Closed) &amp; Bài 5 (Quét 69 Endpoints)</div>
+<div class="page-break"></div>
+
+<!-- ==================== TRANG 3: PHẦN 3 (A07) + PHẦN 4 (A10) + PHẦN 5 (ROUTES) ==================== -->
+<h2 class="sec-title" style="margin-top:0;">5. Kịch Bản Demo Từng Phần &amp; Lời Thuyết Trình (Bài 3, Bài 4 &amp; Bài 5)</h2>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-amber">Phần 3 · Bài 3</span> OWASP A07:2025 — Chống Brute-Force &amp; Khóa Kép 60 Giây (HTTP 429)</h3>
+    <span class="part-time">⏱ ~1.5 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Chuyển sang tab <strong>Bài 3 · OWASP A07</strong>. Giữ mặc định tài khoản mục tiêu <code>b24dcat001@eduflaw.com</code> và số lần thử <code>7</code> -> bấm <span class="btn-ui">⚡ Dội Thử Hàng Loạt (Reset &amp; Chạy)</span>.</li>
+    <li>Chỉ bảng nhật ký bên dưới: các lần đầu trả <code>HTTP 200</code> báo sai mật khẩu; từ ngưỡng <strong>5 lần sai liên tiếp</strong> hệ thống chuyển sang trả <strong><code>HTTP 429 Too Many Requests</code></strong>.</li>
+    <li>Chỉ bảng <code>3.2</code> bên phải (<code>login_attempts</code> trong MySQL): thấy rõ hai khóa đang bị khóa đếm ngược 60s là <code>ip:127.0.0.1</code> và <code>user:b24dcat001@eduflaw.com</code>.</li>
+    <li><em>Kiểm chứng thêm (tùy chọn):</em> Bấm <span class="btn-ui">🔑 Thử 1 Lần</span> với mật khẩu đúng <code>EduFlaw@2026</code> (hoặc bấm <span class="btn-ui">Mở /login để thử đăng nhập tay ↗</span>) -> vẫn bị từ chối trong thời gian khóa 60s. <strong>Xong bài nhớ bấm <span class="btn-ui">🔓 Mở Khóa Nhanh (Xóa DB)</span></strong> (hoặc <span class="btn-ui">🔓 Mở khóa A07</span> trên Thanh nổi) để các phần demo sau không bị vướng khóa.</li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"Ở bài kiểm thử A07 về Xác thực, công cụ dội 7 mật khẩu sai thật vào trang /login. Đúng tới ngưỡng 5 lần sai, hệ thống trả về HTTP 429 và lưu trạng thái khóa kép vào bảng login_attempts trong MySQL suốt 60 giây cho cả địa chỉ IP lẫn tên tài khoản. Nhờ khóa kép này, kể cả kẻ tấn công đổi IP qua proxy hoặc VPN thì tài khoản sinh viên vẫn được bảo vệ, đồng thời chỉ khóa tạm 60 giây theo khuyến nghị NIST để tránh bị lợi dụng khóa vĩnh viễn hàng loạt tài khoản gây từ chối dịch vụ."</div>
+  </div>
+</div>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-blue">Phần 4 · Bài 4</span> OWASP A10:2025 — Xử Lý Ngoại Lệ Fail-Closed &amp; Fuzzing 23 Payload</h3>
+    <span class="part-time">⏱ ~1 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Chuyển sang tab <strong>Bài 4 · OWASP A10</strong>. Để sẵn API mục tiêu <code>POST /auth/api/send-otp</code> (có thể thử đổi sang <code>POST /admin/grades/api/auto-save</code>).</li>
+    <li>Bấm nhanh một nút preset bất kỳ (như <code>sql_or</code> hay <code>qua_dai_10k</code>) rồi bấm <span class="btn-ui">Gửi 1 Payload Này</span> để xem phản hồi đơn lẻ; sau đó bấm <span class="btn-ui">💣 Bơm Toàn Bộ 23 Payload</span> (gồm SQLi, XSS, SSTI, Path Traversal, Null Byte, CRLF và chuỗi 10.000 ký tự <code>A</code>).</li>
+    <li>Chỉ khung tổng kết và cột <code>HTTP</code>, <code>Stack Trace?</code> trong bảng: đạt <strong>0 lỗi 5xx</strong> và <strong>0 rò rỉ Stack Trace</strong>, tất cả đều trả về mã lỗi client an toàn với thông báo chuẩn hóa.</li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"A10:2025 là hạng mục mới nhấn mạnh việc xử lý các tình huống ngoại lệ. Em vừa bơm đồng loạt 23 payload dị dạng từ SQL Injection, Path Traversal đến chuỗi 10.000 ký tự để ép ứng dụng phát sinh lỗi. Kết quả toàn hệ thống ghi nhận 0 lỗi 5xx và 0 lộ Stack Trace: mọi ngoại lệ đều được bắt gọn theo nguyên tắc Fail-Closed, đóng từ chối hợp lệ và giữ kín cấu trúc code lẫn truy vấn MySQL bên dưới."</div>
+  </div>
+</div>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-slate">Phần 5 · Bài 5</span> Attack Surface Mapping — Quét 69 Endpoints Kiểm Chứng Bề Mặt Tấn Công</h3>
+    <span class="part-time">⏱ ~1 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Chuyển sang tab <strong>Bài 5 · Attack Surface</strong>. Giữ <code>Góc nhìn: Chưa đăng nhập</code> (hoặc đổi sang <code>Sinh viên</code>) -> bấm <span class="btn-ui">Quét 69 Đường Dẫn</span>.</li>
+    <li>Bấm lần lượt các nút lọc phía trên bảng:
+      <br>– <span class="btn-ui">302 Bảo vệ</span>: Các trang nghiệp vụ nội bộ đều bị chặn chuyển hướng về <code>/login</code> (hoặc dashboard khi là sinh viên).
+      <br>– <span class="btn-ui">404 Không có</span>: Các file nhạy cảm hay bị rà quét (<code>/.env</code>, <code>/.git/HEAD</code>, <code>/db.sql</code>, <code>/phpmyadmin</code>) đều trả về 404.
+      <br>– <span class="btn-ui">⚠️ Cảnh báo /console</span>: Công cụ tự phát hiện đường dẫn debug Werkzeug đang mở trong môi trường dev để nhắc tắt khi triển khai thật.</li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu:</span>
+    <div class="speech-text">"Bài 5 tự động rà quét 69 đường dẫn để lập bản đồ bề mặt tấn công dưới góc nhìn người ngoài chưa đăng nhập. Toàn bộ các endpoint quản trị và nghiệp vụ đều chuyển hướng bảo vệ HTTP 302; các tệp nhạy cảm như .env hay dump SQL trả về 404 hoàn toàn. Đặc biệt công cụ còn cảnh báo riêng route /console của chế độ dev để đội ngũ vận hành không quên tắt trước khi đưa lên server thật."</div>
+  </div>
+</div>
+
+<div class="footer-note">Trang 3/4 · Tiếp theo Trang 4: Bài 6 (DB Forensic AES-256-GCM + Sửa điểm thật ghi Audit Log) &amp; Xử lý sự cố</div>
+<div class="page-break"></div>
+
+<!-- ==================== TRANG 4: PHẦN 6 (DB + AUDIT) + SỰ CỐ + PHẢN BIỆN ==================== -->
+<h2 class="sec-title" style="margin-top:0;">6. Phần 6 (Bài 6 · DB Forensic, Thao Tác Sửa Điểm Thật) &amp; Tổng Kết</h2>
+
+<div class="part-card">
+  <div class="part-head">
+    <h3 class="part-title"><span class="badge b-green">Phần 6 · Bài 6</span> Pháp Chứng CSDL MySQL (<code>AES-256-GCM</code> &amp; <code>grade_audit_logs</code>)</h3>
+    <span class="part-time">⏱ ~2 phút</span>
+  </div>
+  <ol class="steps">
+    <li>Chuyển sang tab <strong>Bài 6 · DB Forensic</strong> -> bấm <span class="btn-ui">🔄 Truy Vấn MySQL Thật</span>. Chỉ bảng <code>1) Mã hóa số CCCD (student_profiles.id_card)</code>: dữ liệu lưu thật trong DB toàn bộ có tiền tố <code>enc:v1:...</code> (nhãn <code>AES-256-GCM</code>). Sau đó tích vào ô <code>Hiện bản giải mã che mờ (đối chiếu 2 chiều)</code> để cho xem ứng dụng giải mã được khi có khóa trong <code>.env</code>.</li>
+    <li><strong>Thao tác sửa điểm thật trên Web App để sinh Audit Log:</strong> Bấm nút <span class="btn-ui">✏️ Vào /admin/grades sửa điểm (GV1) ↗</span> -> hệ thống chuyển thẳng sang bảng điểm lớp của <code>gv.001</code>. Sửa 1 ô điểm bất kỳ -> bấm <span class="btn-ui">💾 Lưu Toàn Bộ Bảng Điểm</span> -> nhập lý do (VD: <em>"Demo kiểm toán phúc khảo"</em>) -> bấm <span class="btn-ui">💾 Xác nhận Lưu</span>.</li>
+    <li>Trên <strong>Thanh nổi</strong> góc dưới phải, bấm <span class="btn-ui">📊 Bảng Pentest Đầy Đủ ↗</span> quay lại tab <strong>Bài 6</strong> và bấm <span class="btn-ui">🔄 Truy Vấn MySQL Thật</span> -> bảng <code>2) Nhật ký sửa điểm (grade_audit_logs)</code> lập tức hiện bản ghi mới với người sửa (<code>gv.001@eduflaw.com</code>), thời gian, điểm cũ → điểm mới và lý do vừa nhập.</li>
+    <li><strong>Chốt toàn bộ phần demo (tùy chọn):</strong> Bấm <span class="btn-ui">⚡ Chạy Tất Cả 6 Bài</span> trên header để hệ thống tự quét một lượt 6/6 bài và hiển thị tổng tiến độ <code>6/6 bài</code>.</li>
+  </ol>
+  <div class="speech-box">
+    <span class="label">Lời thuyết trình mẫu (kết thúc demo):</span>
+    <div class="speech-text">"Phần cuối cùng chứng minh khả năng bảo vệ dữ liệu lưu trữ và truy vết trách nhiệm trong MySQL thật. Toàn bộ số CCCD sinh viên đều được mã hóa bằng AES-256-GCM kèm Nonce ngẫu nhiên, còn khóa SECRET_KEY nằm tách biệt trong file .env trên server ứng dụng nên kẻ gian dù có dump được database cũng không thể đọc bản rõ. Khi em vừa đóng vai Giảng viên 1 sửa một ô điểm thật trên Web và nhập lý do, bảng grade_audit_logs lập tức ghi vết đầy đủ người sửa, giờ sửa, điểm cũ — điểm mới và lý do mà giảng viên không có quyền xóa. Phần demo hệ thống EduFlaw của nhóm em xin kết thúc tại đây, kính mong nhận được câu hỏi và góp ý từ Thầy/Cô."</div>
+  </div>
+</div>
+
+<h2 class="sec-title">7. Xử Lý Sự Cố Nhanh Khi Đang Demo &amp; 5 Câu Hỏi Phản Biện Bỏ Túi</h2>
+<div class="two-col">
+  <div class="mini-card">
+    <h4>⚠️ 4 Tình Huống Hay Gặp &amp; Cách Xử Lý Ngay (3 Giây)</h4>
+    <ul>
+      <li><strong>Bị báo lỗi khóa 429 khi vừa test A07 sang bài khác:</strong> Bấm ngay <span class="btn-ui">🔓 Mở Khóa Nhanh (Xóa DB)</span> ở tab A07 hoặc <span class="btn-ui">🔓 Mở khóa A07</span> trên Thanh nổi.</li>
+      <li><strong>Vào <code>/pentest</code> bị 404 hoặc không thấy Thanh nổi:</strong> Kiểm tra file <code>src/.env</code> không đặt <code>APP_ENV=production</code>; tắt cửa sổ Flask cũ rồi chạy lại <code>4_CHAY_KIEM_THU_PENTEST.bat</code>.</li>
+      <li><strong>Mất mạng Internet ở phòng hội đồng khi demo Bài 2 (SRI):</strong> Nút <span class="btn-ui">🔎 Kiểm Toán SRI &amp; Requirements</span> vẫn chạy bình thường ở chế độ đối soát cục bộ và kiểm <code>src/requirements.txt</code> (báo rõ <code>offline</code> ở dòng Hash CDN).</li>
+      <li><strong>Điểm/Audit Log bị chỉnh nhiều lần cần làm sạch lại:</strong> Đóng server và nhấp đúp <code>3_RESET_CSDL_DEMO.bat</code> để khôi phục bộ dữ liệu demo gốc.</li>
+    </ul>
+  </div>
+
+  <div class="mini-card">
+    <h4>💡 Ghi Nhớ Chuyển Chế Độ CLI Cũ &amp; Phím Tắt Nhanh</h4>
+    <ul>
+      <li><strong>Nếu thầy/cô muốn xem log Terminal kiểu cổ điển:</strong> Tại cửa sổ đen của <code>4_CHAY_KIEM_THU_PENTEST.bat</code>, gõ phím <code>C</code> rồi <code>Enter</code> (hoặc chạy <code>pentest\live_demo.py --cli</code>).</li>
+      <li><strong>Chạy thẳng 1 bài ngoài Terminal:</strong> <code>src\.venv\Scripts\python.exe pentest\live_demo.py 1</code> (từ <code>1</code> đến <code>7</code>).</li>
+      <li><strong>Thu gọn / tắt Thanh nổi trên Web thật:</strong> Bấm dấu <code>_</code> để thu gọn thành nút tròn <code>Pentest Live</code> khi cần chụp ảnh màn hình sạch, bấm <code>✕</code> để tắt hẳn thanh nổi.</li>
+      <li><strong>Xem nhật ký chi tiết toàn phiên:</strong> Kéo xuống khung <strong>Nhật ký Thực thi Trực tiếp</strong> và bấm <span class="btn-ui">📋 Sao chép Log</span> nếu cần đính kèm báo cáo.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="qa-list">
+  <div class="qa-item"><strong class="q">1. SV tự sửa Cookie để đổi <code>user_id</code> thì có xem trộm được không?</strong> → Không. Flask Session ký HMAC-SHA256 bằng <code>SECRET_KEY</code> trên máy chủ; sửa 1 bit làm sai chữ ký số, server hủy phiên ngay.</div>
+  <div class="qa-item"><strong class="q">2. Sao SV vào <code>/master</code> bị đẩy 302 thay vì trả HTTP 403?</strong> → Tránh xác nhận route quản trị tồn tại cho kẻ dò quét (theo khuyến nghị OWASP) và đưa người dùng gõ nhầm về đúng trang của mình.</div>
+  <div class="qa-item"><strong class="q">3. Vì sao A07 chỉ khóa 60s? Nếu hacker đổi nhiều IP thì sao?</strong> → Theo NIST SP 800-63B, khóa vĩnh viễn dễ bị lợi dụng thành DoS; khóa kép theo cả <code>ip:</code> và <code>user:</code> nên đổi IP vẫn bị khóa đúng tài khoản trong 60s.</div>
+  <div class="qa-item"><strong class="q">4. Tại sao thẻ SRI phải có <code>crossorigin="anonymous"</code>?</strong> → Chính sách Same-Origin yêu cầu thuộc tính này thì trình duyệt mới được đọc byte của file từ CDN để băm SHA-256 kiểm chứng.</div>
+  <div class="qa-item"><strong class="q">5. Nếu hacker dump được MySQL thì có giải mã được số CCCD không?</strong> → Không. Trường CCCD lưu dạng <code>enc:v1:...</code> mã hóa AES-256-GCM, còn <code>SECRET_KEY</code> nằm riêng trong <code>.env</code> trên máy chủ ứng dụng.</div>
+</div>
+
+<div class="footer-note">Trang 4/4 · Học viện Công nghệ Bưu chính Viễn thông (PTIT Hà Nội) · BTL Cơ sở An toàn thông tin — Nhóm 7 (D24)</div>
+</body>
+</html>

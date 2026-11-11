@@ -88,6 +88,9 @@ def create_app(config_class=None):
 
     @app.after_request
     def set_security_headers(response):
+        if not is_production and not app.config.get('TESTING'):
+            from app.utils.pentest_toolbar import inject_pentest_toolbar
+            response = inject_pentest_toolbar(response)
         # Chống clickjacking: không cho trang khác nhúng EduFlaw vào iframe
         response.headers.setdefault('X-Frame-Options', 'DENY')
         response.headers.setdefault('Content-Security-Policy', content_security_policy)
@@ -127,6 +130,15 @@ def create_app(config_class=None):
     app.register_blueprint(admin_bp)
     app.register_blueprint(master_bp)
 
+    pentest_enabled = not is_production
+    if pentest_enabled:
+        from app.controllers.pentest import pentest_bp
+        app.register_blueprint(pentest_bp)
+
+    @app.context_processor
+    def inject_dev_flags():
+        return {'pentest_enabled': pentest_enabled and not app.config.get('TESTING')}
+
     @app.route('/')
     def index():
         if 'user_id' in session:
@@ -157,7 +169,7 @@ def create_app(config_class=None):
             'static'
         }
 
-        if request.endpoint in onboarding_allowed:
+        if request.endpoint in onboarding_allowed or (pentest_enabled and request.blueprint == 'pentest'):
             return None
 
         # Nếu tài khoản đang dùng mật khẩu tạm do nhà trường cấp (users.must_change_password) -> Bắt buộc vào /onboarding

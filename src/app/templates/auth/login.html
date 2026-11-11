@@ -593,12 +593,19 @@
                         <div style="font-size: 10px; color: #64748b;">ATTT 001</div>
                     </button>
                 </div>
-                <div style="margin-top: 10px; text-align: center;">
+                <div style="margin-top: 10px; text-align: center; display: grid; gap: 6px;">
                     <a href="/demo" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 8px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; color: #475569; font-size: 11px; font-weight: 600; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='#f8fafc'; this.style.color='#475569'">
                         <span>🧪</span>
                         <span>Mở Bàn Thí Nghiệm Lab (OWASP Top 10:2025)</span>
                         <span style="font-size: 10px; color: #94a3b8;">↗</span>
                     </a>
+                    {% if pentest_enabled %}
+                    <a href="/pentest?toolbar=1" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; font-size: 11px; font-weight: 700; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'">
+                        <span>🛡️</span>
+                        <span>Mở Bảng Điều Khiển Pentest Trực Tiếp (/pentest)</span>
+                        <span style="font-size: 10px; color: #93c5fd;">↗</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
 

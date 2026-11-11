@@ -85,67 +85,123 @@ Nhóm đã tiến hành kiểm thử toàn diện trên hệ thống bằng cả
 
 ---
 
-## 🚀 Hướng dẫn khởi chạy ứng dụng (Python + MySQL cục bộ)
+## 📦 Hướng dẫn sử dụng Repository
 
-Yêu cầu môi trường: **Python ≥ 3.11** và **MySQL** chạy cục bộ (cổng 3306).
+### 1. Cấu trúc thư mục chính
 
-### ⚡ Khởi chạy 1-Click siêu nhanh (Dành cho Windows)
-Để buổi thuyết trình diễn ra nhanh nhất mà không cần gõ lệnh dòng lệnh:
-* Nhấp đúp file **`1_CHAY_WEB_DEMO.bat`**: Tự động bật máy chủ Web và tự động mở trình duyệt `http://127.0.0.1:5000` với nút **Đăng nhập 1-Click** (Master, Giảng viên, Sinh viên).
-* Nhấp đúp file **`2_MO_LAB_THUYET_TRINH.bat`**: Mở trang mô phỏng tương tác trực quan 4 bài Lab OWASP (A01, A03, A07, A10).
-* Nhấp đúp file **`3_RESET_CSDL_DEMO.bat`**: Tự động dọn dẹp và làm mới CSDL về đúng 20 sinh viên demo.
+```text
+EduFlaw-CSATTT/
+├── 1_CHAY_WEB_DEMO.bat            # Bật Web App Flask (http://127.0.0.1:5000/login) kèm nút 1-click
+├── 2_MO_LAB_THUYET_TRINH.bat      # Mở Lab mô phỏng 4 lỗ hổng OWASP 2025 (offline)
+├── 3_RESET_CSDL_DEMO.bat          # Làm mới MySQL eduflaw_db về bộ dữ liệu demo sạch (20 SV, 5 GV)
+├── 4_CHAY_KIEM_THU_PENTEST.bat    # Bật Web Pentest Console (/pentest?toolbar=1) + Thanh nổi Web App
+├── HUONG-DAN-SU-DUNG-VA-DEMO.pdf  # Tài liệu hướng dẫn sử dụng, kịch bản demo 6 phần & lời thoại (4 trang)
+├── demo/                          # Trang mô phỏng tương tác OWASP Top 10:2025 (GitHub Pages / offline)
+├── docs/                          # Báo cáo bằng chứng thực nghiệm (19 ảnh), hướng dẫn triển khai
+├── pentest/                       # Launcher Web/CLI (live_demo.py), script PoC & fuzzing độc lập
+└── src/                           # Mã nguồn Flask + MySQL, migrations, script cài đặt và bộ test pytest
+    ├── app/                       # Controllers, Models, Services, Templates, Utils (bao gồm /pentest dev-only)
+    ├── tests/                     # Bộ kiểm thử hồi quy pytest
+    ├── setup.ps1 / setup.sh       # Cài đặt tự động môi trường ảo, .env và khởi tạo CSDL
+    ├── reset_db_demo.py           # Nạp lại dữ liệu mẫu tinh gọn phục vụ demo
+    └── run.py                     # Khởi chạy Flask dev server cục bộ
+```
 
 ---
 
-### Khởi chạy thủ công (Nhiều nền tảng)
-### Bước 1: Tạo Database MySQL
-Mở MySQL (MySQL Workbench / phpMyAdmin / dòng lệnh) và tạo cơ sở dữ liệu:
-```sql
-CREATE DATABASE eduflaw_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+### 2. Cài đặt môi trường từ đầu (Sau khi `git clone`)
 
-### Bước 2: Cài đặt tự động một lệnh
-- **Windows (PowerShell):**
-  ```powershell
-  cd src
-  powershell -ExecutionPolicy Bypass -File .\setup.ps1
-  ```
-- **macOS / Linux:**
-  ```bash
-  cd src
-  ./setup.sh
-  ```
-*(Script sẽ tự động tạo môi trường ảo `.venv`, cài thư viện, sinh file `.env`, tạo bảng từ `schema.sql` và tự động nạp dữ liệu mẫu **Demo Tinh Gọn** gồm 20 sinh viên, 5 giảng viên, 17 lớp tín chỉ phục vụ hoàn hảo cho buổi thuyết trình).*
+Yêu cầu hệ thống: **Python ≥ 3.11**, **Git** và **MySQL** chạy cục bộ tại cổng `3306`.
 
-### Bước 3: Khởi chạy Server
+1. **Tải mã nguồn:**
+   ```bash
+   git clone https://github.com/Luffyreals/EduFlaw-CSATTT.git
+   cd EduFlaw-CSATTT
+   ```
+2. **Tạo cơ sở dữ liệu MySQL:**
+   ```sql
+   CREATE DATABASE eduflaw_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+3. **Chạy script cài đặt tự động 1 lệnh:**
+   - **Windows (PowerShell):**
+     ```powershell
+     cd src
+     powershell -ExecutionPolicy Bypass -File .\setup.ps1
+     ```
+   - **macOS / Linux:**
+     ```bash
+     cd src
+     ./setup.sh
+     ```
+   *(Script tự tạo môi trường ảo `src/.venv`, cài gói từ `requirements-dev.txt`, sinh `src/.env` kèm khóa ngẫu nhiên `SECRET_KEY` / `FIELD_ENCRYPTION_KEY`, khởi tạo bảng từ `schema.sql`, nạp bộ dữ liệu mẫu **20 sinh viên, 5 giảng viên** và chạy kiểm thử xác nhận).*
+
+---
+
+### 3. Khởi chạy & Sử dụng hằng ngày
+
+#### Cách A — Dùng Launcher 1-Click trên Windows (Khuyên dùng)
+Tại thư mục gốc, nhấp đúp trực tiếp các file `.bat`:
+1. **`3_RESET_CSDL_DEMO.bat`**: Chạy trước mỗi buổi demo/thuyết trình để khôi phục dữ liệu sạch và xóa sạch khóa brute-force cũ.
+2. **`4_CHAY_KIEM_THU_PENTEST.bat`**: Tự bật Web App tại cổng `5000` (nếu chưa chạy) và mở thẳng **Bảng Điều Khiển Pentest Trực Tiếp** (`http://127.0.0.1:5000/pentest?toolbar=1`) kèm **Thanh Pentest Nổi** trên Web thật.
+   - Phím tắt trong cửa sổ console: `[O]` Mở lại `/pentest`, `[W]` Mở `/login`, `[C]` Chuyển sang Terminal CLI log cũ, `[Q]` Thoát.
+3. **`1_CHAY_WEB_DEMO.bat`**: Chỉ khởi động Web App chuẩn và mở `/login` (có sẵn nút đăng nhập 1-click cho Master, Giảng viên, Sinh viên).
+4. **`2_MO_LAB_THUYET_TRINH.bat`**: Mở nhanh Lab mô phỏng 4 lỗ hổng (`demo/index.html`) với phím tắt `1–4`, `V`, `S`, `Enter`.
+
+#### Cách B — Khởi chạy thủ công trên nhiều nền tảng (Windows / macOS / Linux)
 ```bash
-python run.py
+# 1) Bật Web App (từ thư mục src/)
+.venv/Scripts/python.exe run.py          # Windows
+# hoặc: .venv/bin/python run.py          # macOS / Linux
+
+# 2) Hoặc mở thẳng Web Pentest Console từ thư mục gốc:
+src/.venv/Scripts/python.exe pentest/live_demo.py
 ```
-Mở trình duyệt: **http://127.0.0.1:5000**  
-- **Tài khoản Master:** `master@eduflaw.com` / Mật khẩu trong file `.env` (mặc định: `tung12345678`)  
-- **Tài khoản Giảng viên Demo:** `gv.001@eduflaw.com` / Mật khẩu `EduFlaw@2026`  
-- **Tài khoản Sinh viên Demo:** `b24dcat001@eduflaw.com` / Mật khẩu `EduFlaw@2026`  
+Truy cập trình duyệt:
+- **Web App chính:** `http://127.0.0.1:5000/login`
+- **Bảng Pentest trực tiếp:** `http://127.0.0.1:5000/pentest?toolbar=1`
+
+#### Cách C — Chạy bộ kiểm thử tự động (`pytest`)
+```powershell
+cd src
+.\.venv\Scripts\python.exe -m pytest -v   # Windows (macOS/Linux: .venv/bin/python -m pytest -v)
+```
 
 ---
 
-## ⚡ Bảng điều khiển kiểm thử trực tiếp (Live Pentest Console)
+### 4. Tài khoản Demo Chuẩn
 
-Nhóm đã phát triển bảng điều khiển kiểm thử tương tác trực tiếp qua Terminal. Trong khi ứng dụng web đang chạy, mở một cửa sổ Terminal mới và gõ:
-```bash
-python pentest/live_demo.py
-```
-Menu tương tác cung cấp 5 chức năng kiểm thử thực chiến:
-1. **Live Fuzzing (Quét 69 đường dẫn):** Rà quét tiến trình thực, lập bản đồ xác thực và phát hiện route ẩn.
-2. **Live Input Fuzzing (23 Payload dị dạng):** Bơm SQLi, XSS, Path Traversal, SSTI vào API để kiểm chứng nguyên tắc **Fail-Closed** (0 lỗi 500).
-3. **Live Brute-force Attack (Chống dò mật khẩu A07):** Dội thử mật khẩu sai và kích hoạt cơ chế khóa bảo vệ **HTTP 429** sau lần thứ 5.
-4. **Live Database Forensic Inspector:** Kiểm chứng trực tiếp số CCCD được mã hóa AES-256-GCM trong bảng `student_profiles` và kiểm tra nhật ký kiểm toán `grade_audit_logs`.
-5. **Quick Automated Audit:** Chạy quét kiểm thử tổng hợp toàn bộ hệ thống.
+Sau khi chạy `setup.ps1` / `setup.sh` hoặc `3_RESET_CSDL_DEMO.bat`, hệ thống có sẵn các tài khoản chuẩn (có thể đăng nhập **1-Click** ngay trên `/login`, `/pentest` hoặc **Thanh Pentest Nổi**):
+
+| Vai trò | Tài khoản (Email) | Mật khẩu mặc định | Ghi chú |
+|---|---|---|---|
+| **Master (Đào tạo)** | `master@eduflaw.com` | Theo `MASTER_PASSWORD` trong `src/.env` (`tung12345678`) | Toàn quyền quản trị & xem `grade_audit_logs` |
+| **Giảng viên 1** | `gv.001@eduflaw.com` | `EduFlaw@2026` | Phụ trách lớp tín chỉ mẫu (`AT301`) |
+| **Giảng viên 2** | `gv.002@eduflaw.com` | `EduFlaw@2026` | Dùng kiểm thử phân quyền chéo A01-3 |
+| **Sinh viên 1** | `b24dcat001@eduflaw.com` | `EduFlaw@2026` | Dùng kiểm thử IDOR & leo thang dọc A01 |
+| **Sinh viên 2** | `b24dcat002@eduflaw.com` | `EduFlaw@2026` | Tài khoản sinh viên đối chứng |
 
 ---
 
-## 📚 Tài liệu báo cáo & Thuyết trình của nhóm
+## ⚡ Bảng điều khiển Pentest trực tiếp trên Web App (`/pentest`)
 
+Thay vì chỉ xem log trong Terminal, `/pentest` tích hợp trực tiếp trên Web App cục bộ (tự khóa **HTTP 404** ở `production` và **HTTP 403** từ ngoài `localhost`) cho phép thao tác kiểm thử thời gian thực:
+
+- **Đổi vai trò thật 1-Click & Thanh Pentest Nổi:** Chuyển phiên trình duyệt tức thì sang Master, GV1, GV2, SV1, SV2 và bấm tấn công nhanh (`🎯 Thử IDOR ?student_id=2`, `🚀 Thử vào /master`, `✏️ GV2 sửa lớp GV1`, `🔓 Mở khóa A07`) ngay khi đang đứng trên `/student/grades` hay `/admin/grades`.
+- **6 Tab kiểm thử tương tác thực tế:**
+  1. **Bài 1 (OWASP A01):** Kiểm thử IDOR ngang (`/student/grades`), leo thang dọc 6 route `/master/*` & `/admin/*`, và can thiệp chéo GV2 sửa điểm lớp GV1 (`HTTP 403`).
+  2. **Bài 2 (OWASP A03):** Đối soát mã băm SHA-256 W3C SRI từ `/login` + `10/10` gói ghim cứng `==` trong `src/requirements.txt`, kèm nút thử **SRI Đúng vs Sai 1 ký tự** ngay trên DOM/DevTools Console.
+  3. **Bài 3 (OWASP A07):** Dội thử brute-force tới `/login`, quan sát khóa kép (`ip:` + `user:`) `60s` (`HTTP 429`) trực tiếp trên bảng `login_attempts` và nút **Mở Khóa Nhanh**.
+  4. **Bài 4 (OWASP A10):** Thử từng payload hoặc bơm đồng loạt **23 payload dị dạng** vào API để xác nhận `0 lỗi 5xx` và `0 lộ Stack Trace` (Fail-Closed).
+  5. **Bài 5 (Attack Surface):** Quét **69 endpoints** dưới góc nhìn chưa đăng nhập/sinh viên kèm bộ lọc nhanh (`302 Bảo vệ`, `404 Không có`, `⚠️ Cảnh báo /console`).
+  6. **Bài 6 (DB Forensic):** Soi dữ liệu CCCD mã hóa `AES-256-GCM` (`enc:v1:...`) và nhật ký sửa điểm `grade_audit_logs` trực tiếp từ MySQL thật.
+- **Chế độ Terminal CLI (khi cần):** Chạy `python pentest/live_demo.py --cli` hoặc truyền số `1..7` (hoặc nhấn phím `C` trong cửa sổ launcher).
+
+---
+
+## 📚 Tài liệu báo cáo & Hướng dẫn
+
+- **Hướng dẫn sử dụng, kịch bản demo 6 phần & lời thuyết trình (PDF 4 trang):** [`HUONG-DAN-SU-DUNG-VA-DEMO.pdf`](HUONG-DAN-SU-DUNG-VA-DEMO.pdf)
 - **Báo cáo toàn văn BTL:** [`BAO-CAO-DAY-DU.md`](BAO-CAO-DAY-DU.md)
-- **Kịch bản thuyết trình (Slide 1–25):** [`NOI-DUNG-THUYET-TRINH.md`](NOI-DUNG-THUYET-TRINH.md)
-- **Cẩm nang kiến thức & Hỏi đáp phản biện:** [`GIAI-THICH-KIEN-THUC-VA-QA.md`](GIAI-THICH-KIEN-THUC-VA-QA.md)
-- **Bộ công cụ Pentest & Fuzzing:** [`pentest/README.md`](pentest/README.md)
+- **Báo cáo tổng hợp bằng chứng thực nghiệm:** [`docs/BANG-CHUNG-KIEM-THU.md`](docs/BANG-CHUNG-KIEM-THU.md)
+- **Hướng dẫn triển khai & vận hành an toàn:** [`docs/DEPLOY.md`](docs/DEPLOY.md)
+- **Bộ công cụ Pentest & Fuzzing chi tiết:** [`pentest/README.md`](pentest/README.md)
