@@ -80,7 +80,8 @@ Nhóm đã tiến hành kiểm thử toàn diện trên hệ thống bằng cả
 - **A07:** Tấn công dò mật khẩu và cơ chế khóa tài khoản.
 - **A10:** Xử lý lỗi CSDL (Fail-Closed từ chối an toàn vs Fail-Open lộ quyền).
 
-Mở trực tiếp trên trình duyệt: [`demo/index.html`](demo/index.html) *(không cần cài đặt backend)*.
+- **Trải nghiệm trực tiếp (GitHub Pages):** https://luffyreals.github.io/EduFlaw-CSATTT/ *(không cần cài đặt backend)*
+- **Mở offline từ mã nguồn:** [`demo/index.html`](demo/index.html)
 
 ---
 

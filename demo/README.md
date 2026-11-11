@@ -1,7 +1,7 @@
 # EduFlaw Lab Demo — hướng dẫn buổi thuyết trình
 
 - **Slide:** https://canva.link/bntwb18xbi8e0g3 (25 slide, bản gốc: `EduFlaw-OWASP2025.pptx`)
-- **Trang demo online:** https://claude.ai/artifact/XCSEMHpM127x3BzVPKkGbq (riêng tư — chủ tài khoản bật Share mới xem được)
+- **Trang demo online (GitHub Pages):** https://luffyreals.github.io/EduFlaw-CSATTT/
 - **Trang demo offline:** nhấp đúp `demo/index.html`. Không cần mạng, không cần cài gì.
 - **Lời dẫn từng slide:** [`NOI-DUNG-THUYET-TRINH.md`](../NOI-DUNG-THUYET-TRINH.md)
 
