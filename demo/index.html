@@ -10,24 +10,32 @@
 try { var t = localStorage.getItem('eduflaw-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
 <style>
-/* Layout: bàn thí nghiệm — thanh tab theo mã OWASP, mỗi tab chia đôi: mô tả + công tắc bên trái, "máy" mô phỏng bên phải */
+/* Thiết kế trực quan: phân tách rõ cột hướng dẫn bên trái & sân khấu mô phỏng bên phải, có sơ đồ luồng dữ liệu sống và banner trạng thái Lỗi / Đã vá */
 :root {
-  --bg: #f3f5f8;
+  --bg: #eef2f7;
+  --bg-subtle: #e3e9f2;
   --panel: #ffffff;
-  --ink: #18202c;
-  --muted: #5a6577;
-  --line: #d9dee7;
-  --accent: #2147a8;
-  --accent-soft: #e4eafb;
-  --vuln: #b42318;
-  --vuln-soft: #fdebe9;
-  --safe: #17723f;
-  --safe-soft: #e3f4ea;
-  --warn: #9a5b00;
-  --warn-soft: #fdf1dc;
-  --term: #111722;
-  --term-ink: #d8e0ee;
-  --term-dim: #8592a8;
+  --panel-2: #f8fafc;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #d6dfe9;
+  --shadow: 0 1px 2px rgb(15 23 42 / .04), 0 10px 24px -12px rgb(15 23 42 / .10);
+  --accent: #1d4ed8;
+  --accent-soft: #e8efff;
+  --accent-line: #bfd3ff;
+  --vuln: #c81e1e;
+  --vuln-soft: #fef2f2;
+  --vuln-line: #fecaca;
+  --safe: #047857;
+  --safe-soft: #ecfdf5;
+  --safe-line: #a7f3d0;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --warn-line: #fde68a;
+  --term: #0c1322;
+  --term-head: #151f33;
+  --term-ink: #e2e8f0;
+  --term-dim: #8392ab;
   --font-display: "Bricolage Grotesque", "Be Vietnam Pro", system-ui, sans-serif;
   --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -35,20 +43,26 @@ try { var t = localStorage.getItem('eduflaw-theme'); if (t === 'light' || t === 
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e131b; --panel: #161d29; --ink: #e6ebf3; --muted: #9aa6b9; --line: #2a3445;
-    --accent: #8aa7ff; --accent-soft: #1c2742;
-    --vuln: #ff8a7d; --vuln-soft: #3a1b1a; --safe: #6fd39b; --safe-soft: #12301f;
-    --warn: #f3b562; --warn-soft: #36290f;
-    --term: #090d13; --term-ink: #d8e0ee; --term-dim: #7e8aa0;
+    --bg: #090e17; --bg-subtle: #101826; --panel: #131c2b; --panel-2: #0f1623;
+    --ink: #f1f5f9; --muted: #94a3b8; --line: #253247;
+    --shadow: 0 2px 10px rgb(0 0 0 / .4);
+    --accent: #7ca2ff; --accent-soft: #172442; --accent-line: #294177;
+    --vuln: #ff8a80; --vuln-soft: #331518; --vuln-line: #6b242a;
+    --safe: #5eead4; --safe-soft: #0c2c24; --safe-line: #175c4b;
+    --warn: #fbbf24; --warn-soft: #2e2008; --warn-line: #6b460a;
+    --term: #060a12; --term-head: #0e1524; --term-ink: #e2e8f0; --term-dim: #7c8ca6;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e131b; --panel: #161d29; --ink: #e6ebf3; --muted: #9aa6b9; --line: #2a3445;
-  --accent: #8aa7ff; --accent-soft: #1c2742;
-  --vuln: #ff8a7d; --vuln-soft: #3a1b1a; --safe: #6fd39b; --safe-soft: #12301f;
-  --warn: #f3b562; --warn-soft: #36290f;
-  --term: #090d13; --term-ink: #d8e0ee; --term-dim: #7e8aa0;
+  --bg: #090e17; --bg-subtle: #101826; --panel: #131c2b; --panel-2: #0f1623;
+  --ink: #f1f5f9; --muted: #94a3b8; --line: #253247;
+  --shadow: 0 2px 10px rgb(0 0 0 / .4);
+  --accent: #7ca2ff; --accent-soft: #172442; --accent-line: #294177;
+  --vuln: #ff8a80; --vuln-soft: #331518; --vuln-line: #6b242a;
+  --safe: #5eead4; --safe-soft: #0c2c24; --safe-line: #175c4b;
+  --warn: #fbbf24; --warn-soft: #2e2008; --warn-line: #6b460a;
+  --term: #060a12; --term-head: #0e1524; --term-ink: #e2e8f0; --term-dim: #7c8ca6;
   color-scheme: dark;
 }
 
@@ -62,237 +76,784 @@ body {
   font: 15px/1.6 var(--font-body);
 }
 .wrap {
-  max-width: 1180px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 56px;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 56px;
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
-/* Đầu trang */
-header.top { display: grid; gap: 10px; }
-.eyebrow {
-  font: 600 12px/1 var(--font-mono);
-  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+/* ===== Đầu trang gọn, rõ cấp bậc ===== */
+header.top {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 12px;
 }
+.eyebrow-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.eyebrow {
+  font: 600 11.5px/1.3 var(--font-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 65%, #0f172a));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+:root[data-theme="dark"] .logo-mark { color: #091020; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo-mark { color: #091020; } }
 h1 {
-  margin: 0; font: 800 clamp(28px, 4.4vw, 44px)/1.08 var(--font-display);
-  letter-spacing: -.01em; text-wrap: balance;
+  margin: 0;
+  font: 800 clamp(24px, 3.2vw, 34px)/1.1 var(--font-display);
+  letter-spacing: -.015em;
 }
 h1 span { color: var(--accent); }
-.lede { margin: 0; max-width: 68ch; color: var(--muted); }
+.lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14.5px;
+  max-width: 78ch;
+}
 .notice {
-  display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;
-  font-size: 13px; color: var(--muted);
+  display: flex;
+  gap: 8px 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
 }
 .chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  font: 600 12px/1 var(--font-mono); padding: 6px 9px; border-radius: 6px;
-  background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 11.5px/1 var(--font-mono);
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-line);
+  white-space: nowrap;
+}
+.chip.progress {
+  background: var(--panel-2);
+  color: var(--ink);
+  border-color: var(--line);
+  margin-left: auto;
+}
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+button.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 13px/1.2 var(--font-body);
+  padding: 8px 11px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  transition: border-color .15s, background-color .15s, transform .1s;
+}
+button.tool:hover { border-color: var(--accent); }
+button.tool[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+kbd {
+  display: inline-block;
+  min-width: 1.55em;
+  text-align: center;
+  font: 600 11px/1 var(--font-mono);
+  padding: 3px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  background: var(--panel);
+  color: var(--ink);
 }
 
-/* Thanh tab */
+/* ===== Thanh tab 5 bài học ===== */
 nav.tabs {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
 }
 nav.tabs a {
-  display: grid; gap: 2px; padding: 12px 14px; border-radius: 10px;
-  text-decoration: none; color: var(--ink); background: var(--panel);
-  border: 1px solid var(--line); min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 13px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  min-width: 0;
+  position: relative;
+  transition: border-color .15s, transform .12s, box-shadow .15s;
 }
-nav.tabs a .code { font: 600 13px/1.2 var(--font-mono); color: var(--accent); }
-nav.tabs a .name { font-weight: 600; font-size: 14px; line-height: 1.3; }
-nav.tabs a .tag { font-size: 12px; color: var(--muted); }
-nav.tabs a[aria-current="page"] { border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+nav.tabs a:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); transform: translateY(-1px); }
+nav.tabs a .tab-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+nav.tabs a .code {
+  font: 700 11.5px/1.2 var(--font-mono);
+  color: var(--accent);
+  letter-spacing: .03em;
+}
+nav.tabs a .name {
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1.25;
+}
+nav.tabs a .tag {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+nav.tabs a[aria-current="page"] {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--panel) 48%);
+  box-shadow: inset 0 -3px 0 var(--accent), var(--shadow);
+}
 nav.tabs a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 3px solid var(--accent); outline-offset: 2px;
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 .new {
-  font: 600 10px/1 var(--font-mono); letter-spacing: .06em; padding: 3px 5px; border-radius: 4px;
-  background: var(--warn-soft); color: var(--warn); margin-left: 6px; vertical-align: 2px;
+  font: 700 9.5px/1 var(--font-mono);
+  letter-spacing: .05em;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  border: 1px solid var(--warn-line);
+  margin-left: 5px;
+  vertical-align: 1px;
+}
+.tab-dots { display: inline-flex; gap: 4px; align-items: center; }
+.tab-dots i {
+  width: 16px; height: 16px; border-radius: 5px;
+  font: 700 9.5px/16px var(--font-mono); font-style: normal; text-align: center;
+  background: var(--bg-subtle); color: var(--muted); border: 1px solid var(--line);
+}
+.tab-dots i.dv[data-done="true"] { background: var(--vuln-soft); color: var(--vuln); border-color: var(--vuln-line); }
+.tab-dots i.ds[data-done="true"] { background: var(--safe-soft); color: var(--safe); border-color: var(--safe-line); }
+
+/* ===== Khung làm việc 2 cột ===== */
+section.lab {
+  display: grid;
+  grid-template-columns: minmax(0, 4.4fr) minmax(0, 7.6fr);
+  gap: 18px;
+  align-items: start;
 }
 
-/* Khung một bài lab */
-section.lab { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+/* Cột trái: Hướng dẫn ngắn gọn, dễ quét */
 .brief {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-  padding: 20px; display: grid; gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 15px;
 }
-.brief h2 { margin: 0; font: 800 24px/1.15 var(--font-display); text-wrap: balance; }
-.brief p { margin: 0; }
-.meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
-.meta dt { color: var(--muted); }
-.meta dd { margin: 0; font-family: var(--font-mono); font-size: 12.5px; overflow-wrap: anywhere; }
-.sev { font-weight: 600; color: var(--vuln); font-family: var(--font-body); font-size: 13px; }
-.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; }
-
-/* Công tắc chế độ */
-.mode { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.mode button {
-  font: 600 14px/1.2 var(--font-body); padding: 11px 10px; border: 0; cursor: pointer;
-  background: var(--panel); color: var(--muted);
+.brief-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.owasp-tag {
+  font: 700 11.5px/1 var(--font-mono);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
-.mode button[aria-pressed="true"][data-mode="vuln"] { background: var(--vuln-soft); color: var(--vuln); }
-.mode button[aria-pressed="true"][data-mode="safe"] { background: var(--safe-soft); color: var(--safe); }
-.mode button + button { border-left: 1px solid var(--line); }
-
+.sev {
+  font: 700 11.5px/1 var(--font-body);
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--vuln-soft);
+  color: var(--vuln);
+  border: 1px solid var(--vuln-line);
+}
+.brief h2 {
+  margin: 0;
+  font: 800 22px/1.2 var(--font-display);
+  text-wrap: balance;
+}
+.story-box {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px 14px;
+  font-size: 14px;
+  display: grid;
+  gap: 6px;
+}
+.story-box .box-label {
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.story-box p { margin: 0; }
+.steps-box { display: grid; gap: 8px; }
+.steps-box .box-label {
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  font-size: 13.8px;
+}
+.steps li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 9px;
+  align-items: start;
+}
+.steps .num {
+  width: 24px; height: 24px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 700 12px/24px var(--font-mono);
+  text-align: center;
+}
+.meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
+  font-size: 12.5px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+.meta dt { color: var(--muted); font-weight: 600; }
+.meta dd { margin: 0; font-family: var(--font-mono); font-size: 12px; overflow-wrap: anywhere; }
 .mantra {
-  margin: 0; padding: 12px 14px; border-radius: 8px; background: var(--accent-soft);
-  font-weight: 600; font-size: 14px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--ink);
+  font-size: 13.5px;
+  display: grid;
+  gap: 4px;
+}
+.mantra strong { color: var(--accent); font-size: 11.5px; font-family: var(--font-mono); letter-spacing: .05em; text-transform: uppercase; }
+
+/* Cột phải: Sân khấu mô phỏng */
+.bench { display: grid; gap: 14px; min-width: 0; }
+
+/* Thanh chuyển đổi Có lỗ hổng <-> Đã vá nổi bật ngay trên sân khấu */
+.mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--vuln-line);
+  background: var(--vuln-soft);
+  box-shadow: var(--shadow);
+  transition: background-color .18s, border-color .18s;
+}
+section.lab[data-active-mode="safe"] .mode-banner {
+  border-color: var(--safe-line);
+  background: var(--safe-soft);
+}
+.mode {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+.mode button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: 700 13.5px/1.2 var(--font-body);
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: background-color .15s, color .15s;
+  white-space: nowrap;
+}
+.mode button[aria-pressed="true"][data-mode="vuln"] {
+  background: var(--vuln);
+  color: #fff;
+}
+.mode button[aria-pressed="true"][data-mode="safe"] {
+  background: var(--safe);
+  color: #fff;
+}
+:root[data-theme="dark"] .mode button[aria-pressed="true"] { color: #091020; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mode button[aria-pressed="true"] { color: #091020; } }
+.mode-desc {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--vuln);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+section.lab[data-active-mode="safe"] .mode-desc { color: var(--safe); }
+
+/* Thẻ mô phỏng */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 13px;
+  align-content: start;
+  min-width: 0;
+}
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+.card h3 {
+  margin: 0;
+  font: 700 13px/1.2 var(--font-mono);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 700 11.5px/1 var(--font-mono);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--bg-subtle);
+  color: var(--muted);
+}
+.badge.vuln { background: var(--vuln-soft); color: var(--vuln); }
+.badge.safe { background: var(--safe-soft); color: var(--safe); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+
+/* Sơ đồ luồng trực quan */
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.15fr);
+  gap: 8px;
+  align-items: stretch;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+}
+.flow-4 {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.1fr);
+}
+.flow-node {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 11px;
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  min-width: 0;
+}
+.flow-node .fn-k {
+  font: 700 10.5px/1.1 var(--font-mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.flow-node .fn-v {
+  font: 700 13px/1.3 var(--font-body);
+  overflow-wrap: anywhere;
+}
+.flow-node .fn-s {
+  font: 500 11.5px/1.3 var(--font-mono);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.flow-node[data-state="bad"] { border-color: var(--vuln-line); background: var(--vuln-soft); }
+.flow-node[data-state="bad"] .fn-v { color: var(--vuln); }
+.flow-node[data-state="ok"] { border-color: var(--safe-line); background: var(--safe-soft); }
+.flow-node[data-state="ok"] .fn-v { color: var(--safe); }
+.flow-node[data-state="warn"] { border-color: var(--warn-line); background: var(--warn-soft); }
+.flow-node[data-state="warn"] .fn-v { color: var(--warn); }
+.flow-arrow {
+  display: grid;
+  place-items: center;
+  font: 700 16px/1 var(--font-mono);
+  color: var(--muted);
+  padding-inline: 2px;
 }
 
-/* Khung máy mô phỏng */
-.bench { display: grid; gap: 14px; min-width: 0; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
-.card h3 { margin: 0; font: 600 13px/1.2 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); flex: 1 1 180px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+label.field { display: grid; gap: 5px; font-size: 13px; font-weight: 600; color: var(--muted); flex: 1 1 200px; min-width: 0; }
 input[type="text"], input[type="password"], select {
-  font: 500 14px/1.2 var(--font-mono); padding: 10px 11px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0;
+  font: 500 14px/1.2 var(--font-mono);
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  width: 100%;
+  min-width: 0;
 }
 button.btn {
-  font: 600 14px/1.2 var(--font-body); padding: 10px 14px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--accent); background: var(--accent); color: #fff; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: 700 14px/1.2 var(--font-body);
+  padding: 11px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  white-space: nowrap;
+  transition: opacity .15s, transform .1s;
 }
-:root[data-theme="dark"] button.btn { color: #0b1020; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.btn { color: #0b1020; } }
+button.btn:hover:not(:disabled) { filter: brightness(1.06); }
+:root[data-theme="dark"] button.btn { color: #091020; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.btn { color: #091020; } }
 button.btn.ghost { background: transparent; color: var(--accent); }
 button.btn:disabled { opacity: .55; cursor: not-allowed; }
 button.pill {
-  font: 500 12.5px/1 var(--font-mono); padding: 7px 9px; border-radius: 6px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  font: 600 12.5px/1.2 var(--font-mono);
+  padding: 8px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  transition: border-color .12s, background-color .12s;
 }
-.switch { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
-.switch input { width: 18px; height: 18px; accent-color: var(--vuln); }
+button.pill:hover { border-color: var(--accent); }
+button.pill[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+button.pill span.hint { font-family: var(--font-body); font-weight: 500; font-size: 11.5px; color: var(--muted); margin-left: 4px; }
 
-pre, .term {
-  margin: 0; font: 12.5px/1.55 var(--font-mono); background: var(--term); color: var(--term-ink);
-  padding: 12px 14px; border-radius: 8px; overflow-x: auto; white-space: pre; min-width: 0;
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  cursor: pointer;
 }
-.term { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 120px; }
+.switch input { width: 17px; height: 17px; accent-color: var(--vuln); cursor: pointer; }
+
+/* Khung code & terminal */
+pre, .term {
+  margin: 0;
+  font: 12.5px/1.55 var(--font-mono);
+  background: var(--term);
+  color: var(--term-ink);
+  padding: 12px 14px;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre;
+  min-width: 0;
+}
+.term { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 108px; }
+.term.compact { min-height: 76px; }
 .term .dim { color: var(--term-dim); }
 .term .bad { color: #ff8f84; }
-.term .ok { color: #7fe0a6; }
-.term .warn { color: #ffc66b; }
-.term .hl { color: #9fb7ff; }
+.term .ok { color: #6ee7b7; }
+.term .warn { color: #fcd34d; }
+.term .hl { color: #93c5fd; }
 
 .verdict {
-  display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px;
-  font-weight: 600; font-size: 14px; border: 1px solid transparent;
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid transparent;
 }
-.verdict[data-tone="bad"] { background: var(--vuln-soft); color: var(--vuln); border-color: color-mix(in srgb, var(--vuln) 30%, transparent); }
-.verdict[data-tone="ok"] { background: var(--safe-soft); color: var(--safe); border-color: color-mix(in srgb, var(--safe) 30%, transparent); }
-.verdict[data-tone="idle"] { background: var(--bg); color: var(--muted); border-color: var(--line); font-weight: 500; }
-.verdict .mark { font-family: var(--font-mono); flex: none; }
+.verdict[data-tone="bad"] { background: var(--vuln-soft); color: var(--vuln); border-color: var(--vuln-line); }
+.verdict[data-tone="ok"] { background: var(--safe-soft); color: var(--safe); border-color: var(--safe-line); }
+.verdict[data-tone="idle"] { background: var(--panel-2); color: var(--muted); border-color: var(--line); font-weight: 500; }
+.verdict .mark {
+  width: 22px; height: 22px; border-radius: 6px;
+  display: grid; place-items: center;
+  font: 700 13px/1 var(--font-mono);
+  flex: none;
+  background: rgb(255 255 255 / .55);
+}
+:root[data-theme="dark"] .verdict .mark { background: rgb(0 0 0 / .25); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .verdict .mark { background: rgb(0 0 0 / .25); } }
 
-/* Code so sánh */
-.diff { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-.diff figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
-.diff figcaption { font: 600 12px/1 var(--font-mono); }
-.diff figure.v figcaption { color: var(--vuln); }
-.diff figure.s figcaption { color: var(--safe); }
-.diff figure.v pre { box-shadow: inset 3px 0 0 #e5534b; }
-.diff figure.s pre { box-shadow: inset 3px 0 0 #3fb873; }
+/* Code diff rõ ràng */
+.diff { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.diff figure {
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--term);
+  min-width: 0;
+}
+.diff figcaption {
+  font: 700 12px/1.2 var(--font-mono);
+  padding: 8px 12px;
+  background: var(--term-head);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(255 255 255 / .08);
+}
+.diff figure.v figcaption { color: #ff8f84; }
+.diff figure.s figcaption { color: #6ee7b7; }
+.diff pre { border-radius: 0; padding: 12px 14px; }
+.diff figure.v pre { box-shadow: inset 4px 0 0 #ef4444; }
+.diff figure.s pre { box-shadow: inset 4px 0 0 #10b981; }
 
 table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-table.data th, table.data td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
-table.data th { font: 600 12px/1.2 var(--font-mono); color: var(--muted); }
+table.data th, table.data td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+table.data th { font: 700 11.5px/1.2 var(--font-mono); color: var(--muted); background: var(--panel-2); text-transform: uppercase; }
 table.data td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.tablewrap { overflow-x: auto; }
-.pii { background: var(--vuln-soft); color: var(--vuln); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.pii { background: var(--vuln-soft); color: var(--vuln); padding: 2px 6px; border-radius: 5px; font-family: var(--font-mono); font-weight: 700; }
 
-.hashes { display: grid; gap: 6px; font: 12px/1.4 var(--font-mono); }
-.hashes div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; }
-.hashes span:last-child { overflow-wrap: anywhere; }
-.match-ok { color: var(--safe); } .match-bad { color: var(--vuln); }
-
-.attempts { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; }
-.attempts i {
-  display: grid; place-items: center; aspect-ratio: 1; max-width: 100%; border-radius: 6px;
-  font: 600 11px/1 var(--font-mono); font-style: normal; background: var(--bg); color: var(--muted); border: 1px solid var(--line);
+.hashes {
+  display: grid;
+  gap: 6px;
+  font: 12px/1.4 var(--font-mono);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
 }
-.attempts i[data-s="fail"] { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
-.attempts i[data-s="lock"] { background: var(--safe-soft); color: var(--safe); border-color: transparent; }
-.attempts i[data-s="win"] { background: var(--vuln); color: #fff; border-color: transparent; }
+.hashes div { display: grid; grid-template-columns: 165px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.hashes span:first-child { color: var(--muted); font-weight: 600; }
+.hashes span:last-child { overflow-wrap: anywhere; }
+.match-ok { color: var(--safe); font-weight: 700; }
+.match-bad { color: var(--vuln); font-weight: 700; }
+
+/* A07 Thống kê & 12 ô mật khẩu */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.stat-box {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 11px;
+  display: grid;
+  gap: 2px;
+}
+.stat-box .sk { font: 600 11px/1.2 var(--font-mono); color: var(--muted); text-transform: uppercase; }
+.stat-box .sv { font: 800 16px/1.2 var(--font-display); }
+.stat-box[data-tone="bad"] .sv { color: var(--vuln); }
+.stat-box[data-tone="ok"] .sv { color: var(--safe); }
+.stat-box[data-tone="warn"] .sv { color: var(--warn); }
+
+.attempts { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 5px; }
+.attempts i {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 8px;
+  font: 700 12px/1 var(--font-mono);
+  font-style: normal;
+  background: var(--panel-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  transition: transform .12s, background-color .12s;
+}
+.attempts i[data-s="fail"] { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-line); }
+.attempts i[data-s="lock"] { background: var(--safe-soft); color: var(--safe); border-color: var(--safe-line); }
+.attempts i[data-s="win"] { background: var(--vuln); color: #fff; border-color: transparent; transform: scale(1.06); }
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; border: 1px solid var(--line); background: var(--panel-2); }
+.legend i.lf { background: var(--warn-soft); border-color: var(--warn-line); }
+.legend i.ll { background: var(--safe-soft); border-color: var(--safe-line); }
+.legend i.lw { background: var(--vuln); border-color: transparent; }
 
 .split2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.col-label { font: 700 12px/1.2 var(--font-mono); color: var(--muted); margin: 0 0 6px; display: flex; align-items: center; justify-content: space-between; }
 .small { font-size: 13px; color: var(--muted); margin: 0; }
-footer { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+footer {
+  font-size: 13px;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+  padding: 6px 4px 0;
+}
 footer code { font-family: var(--font-mono); font-size: 12px; }
-
-/* Thanh tiêu đề và công cụ */
-.titlebar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
-button.tool {
-  display: inline-flex; align-items: center; gap: 8px;
-  font: 600 13px/1.2 var(--font-body); padding: 8px 10px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
-}
-button.tool[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-kbd {
-  display: inline-block; min-width: 1.6em; text-align: center;
-  font: 600 11.5px/1 var(--font-mono); padding: 3px 5px; border-radius: 4px;
-  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--bg); color: var(--ink);
-}
 
 /* Hộp phím tắt */
 dialog#keys {
-  border: 1px solid var(--line); border-radius: 12px; padding: 20px; max-width: min(460px, calc(100vw - 32px));
-  background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+  max-width: min(480px, calc(100vw - 32px));
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
 }
-dialog#keys::backdrop { background: rgb(0 0 0 / .45); }
-dialog#keys h2 { margin: 0 0 10px; font: 800 20px/1.2 var(--font-display); }
+dialog#keys::backdrop { background: rgb(0 0 0 / .52); }
+dialog#keys h2 { margin: 0 0 12px; font: 800 20px/1.2 var(--font-display); }
 dialog#keys table { width: 100%; border-collapse: collapse; font-size: 14px; }
-dialog#keys td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
-dialog#keys td:first-child { white-space: nowrap; width: 1%; padding-right: 12px; }
+dialog#keys td { padding: 7px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+dialog#keys td:first-child { white-space: nowrap; width: 1%; padding-right: 14px; }
 dialog#keys form { margin: 14px 0 0; text-align: right; }
 
 /* Tab tổng kết */
 section.lab.summary { grid-template-columns: minmax(0, 1fr); }
+.summary-wrap { display: grid; gap: 16px; }
 table.sum { width: 100%; border-collapse: collapse; font-size: 14px; }
-table.sum th, table.sum td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid var(--line); }
-table.sum th { font: 600 12px/1.2 var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-table.sum td:first-child a { font: 600 13px/1.3 var(--font-mono); color: var(--accent); text-decoration: none; white-space: nowrap; }
-table.sum .v { color: var(--vuln); } table.sum .s { color: var(--safe); }
+table.sum th, table.sum td { text-align: left; vertical-align: top; padding: 12px 12px; border-bottom: 1px solid var(--line); }
+table.sum th { font: 700 11.5px/1.2 var(--font-mono); color: var(--muted); background: var(--panel-2); text-transform: uppercase; letter-spacing: .04em; }
+table.sum td:first-child a { font: 700 13.5px/1.3 var(--font-mono); color: var(--accent); text-decoration: none; white-space: nowrap; }
+table.sum td:first-child a:hover { text-decoration: underline; }
+table.sum .v { color: var(--vuln); font-weight: 500; }
+table.sum .s { color: var(--safe); font-weight: 500; }
 .status { display: flex; gap: 6px; flex-wrap: wrap; }
-.status span { font: 600 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 4px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
-.status span[data-done="true"].sv { background: var(--vuln-soft); color: var(--vuln); border-color: transparent; }
-.status span[data-done="true"].ss { background: var(--safe-soft); color: var(--safe); border-color: transparent; }
-.lessons { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.status span {
+  font: 700 11.5px/1 var(--font-mono);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.status span[data-done="true"].sv { background: var(--vuln-soft); color: var(--vuln); border-color: var(--vuln-line); }
+.status span[data-done="true"].ss { background: var(--safe-soft); color: var(--safe); border-color: var(--safe-line); }
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.lesson-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+.lesson-card .lc-num { font: 800 12px/1 var(--font-mono); color: var(--accent); text-transform: uppercase; }
+.lesson-card strong { font-size: 14.5px; line-height: 1.3; }
+.lesson-card p { margin: 0; font-size: 13.5px; color: var(--muted); }
 
-/* Chế độ trình chiếu: bỏ phần giới thiệu, thu gọn tab, chữ kết quả to hơn, cột trái dính khi cuộn */
-body.present .wrap { max-width: 1600px; padding-block: 10px 24px; gap: 10px; }
-body.present .eyebrow, body.present .lede, body.present .notice, body.present footer { display: none; }
+/* Chế độ trình chiếu (máy chiếu / thuyết trình) */
+body.present .wrap { max-width: 1580px; padding-block: 10px 26px; gap: 10px; }
+body.present header.top { padding: 10px 16px; gap: 8px; }
+body.present .eyebrow-row, body.present .lede, body.present .notice, body.present footer { display: none; }
 body.present h1 { font-size: 22px; }
-body.present nav.tabs { gap: 6px; }
-body.present nav.tabs a { padding: 7px 10px; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: baseline; }
+body.present .logo-mark { width: 32px; height: 32px; border-radius: 8px; }
+body.present nav.tabs { gap: 8px; }
+body.present nav.tabs a { padding: 8px 12px; gap: 2px; }
 body.present nav.tabs a .tag { display: none; }
-body.present nav.tabs a .name { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-body.present section.lab:not(.summary) { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 14px; }
-body.present .brief { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 16px; gap: 10px; }
+body.present nav.tabs a .name { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.present section.lab:not(.summary) { grid-template-columns: minmax(0, 4.1fr) minmax(0, 7.9fr); gap: 14px; }
+body.present .brief { position: sticky; top: 10px; max-height: calc(100vh - 20px); overflow: auto; padding: 16px; gap: 11px; }
 body.present .brief h2 { font-size: 21px; }
-body.present .bench { gap: 10px; }
-body.present .card { padding: 12px 14px; gap: 10px; }
-body.present .term, body.present pre { font-size: 14px; }
-body.present .term { min-height: 90px; }
-body.present .verdict { font-size: 16px; }
+body.present .bench { gap: 11px; }
+body.present .card { padding: 14px 16px; gap: 11px; }
+body.present .term, body.present pre { font-size: 13.8px; }
+body.present .term { min-height: 86px; }
+body.present .verdict { font-size: 15.5px; }
 body.present table.data, body.present table.sum { font-size: 15px; }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   section.lab, body.present section.lab:not(.summary) { grid-template-columns: minmax(0, 1fr); }
   nav.tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   body.present .brief { position: static; max-height: none; }
+  .flow, .flow-4 { grid-template-columns: minmax(0, 1fr); }
+  .flow-arrow { transform: rotate(90deg); padding-block: 0; }
+  .lessons-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
+  header.top { padding: 14px 16px; }
   nav.tabs, body.present nav.tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   nav.tabs a[data-tab="tong-ket"] { grid-column: 1 / -1; }
-  .titlebar { justify-content: flex-start; }
-  .diff, .split2 { grid-template-columns: minmax(0, 1fr); }
+  .chip.progress { margin-left: 0; }
+  .diff, .split2, .stats-strip { grid-template-columns: minmax(0, 1fr); }
   .attempts { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .hashes div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .hashes div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -318,55 +879,119 @@ body.present table.data, body.present table.sum { font-size: 15px; }
 <div class="wrap">
 
 <header class="top">
-  <div class="eyebrow">Nhóm 7 — Lớp D24CQCE04-B (PTIT Hà Nội) · Cơ sở An toàn thông tin · OWASP Top 10:2025</div>
+  <div class="eyebrow-row">
+    <div class="eyebrow">Nhóm 7 — D24 (PTIT Hà Nội) · Cơ sở An toàn thông tin · OWASP Top 10:2025</div>
+    <span class="chip progress" id="demo-progress">Đã chạy 0/8 chế độ</span>
+  </div>
   <div class="titlebar">
-    <h1>EduFlaw <span>Lab Demo</span></h1>
+    <div class="brand">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <h1>EduFlaw <span>Phòng Lab Mô Phỏng Bảo Mật</span></h1>
+    </div>
     <div class="toolbar">
-      <button class="tool" type="button" id="present-toggle" aria-pressed="false">Chế độ trình chiếu <kbd>P</kbd></button>
+      <button class="tool" type="button" id="present-toggle" aria-pressed="false">Trình chiếu <kbd>P</kbd></button>
       <button class="tool" type="button" id="theme-toggle" title="Đổi giao diện: Tự động (theo máy) → Sáng → Tối">Giao diện: <span id="theme-label">Tự động</span> <kbd>T</kbd></button>
       <button class="tool" type="button" id="keys-open">Phím tắt <kbd>?</kbd></button>
     </div>
   </div>
-  <p class="lede">Bấm thử bốn lỗ hổng nhóm trình bày. Mỗi bài có công tắc <strong>Có lỗ hổng / Đã vá</strong>: chạy bản lỗi trước để thấy hậu quả, rồi chuyển sang bản vá để thấy cùng thao tác bị chặn. Đoạn code "Đã vá" lấy từ nhánh <code>main</code> của EduFlaw.</p>
+  <p class="lede">Thực hành trực tiếp 4 lỗ hổng bảo mật trọng tâm trong EduFlaw. Ở mỗi bài, hãy chạy thử chế độ <strong>Có lỗ hổng</strong> trước để quan sát hậu quả, sau đó bật <strong>Đã vá (main)</strong> để thấy cách hệ thống chặn đứng cuộc tấn công.</p>
   <div class="notice">
-    <span class="chip">MÔ PHỎNG</span>
-    <span>Trang chạy hoàn toàn bằng JavaScript trên trình duyệt, không gọi tới máy chủ hay CSDL nào. Mọi tên, mã sinh viên, CCCD, mật khẩu đều là dữ liệu giả.</span>
+    <span class="chip">AN TOÀN 100%</span>
+    <span>Chạy hoàn toàn trên trình duyệt bằng dữ liệu giả lập — không kết nối tới máy chủ hay cơ sở dữ liệu thật.</span>
   </div>
 </header>
 
-<nav class="tabs" aria-label="Chọn lỗ hổng">
-  <a href="#a01" data-tab="a01"><span class="code">A01:2025</span><span class="name">Broken Access Control</span><span class="tag">IDOR · xem điểm người khác</span></a>
-  <a href="#a03" data-tab="a03"><span class="code">A03:2025<span class="new">MỚI</span></span><span class="name">Supply Chain Failures</span><span class="tag">Thư viện CDN bị đầu độc</span></a>
-  <a href="#a07" data-tab="a07"><span class="code">A07:2025</span><span class="name">Authentication Failures</span><span class="tag">Dội mật khẩu</span></a>
-  <a href="#a10" data-tab="a10"><span class="code">A10:2025<span class="new">MỚI</span></span><span class="name">Exceptional Conditions</span><span class="tag">Lộ lỗi · fail-open</span></a>
-  <a href="#tong-ket" data-tab="tong-ket"><span class="code">TỔNG KẾT</span><span class="name">Kiểm thử → Vá</span><span class="tag">Bảng so sánh 4 lỗ hổng</span></a>
+<nav class="tabs" aria-label="Chọn bài thực hành">
+  <a href="#a01" data-tab="a01">
+    <div class="tab-top"><span class="code">A01:2025</span><span class="tab-dots" aria-hidden="true"><i class="dv" data-done="false" title="Chưa chạy Có lỗ hổng"></i><i class="ds" data-done="false" title="Chưa chạy Đã vá"></i></span></div>
+    <span class="name">1. Xem trộm điểm (IDOR)</span>
+    <span class="tag">Broken Access Control</span>
+  </a>
+  <a href="#a03" data-tab="a03">
+    <div class="tab-top"><span class="code">A03:2025<span class="new">MỚI</span></span><span class="tab-dots" aria-hidden="true"><i class="dv" data-done="false" title="Chưa chạy Có lỗ hổng"></i><i class="ds" data-done="false" title="Chưa chạy Đã vá"></i></span></div>
+    <span class="name">2. Đầu độc thư viện CDN</span>
+    <span class="tag">Supply Chain Failures</span>
+  </a>
+  <a href="#a07" data-tab="a07">
+    <div class="tab-top"><span class="code">A07:2025</span><span class="tab-dots" aria-hidden="true"><i class="dv" data-done="false" title="Chưa chạy Có lỗ hổng"></i><i class="ds" data-done="false" title="Chưa chạy Đã vá"></i></span></div>
+    <span class="name">3. Dò vét mật khẩu</span>
+    <span class="tag">Authentication Failures</span>
+  </a>
+  <a href="#a10" data-tab="a10">
+    <div class="tab-top"><span class="code">A10:2025<span class="new">MỚI</span></span><span class="tab-dots" aria-hidden="true"><i class="dv" data-done="false" title="Chưa chạy Có lỗ hổng"></i><i class="ds" data-done="false" title="Chưa chạy Đã vá"></i></span></div>
+    <span class="name">4. Xử lý lỗi mở toang</span>
+    <span class="tag">Exceptional Conditions</span>
+  </a>
+  <a href="#tong-ket" data-tab="tong-ket">
+    <div class="tab-top"><span class="code">TỔNG KẾT</span></div>
+    <span class="name">Bảng so sánh &amp; Bài học</span>
+    <span class="tag">Kiểm thử → Bản vá (main)</span>
+  </a>
 </nav>
 
 <!-- ================= A01 ================= -->
-<section class="lab" id="tab-a01" data-lab="a01">
+<section class="lab" id="tab-a01" data-lab="a01" data-active-mode="vuln">
   <div class="brief">
-    <h2>IDOR: đổi một con số, đọc điểm của người khác</h2>
-    <dl class="meta">
-      <dt>Vị trí</dt><dd>src/app/controllers/student.py:51 · view_grades()</dd>
-      <dt>Nhánh lỗi</dt><dd>vuln/A01-1</dd>
-      <dt>Mức độ</dt><dd><span class="sev">Cao</span></dd>
-    </dl>
-    <p>Bạn đang đăng nhập bằng tài khoản sinh viên <strong>B24DCAT001</strong> (id 1201). Trang xem điểm nhận thêm tham số <code>student_id</code> trên URL.</p>
-    <ol class="steps">
-      <li>Giữ chế độ <em>Có lỗ hổng</em>, đổi <code>student_id</code> sang B24DCAT002 (id 1202), bấm Gửi.</li>
-      <li>Chuyển sang <em>Đã vá</em>: request vừa rồi tự gửi lại.</li>
-    </ol>
-    <div class="mode" role="group" aria-label="Chế độ A01">
-      <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
-      <button type="button" data-mode="safe" aria-pressed="false">Đã vá</button>
+    <div class="brief-head">
+      <span class="owasp-tag">OWASP A01:2025</span>
+      <span class="sev">Mức độ: Cao</span>
     </div>
-    <p class="mantra">Danh tính lấy từ session, không tin tham số client.</p>
+    <h2>IDOR: đổi 1 con số trên URL để đọc trộm điểm &amp; CCCD</h2>
+    <div class="story-box">
+      <div class="box-label">Tình huống mô phỏng</div>
+      <p>Bạn đang đăng nhập hợp lệ bằng tài khoản sinh viên <strong>B24DCAT001</strong> (<code>id = 1201</code>). Trang xem điểm vô tình nhận thêm tham số <code>?student_id=...</code> ngay trên thanh địa chỉ.</p>
+    </div>
+    <div class="steps-box">
+      <div class="box-label">Cách thực hành nhanh</div>
+      <ol class="steps">
+        <li><span class="num">1</span><span>Ở chế độ <strong>Có lỗ hổng</strong>, chọn sinh viên <code>1202 · B24DCAT002</code> rồi bấm <strong>Gửi request</strong>.</span></li>
+        <li><span class="num">2</span><span>Gạt công tắc sang <strong>Đã vá (main)</strong>: request vừa rồi tự chạy lại để so sánh kết quả.</span></li>
+      </ol>
+    </div>
+    <dl class="meta">
+      <dt>Vị trí mã nguồn</dt><dd><code>src/app/controllers/student.py:51</code> · <code>view_grades()</code></dd>
+      <dt>Nhánh lỗi</dt><dd><code>vuln/A01-1</code></dd>
+    </dl>
+    <p class="mantra"><strong>Nguyên tắc cốt lõi:</strong> <span>Danh tính người dùng luôn lấy từ <code>session</code> trên máy chủ, tuyệt đối không tin ID gửi từ trình duyệt.</span></p>
   </div>
   <div class="bench">
+    <div class="mode-banner">
+      <div class="mode" role="group" aria-label="Chế độ A01">
+        <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
+        <button type="button" data-mode="safe" aria-pressed="false">Đã vá (main)</button>
+      </div>
+      <span class="mode-desc" id="a01-mode-desc">Đang chạy bản lỗi: máy chủ lấy thẳng <code>student_id</code> từ URL.</span>
+    </div>
+
+    <div class="flow" aria-label="Minh họa luồng xử lý A01">
+      <div class="flow-node" data-state="ok">
+        <span class="fn-k">1. Phiên đăng nhập thật</span>
+        <span class="fn-v">B24DCAT001 (id 1201)</span>
+        <span class="fn-s">Đang giữ cookie hợp lệ</span>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-node" id="a01-flow-req" data-state="warn">
+        <span class="fn-k">2. Tham số URL gửi lên</span>
+        <span class="fn-v" id="a01-fn-req-v">?student_id=1202</span>
+        <span class="fn-s" id="a01-fn-req-s">B24DCAT002 · Phạm Thu Hà</span>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-node" id="a01-flow-res">
+        <span class="fn-k">3. Dữ liệu trả về</span>
+        <span class="fn-v" id="a01-fn-res-v">Chưa gửi request</span>
+        <span class="fn-s" id="a01-fn-res-s">Bấm Gửi request bên dưới</span>
+      </div>
+    </div>
+
     <div class="card">
-      <h3>Request</h3>
+      <div class="card-head">
+        <h3>1. Giả lập trình duyệt gửi yêu cầu</h3>
+        <span class="badge warn">Phiên: B24DCAT001 (1201)</span>
+      </div>
       <div class="row">
-        <label class="field" for="a01-sid">student_id trên URL
+        <label class="field" for="a01-sid"><span>Chọn <code>student_id</code> gắn lên URL</span>
           <select id="a01-sid">
             <option value="1201">1201 · B24DCAT001 (chính mình)</option>
             <option value="1202" selected>1202 · B24DCAT002 (sinh viên khác)</option>
@@ -375,19 +1000,24 @@ body.present table.data, body.present table.sum { font-size: 15px; }
         </label>
         <button class="btn" type="button" id="a01-send">Gửi request</button>
       </div>
-      <div class="term" id="a01-req" aria-live="polite"></div>
+      <div class="term compact" id="a01-req" aria-live="polite"></div>
     </div>
+
     <div class="card">
-      <h3>Phản hồi máy chủ</h3>
+      <div class="card-head">
+        <h3>2. Phản hồi từ máy chủ</h3>
+        <span class="badge" id="a01-res-badge">Chờ request</span>
+      </div>
       <div class="verdict" id="a01-verdict" data-tone="idle"><span class="mark">…</span><span>Chưa gửi request.</span></div>
       <div id="a01-out"></div>
     </div>
+
     <div class="diff">
-      <figure class="v"><figcaption>vuln/A01-1</figcaption><pre># VULN A01-1: tin tham số student_id
+      <figure class="v"><figcaption><span>Mã có lỗ hổng (vuln/A01-1)</span><span>Tin tham số client</span></figcaption><pre># VULN A01-1: tin tham số student_id
 sid = request.args.get('student_id') \
       or session['user_id']
 raw_grades = Grade.get_all_grades_by_student(sid)</pre></figure>
-      <figure class="s"><figcaption>main (đã vá)</figcaption><pre># Danh tính chỉ đến từ phiên đã xác thực
+      <figure class="s"><figcaption><span>Mã đã vá (main)</span><span>Lấy từ session</span></figcaption><pre># Danh tính chỉ đến từ phiên đã xác thực
 raw_grades = Grade.get_all_grades_by_student(
     session['user_id'])</pre></figure>
     </div>
@@ -395,72 +1025,120 @@ raw_grades = Grade.get_all_grades_by_student(
 </section>
 
 <!-- ================= A03 ================= -->
-<section class="lab" id="tab-a03" data-lab="a03" hidden>
+<section class="lab" id="tab-a03" data-lab="a03" data-active-mode="vuln" hidden>
   <div class="brief">
-    <h2>Thư viện CDN bị sửa: mã độc chạy trên trang đăng nhập</h2>
-    <dl class="meta">
-      <dt>Vị trí</dt><dd>6 template trong src/app/templates (login, forgot_password, onboarding, ui_macros, dashboard…)</dd>
-      <dt>Phòng thủ</dt><dd>SRI integrity + crossorigin, ghim sweetalert2@11.10.5</dd>
-      <dt>Mức độ</dt><dd><span class="sev">Nghiêm trọng · ảnh hưởng mọi người dùng</span></dd>
-    </dl>
-    <p>Trang đăng nhập EduFlaw tải SweetAlert2 từ CDN. Nếu kẻ tấn công chiếm được CDN hoặc tài khoản npm của tác giả, họ sửa file thư viện. Chuyện này đã xảy ra thật với polyfill.io (2024) và sâu Shai-Hulud trên npm (9/2025).</p>
-    <ol class="steps">
-      <li>Bật <em>CDN bị chiếm</em>, chế độ <em>Có lỗ hổng</em>, bấm Đăng nhập: xem máy chủ của kẻ tấn công nhận được gì.</li>
-      <li>Chuyển <em>Đã vá</em>: trình duyệt tính SHA-256 thật của file và so với mã băm đã ghim.</li>
-    </ol>
-    <div class="mode" role="group" aria-label="Chế độ A03">
-      <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
-      <button type="button" data-mode="safe" aria-pressed="false">Đã vá</button>
+    <div class="brief-head">
+      <span class="owasp-tag">OWASP A03:2025 · MỚI</span>
+      <span class="sev">Mức độ: Nghiêm trọng</span>
     </div>
-    <p class="mantra">Không tin thứ mình không viết: ghim phiên bản, ghim mã băm.</p>
+    <h2>Thư viện CDN bị sửa: mã độc chạy ngay trên trang đăng nhập</h2>
+    <div class="story-box">
+      <div class="box-label">Tình huống thực tế</div>
+      <p>Trang đăng nhập EduFlaw nhúng thư viện SweetAlert2 từ CDN ngoài. Nếu kẻ tấn công chiếm được CDN hoặc tài khoản npm tác giả (như vụ <em>polyfill.io 2024</em> hay sâu <em>Shai-Hulud 9/2025</em>), mọi mật khẩu gõ vào form đều bị gửi trộm.</p>
+    </div>
+    <div class="steps-box">
+      <div class="box-label">Cách thực hành nhanh</div>
+      <ol class="steps">
+        <li><span class="num">1</span><span>Giữ công tắc <em>CDN bị chiếm</em> và chế độ <strong>Có lỗ hổng</strong>, bấm <strong>Đăng nhập</strong> để xem kẻ tấn công thu được gì.</span></li>
+        <li><span class="num">2</span><span>Bật sang <strong>Đã vá (main)</strong>: trình duyệt tự băm SHA-256 thật và chặn ngay file lạ trước khi nó kịp chạy.</span></li>
+      </ol>
+    </div>
+    <dl class="meta">
+      <dt>Vị trí mã nguồn</dt><dd>6 template trong <code>src/app/templates/</code> (<code>login</code>, <code>ui_macros</code>…)</dd>
+      <dt>Cơ chế phòng thủ</dt><dd>Ghim <code>sweetalert2@11.10.5</code> + W3C SRI <code>integrity</code></dd>
+    </dl>
+    <p class="mantra"><strong>Nguyên tắc cốt lõi:</strong> <span>Không mù quáng tin thư viện bên thứ ba: luôn ghim phiên bản cứng và ghim mã băm SHA-256.</span></p>
   </div>
   <div class="bench">
+    <div class="mode-banner">
+      <div class="mode" role="group" aria-label="Chế độ A03">
+        <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
+        <button type="button" data-mode="safe" aria-pressed="false">Đã vá (main)</button>
+      </div>
+      <span class="mode-desc" id="a03-mode-desc">Đang chạy bản lỗi: tải <code>@latest</code> và không kiểm tra chữ ký SRI.</span>
+    </div>
+
+    <div class="flow" aria-label="Minh họa luồng kiểm tra SRI A03">
+      <div class="flow-node" id="a03-flow-cdn" data-state="bad">
+        <span class="fn-k">1. Nguồn CDN tải về</span>
+        <span class="fn-v" id="a03-fn-cdn-v">Bị đầu độc</span>
+        <span class="fn-s" id="a03-fn-cdn-s">sweetalert2@latest</span>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-node" id="a03-flow-sri" data-state="warn">
+        <span class="fn-k">2. Kiểm tra mã băm SRI</span>
+        <span class="fn-v" id="a03-fn-sri-v">Bỏ qua kiểm tra</span>
+        <span class="fn-s" id="a03-fn-sri-s">Thiếu thuộc tính integrity</span>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-node" id="a03-flow-res">
+        <span class="fn-k">3. Hành vi khi đăng nhập</span>
+        <span class="fn-v" id="a03-fn-res-v">Chưa thử đăng nhập</span>
+        <span class="fn-s" id="a03-fn-res-s">Bấm Đăng nhập để xem</span>
+      </div>
+    </div>
+
     <div class="card">
-      <h3>Trang /login (trình duyệt nạn nhân)</h3>
-      <label class="switch" for="a03-tamper"><input type="checkbox" id="a03-tamper" checked> CDN bị chiếm: file sweetalert2 đã bị sửa</label>
+      <div class="card-head">
+        <h3>1. Trang /login (trình duyệt nạn nhân)</h3>
+        <span class="badge vuln" id="a03-sri-badge">SRI: Tắt</span>
+      </div>
+      <label class="switch" for="a03-tamper"><input type="checkbox" id="a03-tamper" checked><span>Giả lập CDN bị chiếm: file <code>sweetalert2</code> đã bị chèn mã đánh cắp mật khẩu</span></label>
       <pre id="a03-tag"></pre>
       <div class="split2">
-        <label class="field" for="a03-user">Email
+        <label class="field" for="a03-user">Email đăng nhập
           <input type="text" id="a03-user" value="b24dcat001@eduflaw.com" autocomplete="off">
         </label>
-        <label class="field" for="a03-pass">Mật khẩu (giả)
+        <label class="field" for="a03-pass">Mật khẩu (giả lập)
           <input type="password" id="a03-pass" value="Demo-MatKhau-2025" autocomplete="off">
         </label>
       </div>
-      <div class="row"><button class="btn" type="button" id="a03-login">Đăng nhập</button></div>
-      <p class="small">Mã băm trong demo được tính từ một file thư viện mô phỏng nên khác mã băm thật của SweetAlert2 trong code bên dưới. Phép tính SHA-256 là thật, do trình duyệt thực hiện.</p>
+      <div class="row"><button class="btn" type="button" id="a03-login">Đăng nhập trên /login</button></div>
+      <p class="small">Mã băm bên dưới được tính bằng hàm <strong>SHA-256 thật</strong> ngay trên trình duyệt từ nội dung file JS mô phỏng — lệch 1 byte là sai khác hoàn toàn.</p>
       <div class="hashes" id="a03-hash"></div>
       <div class="verdict" id="a03-verdict" data-tone="idle"><span class="mark">…</span><span>Chưa tải trang.</span></div>
     </div>
+
     <div class="split2">
       <div class="card">
-        <h3>Console trình duyệt</h3>
-        <div class="term" id="a03-console"></div>
+        <div class="card-head">
+          <h3>2. Console trình duyệt</h3>
+          <span class="badge">Nhật ký JS</span>
+        </div>
+        <div class="term compact" id="a03-console"></div>
       </div>
       <div class="card">
-        <h3>Máy chủ kẻ tấn công</h3>
-        <div class="term" id="a03-evil"></div>
+        <div class="card-head">
+          <h3>3. Máy chủ kẻ tấn công</h3>
+          <span class="badge warn">evil.example</span>
+        </div>
+        <div class="term compact" id="a03-evil"></div>
       </div>
     </div>
+
     <div class="card">
-      <h3>Phía máy chủ: pip install</h3>
-      <p class="small">Cùng nguyên tắc với gói Python. Giả định kẻ tấn công vừa đẩy một bản Flask độc lên PyPI (số phiên bản 99.0.0 là giả định).</p>
-      <div class="term" id="a03-pip"></div>
+      <div class="card-head">
+        <h3>4. Phía máy chủ Python: khóa chặt <code>requirements.txt</code></h3>
+        <span class="badge" id="a03-pip-badge">Chưa ghim ==</span>
+      </div>
+      <p class="small">Nguyên tắc tương tự với gói thư viện Python: giả sử kẻ tấn công vừa đẩy bản <code>Flask 99.0.0</code> chứa mã độc lên kho PyPI.</p>
+      <div class="term compact" id="a03-pip"></div>
     </div>
+
     <div class="diff">
-      <figure class="v"><figcaption>bản lỗi</figcaption><pre>&lt;script src="https://cdn.jsdelivr.net/npm/
+      <figure class="v"><figcaption><span>Mã có lỗ hổng (bản cũ)</span><span>Tải @latest, không SRI</span></figcaption><pre>&lt;script src="https://cdn.jsdelivr.net/npm/
   sweetalert2@latest/dist/sweetalert2.all.min.js"&gt;
 &lt;/script&gt;
 
 # requirements.txt
 Flask
 cryptography&gt;=40</pre></figure>
-      <figure class="s"><figcaption>main (đã vá)</figcaption><pre>&lt;script src="https://cdn.jsdelivr.net/npm/
+      <figure class="s"><figcaption><span>Mã đã vá (main)</span><span>Ghim phiên bản + SRI</span></figcaption><pre>&lt;script src="https://cdn.jsdelivr.net/npm/
   sweetalert2@11.10.5/dist/sweetalert2.all.min.js"
   integrity="sha256-+0Qf8IHMJWuYlZ2lQDBrF1+2aigIRZXEdSvegtELo2I="
   crossorigin="anonymous"&gt;&lt;/script&gt;
 
-# requirements.txt
+# requirements.txt (10/10 gói dùng ==)
 Flask==3.1.3
 cryptography==50.0.2</pre></figure>
     </div>
@@ -468,162 +1146,268 @@ cryptography==50.0.2</pre></figure>
 </section>
 
 <!-- ================= A07 ================= -->
-<section class="lab" id="tab-a07" data-lab="a07" hidden>
+<section class="lab" id="tab-a07" data-lab="a07" data-active-mode="vuln" hidden>
   <div class="brief">
-    <h2>Dội mật khẩu: không giới hạn thì sớm muộn cũng đoán trúng</h2>
-    <dl class="meta">
-      <dt>Vị trí</dt><dd>src/app/controllers/auth.py:15 · LOGIN_MAX_ATTEMPTS</dd>
-      <dt>Nhánh lỗi</dt><dd>vuln/A07-1</dd>
-      <dt>Mức độ</dt><dd><span class="sev">Cao</span></dd>
-    </dl>
-    <p>Kẻ tấn công thử lần lượt 12 mật khẩu phổ biến vào tài khoản <strong>b24dcat001@eduflaw.com</strong>. Mật khẩu đúng (giả) nằm ở vị trí thứ 12.</p>
-    <ol class="steps">
-      <li><em>Có lỗ hổng</em>: bấm Dội mật khẩu, đếm số lần bị khóa.</li>
-      <li>Chuyển <em>Đã vá</em>: cuộc tấn công tự chạy lại, lần sai thứ 5 kích hoạt khóa, sau đó máy chủ trả 429.</li>
-    </ol>
-    <div class="mode" role="group" aria-label="Chế độ A07">
-      <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
-      <button type="button" data-mode="safe" aria-pressed="false">Đã vá</button>
+    <div class="brief-head">
+      <span class="owasp-tag">OWASP A07:2025</span>
+      <span class="sev">Mức độ: Cao</span>
     </div>
-    <p class="mantra">Khóa sau 5 lần sai theo IP và tài khoản; đổi mật khẩu thu hồi mọi phiên.</p>
+    <h2>Dò vét mật khẩu: không giới hạn lần thử thì sớm muộn cũng lọt</h2>
+    <div class="story-box">
+      <div class="box-label">Tình huống mô phỏng</div>
+      <p>Kẻ tấn công dùng công cụ tự động thử lần lượt <strong>12 mật khẩu phổ biến</strong> vào tài khoản <code>b24dcat001@eduflaw.com</code>. Mật khẩu đúng (giả lập) nằm ở lượt thử cuối cùng (lượt 12).</p>
+    </div>
+    <div class="steps-box">
+      <div class="box-label">Cách thực hành nhanh</div>
+      <ol class="steps">
+        <li><span class="num">1</span><span>Ở chế độ <strong>Có lỗ hổng</strong>, bấm <strong>Dội mật khẩu</strong> để xem kẻ tấn công thử trơn tru tới lần 12.</span></li>
+        <li><span class="num">2</span><span>Gạt sang <strong>Đã vá (main)</strong>: hệ thống tự chạy lại và khóa cứng sau lần sai thứ 5 (HTTP 429).</span></li>
+      </ol>
+    </div>
+    <dl class="meta">
+      <dt>Vị trí mã nguồn</dt><dd><code>src/app/controllers/auth.py:15</code> · <code>LOGIN_MAX_ATTEMPTS</code></dd>
+      <dt>Nhánh lỗi</dt><dd><code>vuln/A07-1</code></dd>
+    </dl>
+    <p class="mantra"><strong>Nguyên tắc cốt lõi:</strong> <span>Khóa kép theo cả IP lẫn tài khoản sau 5 lần sai (60 giây); đổi mật khẩu thu hồi ngay mọi phiên cũ bằng <code>pw_fp</code>.</span></p>
   </div>
   <div class="bench">
+    <div class="mode-banner">
+      <div class="mode" role="group" aria-label="Chế độ A07">
+        <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
+        <button type="button" data-mode="safe" aria-pressed="false">Đã vá (main)</button>
+      </div>
+      <span class="mode-desc" id="a07-mode-desc">Đang chạy bản lỗi: <code>LOGIN_MAX_ATTEMPTS = 10⁹</code> (thực tế không giới hạn).</span>
+    </div>
+
     <div class="card">
-      <h3>Công cụ tấn công</h3>
+      <div class="card-head">
+        <h3>Công cụ dò mật khẩu tự động (12 lượt thử)</h3>
+        <span class="badge warn" id="a07-target-badge">Mục tiêu: b24dcat001@eduflaw.com</span>
+      </div>
       <div class="row">
-        <button class="btn" type="button" id="a07-run">Dội mật khẩu</button>
+        <button class="btn" type="button" id="a07-run">Chạy 12 lượt dội mật khẩu</button>
         <button class="btn ghost" type="button" id="a07-reset">Làm lại</button>
       </div>
-      <div class="attempts" id="a07-grid" aria-hidden="true"></div>
-      <div class="term" id="a07-log" aria-live="polite"></div>
+
+      <div class="stats-strip" aria-live="polite">
+        <div class="stat-box"><span class="sk">Lượt đã gửi</span><span class="sv" id="a07-stat-tried">0 / 12</span></div>
+        <div class="stat-box"><span class="sk">Sai được xử lý</span><span class="sv" id="a07-stat-fails">0</span></div>
+        <div class="stat-box" id="a07-stat-blk-box"><span class="sk">Bị chặn (429)</span><span class="sv" id="a07-stat-blocked">0</span></div>
+        <div class="stat-box" id="a07-stat-st-box"><span class="sk">Trạng thái tài khoản</span><span class="sv" id="a07-stat-state">Sẵn sàng</span></div>
+      </div>
+
+      <div class="attempts" id="a07-grid" aria-label="Tiến trình 12 lượt thử"></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lf"></i>Sai mật khẩu (xử lý)</span>
+        <span><i class="ll"></i>Bị khóa / HTTP 429</span>
+        <span><i class="lw"></i>Đoán trúng mật khẩu!</span>
+      </div>
+
+      <div class="term compact" id="a07-log" aria-live="polite"></div>
       <div class="verdict" id="a07-verdict" data-tone="idle"><span class="mark">…</span><span>Chưa tấn công.</span></div>
     </div>
+
     <div class="diff">
-      <figure class="v"><figcaption>vuln/A07-1</figcaption><pre>LOGIN_MAX_ATTEMPTS = 10**9
+      <figure class="v"><figcaption><span>Mã có lỗ hổng (vuln/A07-1)</span><span>Không giới hạn</span></figcaption><pre>LOGIN_MAX_ATTEMPTS = 10**9
 # thực tế không bao giờ khóa</pre></figure>
-      <figure class="s"><figcaption>main (đã vá)</figcaption><pre>LOGIN_MAX_ATTEMPTS = 5
+      <figure class="s"><figcaption><span>Mã đã vá (main)</span><span>Khóa kép IP + User</span></figcaption><pre>LOGIN_MAX_ATTEMPTS = 5
 LOGIN_LOCKOUT_SECONDS = 60
 # khóa theo cả "ip:..." và "user:..."
-# lưu ở bảng login_attempts</pre></figure>
+# lưu vết tại bảng login_attempts</pre></figure>
     </div>
   </div>
 </section>
 
 <!-- ================= A10 ================= -->
-<section class="lab" id="tab-a10" data-lab="a10" hidden>
+<section class="lab" id="tab-a10" data-lab="a10" data-active-mode="vuln" hidden>
   <div class="brief">
-    <h2>Xử lý lỗi sai: lộ nội tạng và mở cửa khi hệ thống trục trặc</h2>
-    <dl class="meta">
-      <dt>Vị trí 1</dt><dd>src/app/controllers/admin.py · /admin/grades/api/auto-save</dd>
-      <dt>Vị trí 2</dt><dd>src/app/models/user_model.py:80 · is_account_active()</dd>
-      <dt>Vị trí 3</dt><dd>src/app/utils/error_pages.py</dd>
-      <dt>Mức độ</dt><dd><span class="sev">Cao</span></dd>
-    </dl>
-    <p><strong>Thí nghiệm 1:</strong> gửi giá trị điểm dị dạng để ép máy chủ lỗi. <strong>Thí nghiệm 2:</strong> tài khoản đã bị Master khóa, kẻ tấn công vẫn giữ cookie phiên cũ và làm CSDL quá tải.</p>
-    <div class="mode" role="group" aria-label="Chế độ A10">
-      <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
-      <button type="button" data-mode="safe" aria-pressed="false">Đã vá</button>
+    <div class="brief-head">
+      <span class="owasp-tag">OWASP A10:2025 · MỚI</span>
+      <span class="sev">Mức độ: Cao</span>
     </div>
-    <p class="mantra">Lỗi thì đóng, không mở. Người dùng thấy câu chung, log giữ chi tiết.</p>
+    <h2>Xử lý lỗi sai: lộ thông tin nội bộ &amp; tự mở cửa khi sự cố</h2>
+    <div class="story-box">
+      <div class="box-label">Hai kịch bản mô phỏng</div>
+      <p><strong>Thí nghiệm 1:</strong> gửi giá trị điểm dị dạng để ép máy chủ văng ngoại lệ. <strong>Thí nghiệm 2:</strong> tài khoản đã bị Master khóa, nhưng kẻ tấn công vẫn giữ cookie phiên cũ và làm CSDL quá tải.</p>
+    </div>
+    <div class="steps-box">
+      <div class="box-label">Cách thực hành nhanh</div>
+      <ol class="steps">
+        <li><span class="num">1</span><span>Chọn các nút dữ liệu dị dạng như <code>abc</code>, <code>nan</code>, <code>15</code> ở chế độ <strong>Có lỗ hổng</strong> rồi chuyển <strong>Đã vá</strong>.</span></li>
+        <li><span class="num">2</span><span>Giữ công tắc <em>CSDL gặp sự cố</em> và bấm <strong>Thử truy cập bằng phiên cũ</strong> để xem <em>fail-open</em> vs <em>fail-closed</em>.</span></li>
+      </ol>
+    </div>
+    <dl class="meta">
+      <dt>Vị trí 1 (Nhập liệu)</dt><dd><code>admin.py</code> · <code>/admin/grades/api/auto-save</code></dd>
+      <dt>Vị trí 2 (Fail-closed)</dt><dd><code>user_model.py:80</code> · <code>is_account_active()</code></dd>
+      <dt>Vị trí 3 (Trang lỗi)</dt><dd><code>src/app/utils/error_pages.py</code></dd>
+    </dl>
+    <p class="mantra"><strong>Nguyên tắc cốt lõi (Fail-Closed):</strong> <span>Gặp sự cố thì đóng cửa từ chối phục vụ, không mở cho qua. Người dùng chỉ thấy thông báo chung; chi tiết lưu vào log.</span></p>
   </div>
   <div class="bench">
+    <div class="mode-banner">
+      <div class="mode" role="group" aria-label="Chế độ A10">
+        <button type="button" data-mode="vuln" aria-pressed="true">Có lỗ hổng</button>
+        <button type="button" data-mode="safe" aria-pressed="false">Đã vá (main)</button>
+      </div>
+      <span class="mode-desc" id="a10-mode-desc">Đang chạy bản lỗi: phơi bày <code>Exception</code> ra JSON và mở cửa (<code>return True</code>) khi CSDL lỗi.</span>
+    </div>
+
     <div class="card">
-      <h3>Thí nghiệm 1 · ép lỗi để đọc thông tin</h3>
+      <div class="card-head">
+        <h3>Thí nghiệm 1 · Ép lỗi qua dữ liệu điểm dị dạng</h3>
+        <span class="badge warn" id="a10-t1-badge">Chưa gửi payload</span>
+      </div>
+      <p class="small">Bấm chọn giá trị điểm để gửi vào API lưu điểm:</p>
       <div class="row" id="a10-payloads">
-        <button class="pill" type="button" data-v="8.5">8.5</button>
-        <button class="pill" type="button" data-v="abc">abc</button>
-        <button class="pill" type="button" data-v="nan">nan</button>
-        <button class="pill" type="button" data-v="1e999">1e999</button>
-        <button class="pill" type="button" data-v="15">15</button>
+        <button class="pill" type="button" data-v="8.5" aria-pressed="false">8.5 <span class="hint">· Hợp lệ</span></button>
+        <button class="pill" type="button" data-v="abc" aria-pressed="false">abc <span class="hint">· Chữ</span></button>
+        <button class="pill" type="button" data-v="nan" aria-pressed="false">nan <span class="hint">· NaN</span></button>
+        <button class="pill" type="button" data-v="1e999" aria-pressed="false">1e999 <span class="hint">· Vô cực</span></button>
+        <button class="pill" type="button" data-v="15" aria-pressed="false">15 <span class="hint">· Quá 10</span></button>
       </div>
       <div class="split2">
-        <div><p class="small">Trình duyệt kẻ tấn công thấy</p><div class="term" id="a10-client"></div></div>
-        <div><p class="small">Log phía máy chủ (chỉ quản trị đọc)</p><div class="term" id="a10-server"></div></div>
+        <div>
+          <div class="col-label">Trình duyệt nhận được (Kẻ tấn công thấy)</div>
+          <div class="term compact" id="a10-client"></div>
+        </div>
+        <div>
+          <div class="col-label">Log máy chủ (Chỉ quản trị đọc)</div>
+          <div class="term compact" id="a10-server"></div>
+        </div>
       </div>
-      <div class="verdict" id="a10-verdict1" data-tone="idle"><span class="mark">…</span><span>Chọn một giá trị để gửi.</span></div>
+      <div class="verdict" id="a10-verdict1" data-tone="idle"><span class="mark">…</span><span>Chọn một giá trị điểm ở trên để gửi.</span></div>
     </div>
+
     <div class="card">
-      <h3>Thí nghiệm 2 · fail-open khi CSDL lỗi</h3>
-      <p class="small">Tài khoản <code>b24dcat009@eduflaw.com</code> đã bị khóa (<code>is_active = 0</code>). Kẻ tấn công còn giữ cookie phiên từ trước.</p>
-      <div class="row">
-        <label class="switch" for="a10-dbdown"><input type="checkbox" id="a10-dbdown" checked> CSDL gặp sự cố (quá tải, truy vấn timeout)</label>
-        <button class="btn" type="button" id="a10-access">GET /student/grades bằng phiên cũ</button>
+      <div class="card-head">
+        <h3>Thí nghiệm 2 · Fail-Open vs Fail-Closed khi CSDL sự cố</h3>
+        <span class="badge warn" id="a10-t2-badge">Phiên cũ · is_active=0</span>
       </div>
-      <div class="term" id="a10-trace"></div>
+      <p class="small">Tài khoản <code>b24dcat009@eduflaw.com</code> đã bị quản trị khóa (<code>is_active = 0</code>), nhưng kẻ tấn công vẫn giữ cookie phiên từ trước.</p>
+      <div class="row">
+        <label class="switch" for="a10-dbdown"><input type="checkbox" id="a10-dbdown" checked><span>CSDL gặp sự cố (quá tải / truy vấn timeout)</span></label>
+        <button class="btn" type="button" id="a10-access">Thử GET /student/grades bằng phiên cũ</button>
+      </div>
+
+      <div class="flow flow-4" aria-label="Minh họa luồng Fail-Closed A10">
+        <div class="flow-node" data-state="warn">
+          <span class="fn-k">1. Cookie phiên</span>
+          <span class="fn-v">Chữ ký còn hạn</span>
+          <span class="fn-s">Tài khoản đã khóa</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-node" id="a10-flow-db" data-state="warn">
+          <span class="fn-k">2. Hỏi CSDL</span>
+          <span class="fn-v" id="a10-fn-db-v">Quá tải / Timeout</span>
+          <span class="fn-s" id="a10-fn-db-s">Mất kết nối DB</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-node" id="a10-flow-ex" data-state="bad">
+          <span class="fn-k">3. Nhánh except:</span>
+          <span class="fn-v" id="a10-fn-ex-v">return True</span>
+          <span class="fn-s" id="a10-fn-ex-s">Lỗi → cho qua (Fail-Open)</span>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-node" id="a10-flow-res">
+          <span class="fn-k">4. Kết quả</span>
+          <span class="fn-v" id="a10-fn-res-v">Chưa kiểm tra</span>
+          <span class="fn-s" id="a10-fn-res-s">Bấm nút ở trên</span>
+        </div>
+      </div>
+
+      <div class="term compact" id="a10-trace"></div>
       <div class="verdict" id="a10-verdict2" data-tone="idle"><span class="mark">…</span><span>Chưa truy cập.</span></div>
     </div>
+
     <div class="diff">
-      <figure class="v"><figcaption>bản lỗi</figcaption><pre>parsed_value = float(raw_value)  # không bắt lỗi
+      <figure class="v"><figcaption><span>Mã có lỗ hổng</span><span>Fail-open &amp; Lộ lỗi</span></figcaption><pre>parsed_value = float(raw_value)  # không bắt lỗi
 ...
 def is_account_active(cls, user_id, role, fp=None):
     try:
         ...
     except Exception:
-        return True   # lỗi thì cho qua</pre></figure>
-      <figure class="s"><figcaption>main (đã vá)</figcaption><pre>try:
+        return True   # lỗi thì mở cửa cho qua</pre></figure>
+      <figure class="s"><figcaption><span>Mã đã vá (main)</span><span>Fail-closed &amp; Ẩn trace</span></figcaption><pre>try:
     parsed_value = float(raw_value)
 except (TypeError, ValueError):
     return jsonify({'success': False,
       'message': 'Điểm số phải là số hợp lệ.'}), 400
 ...
     except Exception:
-        return False  # lỗi CSDL =&gt; từ chối</pre></figure>
+        return False  # lỗi CSDL =&gt; đóng cửa từ chối</pre></figure>
     </div>
   </div>
 </section>
 
 <!-- ================= TỔNG KẾT ================= -->
 <section class="lab summary" id="tab-tong-ket" data-lab="tong-ket" hidden>
-  <div class="brief">
-    <h2>Kiểm thử → Lỗ hổng → Phòng thủ</h2>
-    <p>Mỗi lỗ hổng tìm ra trên EduFlaw đều có bằng chứng, bản vá trên <code>main</code> và bài demo ở trên. Cột cuối đánh dấu những chế độ đã chạy trong buổi này.</p>
+  <div class="summary-wrap">
+    <div class="brief-head">
+      <span class="owasp-tag">TỔNG HỢP OWASP TOP 10:2025</span>
+      <span class="badge safe" id="sum-progress-badge">0 / 8 chế độ đã thử</span>
+    </div>
+    <h2>Từ Kiểm thử (Pentest) → Lỗ hổng → Bản vá (main)</h2>
+    <p class="small">Mỗi lỗ hổng trong EduFlaw đều có bằng chứng kiểm thử, bài mô phỏng trực tiếp ở trên và bản vá trên nhánh <code>main</code>. Cột bên phải tự động sáng lên khi bạn đã chạy đủ cả hai chế độ.</p>
     <div class="tablewrap">
       <table class="sum">
-        <thead><tr><th>Bài</th><th>Cách tìm ra</th><th>Bản lỗi</th><th>Phòng thủ ở main</th><th>Đã demo</th></tr></thead>
+        <thead><tr><th>Bài thực hành</th><th>Cách phát hiện</th><th>Hậu quả (Có lỗ hổng)</th><th>Cơ chế phòng thủ (main)</th><th>Đã chạy</th></tr></thead>
         <tbody>
           <tr>
-            <td><a href="#a01">A01 IDOR</a></td>
-            <td>Soi mã, đổi tham số <code>student_id</code></td>
-            <td class="v">Đổi một con số là đọc được điểm và CCCD người khác</td>
-            <td class="s">Danh tính lấy từ <code>session['user_id']</code>, kiểm quyền sở hữu mỗi request</td>
+            <td><a href="#a01">A01 · Xem trộm điểm (IDOR)</a></td>
+            <td>Rà soát mã &amp; sửa tham số <code>?student_id=</code></td>
+            <td class="v">Đổi 1 con số trên URL là đọc được điểm và CCCD sinh viên khác</td>
+            <td class="s">Neo danh tính vào <code>session['user_id']</code>, kiểm tra quyền sở hữu mỗi request</td>
             <td><div class="status" data-lab="a01"><span class="sv">Lỗi</span><span class="ss">Vá</span></div></td>
           </tr>
           <tr>
-            <td><a href="#a03">A03 Supply Chain</a></td>
-            <td>Rà <code>requirements.txt</code> và thẻ <code>&lt;script&gt;</code> CDN</td>
-            <td class="v">Thư viện CDN bị sửa gửi mật khẩu ra ngoài; pip kéo bản độc</td>
-            <td class="s">Ghim phiên bản, SRI <code>integrity</code> + <code>crossorigin</code>, 10 gói ghim <code>==</code></td>
+            <td><a href="#a03">A03 · Đầu độc chuỗi cung ứng</a></td>
+            <td>Kiểm tra <code>requirements.txt</code> và thẻ <code>&lt;script&gt;</code> CDN</td>
+            <td class="v">CDN bị sửa gửi trộm mật khẩu; <code>pip</code> kéo gói giả mạo phiên bản cao</td>
+            <td class="s">Ghim phiên bản cứng, bật W3C SRI <code>integrity</code> + <code>crossorigin</code>, 10/10 gói ghim <code>==</code></td>
             <td><div class="status" data-lab="a03"><span class="sv">Lỗi</span><span class="ss">Vá</span></div></td>
           </tr>
           <tr>
-            <td><a href="#a07">A07 Brute-force</a></td>
-            <td>Fuzzing form đăng nhập</td>
-            <td class="v">Thử mật khẩu không giới hạn, đoán trúng ở lần 12</td>
-            <td class="s">Khóa sau 5 lần sai theo IP và tài khoản, trả 429</td>
+            <td><a href="#a07">A07 · Dò vét mật khẩu</a></td>
+            <td>Fuzzing / Brute-force biểu mẫu <code>/login</code></td>
+            <td class="v">Thử mật khẩu không giới hạn, công cụ tự động đoán trúng ở lượt 12</td>
+            <td class="s">Khóa kép theo IP và tài khoản sau 5 lần sai (60 giây), trả HTTP 429; đổi mật khẩu thu hồi phiên</td>
             <td><div class="status" data-lab="a07"><span class="sv">Lỗi</span><span class="ss">Vá</span></div></td>
           </tr>
           <tr>
-            <td><a href="#a10">A10 Exceptional</a></td>
-            <td>Fuzzing payload dị dạng, giả lập CSDL lỗi</td>
-            <td class="v">Lộ stack trace và câu SQL; tài khoản đã khóa vẫn vào được</td>
-            <td class="s">Fail-closed, trả 400 với câu chung, rollback, chi tiết chỉ ghi log</td>
+            <td><a href="#a10">A10 · Xử lý lỗi mở toang</a></td>
+            <td>Gửi payload dị dạng &amp; giả lập CSDL timeout</td>
+            <td class="v">Lộ Stack Trace/SQL ra JSON; tài khoản đã bị khóa vẫn truy cập được khi DB quá tải</td>
+            <td class="s">Nguyên tắc Fail-Closed: trả 400 thông báo chung, rollback, từ chối khi lỗi DB, chi tiết ghi log</td>
             <td><div class="status" data-lab="a10"><span class="sv">Lỗi</span><span class="ss">Vá</span></div></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <h2>Ba bài học</h2>
-    <ol class="lessons">
-      <li>Kiểm quyền ở máy chủ trong mọi request, không tin tham số client gửi lên.</li>
-      <li>Mã mình viết an toàn chưa đủ: thư viện người khác viết cũng là bề mặt tấn công.</li>
-      <li>Lỗi chắc chắn sẽ xảy ra: thiết kế để khi lỗi thì hệ thống đóng lại, không mở ra.</li>
-    </ol>
+    <h2>3 Bài học cốt lõi</h2>
+    <div class="lessons-grid">
+      <div class="lesson-card">
+        <span class="lc-num">BÀI HỌC 01</span>
+        <strong>Không bao giờ tin dữ liệu từ trình duyệt</strong>
+        <p>Danh tính và quyền truy cập phải được xác minh lại ở máy chủ trên từng request dựa vào phiên đã xác thực.</p>
+      </div>
+      <div class="lesson-card">
+        <span class="lc-num">BÀI HỌC 02</span>
+        <strong>Code mình sạch vẫn chưa đủ</strong>
+        <p>Thư viện CDN ngoài và gói cài đặt từ kho công cộng đều là bề mặt tấn công — hãy ghim phiên bản và chữ ký SHA-256.</p>
+      </div>
+      <div class="lesson-card">
+        <span class="lc-num">BÀI HỌC 03</span>
+        <strong>Lỗi chắc chắn sẽ xảy ra — hãy Fail-Closed</strong>
+        <p>Khi ngoại lệ hoặc quá tải xảy ra, hệ thống phải đóng lại để an toàn, giữ chi tiết trong log và chỉ báo lỗi chung cho người dùng.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <footer>
   <span>EduFlaw · Nhóm 7 (D24CQCE04-B, PTIT Hà Nội) · Tùng · Đức · Tú · Khang · GVHD: ThS. Đỗ Xuân Chợ</span>
-  <span>Mở nhanh từng bài bằng <code>#a01</code>, <code>#a03</code>, <code>#a07</code>, <code>#a10</code>, <code>#tong-ket</code> ở cuối đường dẫn; thêm <code>?present</code> để mở sẵn chế độ trình chiếu. Mã lỗi thật nằm trên các nhánh <code>vuln/*</code> riêng tư, không công khai.</span>
+  <span>Mở nhanh: <code>#a01</code>, <code>#a03</code>, <code>#a07</code>, <code>#a10</code>, <code>#tong-ket</code> · Thêm <code>?present</code> để trình chiếu · Mã lỗi nằm trên nhánh <code>vuln/*</code> riêng tư.</span>
 </footer>
 
 <dialog id="keys" aria-labelledby="keys-title">
@@ -666,12 +1450,50 @@ except (TypeError, ValueError):
   function reveal(el) {
     if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
   }
-  // Ghi nhận bài đã chạy ở chế độ nào, hiển thị ở tab Tổng kết
+  const MODE_DESC = {
+    a01: {
+      vuln: 'Đang chạy bản lỗi: máy chủ lấy thẳng <code>?student_id=</code> từ URL thay vì <code>session</code>.',
+      safe: 'Đang chạy bản đã vá (main): bỏ qua URL, luôn lấy danh tính từ <code>session[\'user_id\']</code>.'
+    },
+    a03: {
+      vuln: 'Đang chạy bản lỗi: tải <code>@latest</code> từ CDN và không có kiểm tra toàn vẹn SRI.',
+      safe: 'Đang chạy bản đã vá (main): ghim <code>11.10.5</code> + kiểm tra mã băm SHA-256 (W3C SRI).'
+    },
+    a07: {
+      vuln: 'Đang chạy bản lỗi: <code>LOGIN_MAX_ATTEMPTS = 10⁹</code> (thực tế không giới hạn số lần thử).',
+      safe: 'Đang chạy bản đã vá (main): khóa 60 giây theo IP + tài khoản sau 5 lần sai (HTTP 429).'
+    },
+    a10: {
+      vuln: 'Đang chạy bản lỗi: phơi bày <code>Traceback/SQL</code> và mở cửa (<code>return True</code>) khi CSDL lỗi.',
+      safe: 'Đang chạy bản đã vá (main): ẩn log nội bộ, trả HTTP 400 chung và đóng cửa (<code>return False</code>).'
+    }
+  };
+
+  function setFlow(lab, part, state, v, s) {
+    const box = $(lab + '-flow-' + part);
+    if (!box) return;
+    if (state) box.dataset.state = state;
+    else delete box.dataset.state;
+    $(lab + '-fn-' + part + '-v').textContent = v;
+    $(lab + '-fn-' + part + '-s').textContent = s;
+  }
+
+  // Ghi nhận bài đã chạy ở chế độ nào, hiển thị ở thanh tab, header và tab Tổng kết
   function markDemo(lab) {
     demoed[lab][modes[lab]] = true;
     document.querySelectorAll('.status[data-lab="' + lab + '"] span').forEach((s) => {
       s.dataset.done = String(!!demoed[lab][s.classList.contains('sv') ? 'vuln' : 'safe']);
     });
+    const tabEl = document.querySelector('nav.tabs a[data-tab="' + lab + '"]');
+    if (tabEl) {
+      const dv = tabEl.querySelector('.dv');
+      const ds = tabEl.querySelector('.ds');
+      if (dv) { dv.dataset.done = String(!!demoed[lab].vuln); dv.title = (demoed[lab].vuln ? 'Đã chạy' : 'Chưa chạy') + ' Có lỗ hổng'; }
+      if (ds) { ds.dataset.done = String(!!demoed[lab].safe); ds.title = (demoed[lab].safe ? 'Đã chạy' : 'Chưa chạy') + ' Đã vá'; }
+    }
+    const total = ['a01', 'a03', 'a07', 'a10'].reduce((acc, k) => acc + (demoed[k].vuln ? 1 : 0) + (demoed[k].safe ? 1 : 0), 0);
+    if ($('demo-progress')) $('demo-progress').textContent = 'Đã chạy ' + total + '/8 chế độ';
+    if ($('sum-progress-badge')) $('sum-progress-badge').textContent = total + ' / 8 chế độ đã thử';
   }
 
   /* ---------- Tab theo hash ---------- */
@@ -699,7 +1521,11 @@ except (TypeError, ValueError):
     if (!(lab in modes)) return;
     const sec = $('tab-' + lab);
     modes[lab] = mode;
+    sec.dataset.activeMode = mode;
     sec.querySelectorAll('.mode button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.mode === mode)));
+    if ($(lab + '-mode-desc') && MODE_DESC[lab] && MODE_DESC[lab][mode]) {
+      $(lab + '-mode-desc').innerHTML = MODE_DESC[lab][mode];
+    }
     if (resets[lab]) resets[lab]();
     if (reruns[lab]) reruns[lab]();
   }
@@ -800,9 +1626,11 @@ except (TypeError, ValueError):
   const SESSION_ID = 1201;
   function a01Render() {
     const sid = Number($('a01-sid').value);
+    const target = STUDENTS[sid];
     $('a01-req').innerHTML =
       '<span class="hl">GET</span> /student/grades?student_id=<span class="warn">' + sid + '</span> HTTP/1.1\n' +
       '<span class="dim">Host: eduflaw.local\nCookie: session=…  </span><span class="dim"># phiên của user_id = ' + SESSION_ID + ' (B24DCAT001)</span>';
+    setFlow('a01', 'req', sid === SESSION_ID ? 'ok' : 'warn', '?student_id=' + sid, target.ma + ' · ' + target.ten);
   }
   function a01Send() {
     a01Render();
@@ -817,16 +1645,32 @@ except (TypeError, ValueError):
       '<div class="tablewrap"><table class="data"><thead><tr><th>Học phần</th><th>TC</th><th>Điểm</th><th>Chữ</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     if (other) {
       setVerdict($('a01-verdict'), 'bad', '✗', 'Lộ dữ liệu: B24DCAT001 vừa đọc được điểm và CCCD của ' + s.ma + '. Phản hồi vẫn là 200 nên fuzzer không tự nhận ra.');
+      setFlow('a01', 'res', 'bad', 'Lộ dữ liệu ' + s.ma, 'Điểm + CCCD của ' + s.ten);
+      $('a01-res-badge').className = 'badge vuln';
+      $('a01-res-badge').textContent = 'HTTP 200 · Lộ dữ liệu';
     } else if (sid !== SESSION_ID) {
       setVerdict($('a01-verdict'), 'ok', '✓', 'Tham số student_id=' + sid + ' bị bỏ qua. Máy chủ lấy session[\'user_id\'] nên chỉ trả dữ liệu của chính B24DCAT001.');
+      setFlow('a01', 'res', 'ok', 'Chỉ trả ' + s.ma, 'Đã bỏ qua ?student_id=' + sid);
+      $('a01-res-badge').className = 'badge safe';
+      $('a01-res-badge').textContent = 'An toàn · Neo vào session';
     } else {
       setVerdict($('a01-verdict'), 'idle', 'i', 'Đây là dữ liệu của chính bạn. Hãy chọn mã của sinh viên khác để thử tấn công.');
+      setFlow('a01', 'res', 'ok', 'Dữ liệu ' + s.ma, 'Chính chủ (session 1201)');
+      $('a01-res-badge').className = 'badge safe';
+      $('a01-res-badge').textContent = 'HTTP 200 · Chính chủ';
     }
     ran.a01 = true;
     if (sid !== SESSION_ID) markDemo('a01');
     reveal($('a01-out'));
   }
-  resets.a01 = () => { $('a01-out').innerHTML = ''; setVerdict($('a01-verdict'), 'idle', '…', 'Chưa gửi request.'); a01Render(); };
+  resets.a01 = () => {
+    $('a01-out').innerHTML = '';
+    setVerdict($('a01-verdict'), 'idle', '…', 'Chưa gửi request.');
+    setFlow('a01', 'res', '', 'Chưa gửi request', 'Bấm Gửi request bên dưới');
+    $('a01-res-badge').className = 'badge';
+    $('a01-res-badge').textContent = 'Chờ request';
+    a01Render();
+  };
   reruns.a01 = () => { if (ran.a01) a01Send(); };
   actions.a01 = a01Send;
   $('a01-sid').addEventListener('change', a01Render);
@@ -904,6 +1748,16 @@ except (TypeError, ValueError):
     }
     $('a03-pip').innerHTML = lines.join('\n');
   }
+  function a03SyncState() {
+    const safe = modes.a03 === 'safe', tampered = $('a03-tamper').checked;
+    $('a03-sri-badge').className = safe ? 'badge safe' : 'badge vuln';
+    $('a03-sri-badge').textContent = safe ? 'SRI: Đang bật SHA-256' : 'SRI: Tắt (nguy hiểm)';
+    $('a03-pip-badge').className = safe ? 'badge safe' : 'badge vuln';
+    $('a03-pip-badge').textContent = safe ? '10/10 gói ghim ==' : 'Chưa ghim phiên bản';
+    setFlow('a03', 'cdn', tampered ? 'bad' : 'ok', tampered ? 'File bị chèn mã độc' : 'File sạch nguyên bản', safe ? 'sweetalert2@11.10.5' : 'sweetalert2@latest');
+    setFlow('a03', 'sri', safe ? 'ok' : 'warn', safe ? 'Đối chiếu SHA-256' : 'Bỏ qua kiểm tra', safe ? 'Có integrity + crossorigin' : 'Thiếu thuộc tính integrity');
+    setFlow('a03', 'res', '', 'Chưa thử đăng nhập', 'Bấm Đăng nhập để xem');
+  }
   function a03Reset() {
     $('a03-tag').textContent = a03Tag();
     $('a03-hash').innerHTML = '';
@@ -911,7 +1765,9 @@ except (TypeError, ValueError):
     $('a03-evil').innerHTML = '<span class="dim">Đang chờ dữ liệu…</span>';
     setVerdict($('a03-verdict'), 'idle', '…', 'Bấm Đăng nhập để tải trang và gửi form.');
     a03Pip();
+    a03SyncState();
   }
+  a03SyncState();
   resets.a03 = a03Reset;
   reruns.a03 = () => { if (ran.a03) a03Login(); };
   $('a03-tamper').addEventListener('change', () => { a03Reset(); if (ran.a03) a03Login(); });
@@ -924,6 +1780,7 @@ except (TypeError, ValueError):
     const got = await sha256b64(served);
     const user = $('a03-user').value, pass = $('a03-pass').value;
     const con = [], evil = [];
+    a03SyncState();
     if (modes.a03 === 'safe') {
       const ok = got === PINNED;
       $('a03-hash').innerHTML =
@@ -933,10 +1790,14 @@ except (TypeError, ValueError):
         con.push('<span class="bad">Failed to find a valid digest in the \'integrity\' attribute for resource\n\'https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js\'\nwith computed SHA-256 integrity \'' + esc(got.slice(7)) + '\'.\nThe resource has been blocked.</span>');
         con.push('<span class="dim">Form gửi bình thường; chỉ thiếu hộp thoại SweetAlert.</span>');
         evil.push('<span class="dim">Không nhận được gì.</span>');
+        setFlow('a03', 'sri', 'bad', 'Sai khác mã băm!', 'SHA-256 không khớp bản ghim');
+        setFlow('a03', 'res', 'ok', 'Chặn tải file độc', 'Mật khẩu không bị đánh cắp');
         setVerdict($('a03-verdict'), 'ok', '✓', 'Trình duyệt chặn file bị sửa vì SHA-256 không khớp mã băm ghim trong template của EduFlaw. Mật khẩu không bị gửi đi.');
       } else {
         con.push('<span class="ok">sweetalert2 v11.10.5 loaded (integrity OK)</span>');
         evil.push('<span class="dim">Không nhận được gì.</span>');
+        setFlow('a03', 'sri', 'ok', 'Khớp mã băm 100%', 'Cho phép chạy thư viện');
+        setFlow('a03', 'res', 'ok', 'Đăng nhập an toàn', 'Thư viện nguyên vẹn');
         setVerdict($('a03-verdict'), 'ok', '✓', 'File nguyên vẹn, mã băm khớp, thư viện chạy bình thường.');
       }
     } else {
@@ -947,9 +1808,13 @@ except (TypeError, ValueError):
         evil.push('<span class="warn">u</span> = ' + esc(user));
         evil.push('<span class="warn">p</span> = <span class="bad">' + esc(pass) + '</span>');
         evil.push('<span class="warn">c</span> = csrf_token=IjY0…; theme=light');
+        setFlow('a03', 'sri', 'bad', 'Không có SRI để chặn', 'Chạy thẳng mã lạ từ CDN');
+        setFlow('a03', 'res', 'bad', 'Lộ mật khẩu!', 'Đã gửi về evil.example');
         setVerdict($('a03-verdict'), 'bad', '✗', 'Mã độc nằm trong file thư viện đã chạy trên trang đăng nhập và gửi mật khẩu ra ngoài. Mọi người dùng mở trang đều bị như vậy.');
       } else {
         evil.push('<span class="dim">Không nhận được gì.</span>');
+        setFlow('a03', 'sri', 'warn', 'Không có SRI bảo vệ', 'CDN hôm nay may mắn chưa bị sửa');
+        setFlow('a03', 'res', 'warn', 'Chạy nhưng thiếu phòng vệ', 'Bật "CDN bị chiếm" để thử tấn công');
         setVerdict($('a03-verdict'), 'idle', 'i', 'Hôm nay CDN chưa bị chiếm nên không có gì xảy ra. Nhưng không có gì đảm bảo ngày mai cũng vậy: bật công tắc CDN bị chiếm để thử.');
       }
     }
@@ -964,12 +1829,23 @@ except (TypeError, ValueError):
   /* ================= A07 ================= */
   const WORDLIST = ['123456', 'password', 'eduflaw', '12345678', 'qwerty', 'Eduflaw@123', 'B24dcat001', 'admin123', 'matkhau', 'Abc@12345', 'iloveyou', 'Demo-MatKhau-2025'];
   let a07Timer = null;
+  function a07SetStats(tried, fails, locks, stateText, blkTone, stTone) {
+    $('a07-stat-tried').textContent = tried + ' / ' + WORDLIST.length;
+    $('a07-stat-fails').textContent = String(fails);
+    $('a07-stat-blocked').textContent = String(locks);
+    $('a07-stat-state').textContent = stateText;
+    if (blkTone) $('a07-stat-blk-box').dataset.tone = blkTone;
+    else delete $('a07-stat-blk-box').dataset.tone;
+    if (stTone) $('a07-stat-st-box').dataset.tone = stTone;
+    else delete $('a07-stat-st-box').dataset.tone;
+  }
   function a07Grid() {
-    $('a07-grid').innerHTML = WORDLIST.map((_, i) => '<i data-i="' + i + '">' + (i + 1) + '</i>').join('');
+    $('a07-grid').innerHTML = WORDLIST.map((pw, i) => '<i data-i="' + i + '" title="Lượt #' + (i + 1) + ': ' + esc(pw) + '">' + (i + 1) + '</i>').join('');
   }
   function a07Reset() {
     if (a07Timer) { clearTimeout(a07Timer); a07Timer = null; }
     a07Grid();
+    a07SetStats(0, 0, 0, 'Sẵn sàng', '', '');
     $('a07-log').innerHTML = '<span class="dim">$ python a07_1_bruteforce.py --user b24dcat001@eduflaw.com --wordlist top12.txt</span>';
     $('a07-run').disabled = false;
     setVerdict($('a07-verdict'), 'idle', '…', 'Chưa tấn công.');
@@ -1012,6 +1888,10 @@ except (TypeError, ValueError):
       log.innerHTML += '\n' + line;
       log.scrollTop = log.scrollHeight;
       i++;
+      const stateText = locks > 0 || fails >= max ? 'Đã khóa 60s' : (cell.dataset.s === 'win' ? 'Bị chiếm!' : 'Đang thử…');
+      const blkTone = locks > 0 ? 'ok' : '';
+      const stTone = cell.dataset.s === 'win' ? 'bad' : (locks > 0 || fails >= max ? 'ok' : '');
+      a07SetStats(i, fails, locks, stateText, blkTone, stTone);
       if (i < WORDLIST.length) { a07Timer = setTimeout(step, reduced ? 0 : 260); return; }
       a07Timer = null; $('a07-run').disabled = false;
       if (modes.a07 === 'vuln') {
@@ -1027,6 +1907,9 @@ except (TypeError, ValueError):
   /* ================= A10 ================= */
   const TS = '2026-11-05 09:41:';
   function a10Payload(v) {
+    document.querySelectorAll('#a10-payloads button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.v === v));
+    });
     const client = [], server = [];
     let tone, msg;
     const req = '<span class="dim">POST /admin/grades/api/auto-save\n{"grade_id": "845", "field": "score_thi", "value": "' + esc(v) + '"}</span>';
@@ -1038,6 +1921,8 @@ except (TypeError, ValueError):
       client.push('<span class="ok">HTTP 200 {"success": true, "score": ' + esc(v) + '}</span>');
       server.push(TS + '02 INFO grade 845 score_thi -> ' + esc(v));
       $('a10-client').innerHTML = client.join('\n'); $('a10-server').innerHTML = server.join('\n');
+      $('a10-t1-badge').className = 'badge safe';
+      $('a10-t1-badge').textContent = 'HTTP 200 · Hợp lệ';
       setVerdict($('a10-verdict1'), 'idle', 'i', 'Giá trị hợp lệ, hai bản xử lý giống nhau. Hãy thử abc, nan hoặc 1e999.');
       return;
     }
@@ -1050,18 +1935,24 @@ except (TypeError, ValueError):
         client.push('<span class="bad">HTTP 200 {"success": true, "score": ' + esc(v) + '}</span>');
         server.push(TS + '02 INFO grade 845 score_thi -> ' + esc(v));
         tone = 'bad'; msg = 'Bản lỗi không kiểm khoảng 0–10 nên lưu luôn điểm ' + v + ' vào CSDL.';
+        $('a10-t1-badge').className = 'badge vuln';
+        $('a10-t1-badge').textContent = 'HTTP 200 · Lưu điểm sai';
       } else {
         client.push('<span class="bad">HTTP 500 Internal Server Error</span>');
         client.push('<span class="bad">Traceback (most recent call last):\n  File "C:\\EduFlaw\\src\\.venv\\Lib\\site-packages\\flask\\app.py", line 1511, in wsgi_app\n  File "C:\\EduFlaw\\src\\app\\controllers\\admin.py", line 392, in api_auto_save_grade\n  File "C:\\EduFlaw\\src\\app\\models\\grade_model.py", line 118, in save_single_score\n    cursor.execute("UPDATE grades SET score_thi = %s, score = %s WHERE id = %s", ...)\n' + esc(err) + '</span>');
         client.push('<span class="dim">Werkzeug/3.1 Python/3.12 · MYSQL_HOST=db.eduflaw.local</span>');
         server.push(TS + '02 ERROR ' + esc(err));
         tone = 'bad'; msg = 'Kẻ tấn công đọc được đường dẫn máy chủ, tên file, câu SQL, tên bảng và cột, phiên bản thư viện, tên máy CSDL. Đó là bản đồ cho bước tấn công tiếp theo.';
+        $('a10-t1-badge').className = 'badge vuln';
+        $('a10-t1-badge').textContent = 'HTTP 500 · Lộ Stack Trace';
       }
     } else {
       const m = !isNum ? 'Điểm số phải là số hợp lệ.' : 'Điểm phải nằm trong khoảng 0–10.';
       client.push('<span class="ok">HTTP 400 {"success": false, "message": "' + m + '"}</span>');
       server.push(TS + '02 WARNING auto-save từ chối giá trị "' + esc(v) + '" (grade 845, user 77)');
       tone = 'ok'; msg = 'Giá trị bị kiểm tra và từ chối với thông báo chung. Không có stack trace, chi tiết chỉ nằm trong log máy chủ.';
+      $('a10-t1-badge').className = 'badge safe';
+      $('a10-t1-badge').textContent = 'HTTP 400 · Từ chối an toàn';
     }
     $('a10-client').innerHTML = client.join('\n');
     $('a10-server').innerHTML = server.join('\n');
@@ -1081,7 +1972,16 @@ except (TypeError, ValueError):
   };
   actions.a10 = () => { a10Payload(ran.a10.payload !== null ? ran.a10.payload : 'abc'); a10Access(); };
 
+  function a10PreviewFlow() {
+    const down = $('a10-dbdown').checked, vuln = modes.a10 === 'vuln';
+    setFlow('a10', 'db', down ? 'warn' : 'ok', down ? 'Quá tải / Timeout' : 'Hoạt động bình thường', down ? 'Lỗi OperationalError 2013' : 'Đọc is_active = 0');
+    setFlow('a10', 'ex', down ? (vuln ? 'bad' : 'ok') : '', down ? (vuln ? 'return True' : 'return False') : 'Không vào except', down ? (vuln ? 'Lỗi → cho qua (Fail-Open)' : 'Lỗi → từ chối (Fail-Closed)') : 'Kiểm tra DB trực tiếp');
+    setFlow('a10', 'res', '', 'Chưa kiểm tra', 'Bấm nút ở trên');
+    $('a10-t2-badge').className = 'badge warn';
+    $('a10-t2-badge').textContent = down ? 'CSDL lỗi · Phiên cũ' : 'CSDL ổn · Phiên cũ';
+  }
   function a10Access() {
+    a10PreviewFlow();
     const down = $('a10-dbdown').checked;
     const t = [];
     t.push('<span class="dim">GET /student/grades   Cookie: session=… (user_id 1209, role student)</span>');
@@ -1100,22 +2000,40 @@ except (TypeError, ValueError):
     if (granted) t.push('<span class="bad">HTTP 200 OK  → hiển thị bảng điểm</span>');
     else t.push('session.clear()\n<span class="ok">HTTP 302 Found → /login</span>');
     $('a10-trace').innerHTML = t.join('\n');
-    if (granted) setVerdict($('a10-verdict2'), 'bad', '✗', 'Fail-open: tài khoản đã bị khóa vẫn vào được, chỉ vì kẻ tấn công làm CSDL lỗi. Lỗi đã biến thành quyền.');
-    else if (down) setVerdict($('a10-verdict2'), 'ok', '✓', 'Fail-closed: không xác minh được thì từ chối và hủy phiên. Tệ nhất người dùng thật phải đăng nhập lại.');
-    else setVerdict($('a10-verdict2'), 'ok', '✓', 'CSDL bình thường nên cả hai bản đều chặn. Bật công tắc CSDL gặp sự cố để thấy khác biệt.');
+    if (granted) {
+      setFlow('a10', 'res', 'bad', 'HTTP 200 · Vào được!', 'Kẻ bị khóa đọc được bảng điểm');
+      $('a10-t2-badge').className = 'badge vuln';
+      $('a10-t2-badge').textContent = 'Fail-Open · Bị lách khóa';
+      setVerdict($('a10-verdict2'), 'bad', '✗', 'Fail-open: tài khoản đã bị khóa vẫn vào được, chỉ vì kẻ tấn công làm CSDL lỗi. Lỗi đã biến thành quyền.');
+    } else if (down) {
+      setFlow('a10', 'res', 'ok', 'HTTP 302 → /login', 'Hủy session, từ chối an toàn');
+      $('a10-t2-badge').className = 'badge safe';
+      $('a10-t2-badge').textContent = 'Fail-Closed · Đã chặn';
+      setVerdict($('a10-verdict2'), 'ok', '✓', 'Fail-closed: không xác minh được thì từ chối và hủy phiên. Tệ nhất người dùng thật phải đăng nhập lại.');
+    } else {
+      setFlow('a10', 'res', 'ok', 'HTTP 302 → /login', 'is_active = 0 nên bị từ chối');
+      $('a10-t2-badge').className = 'badge safe';
+      $('a10-t2-badge').textContent = 'Đã chặn (DB bình thường)';
+      setVerdict($('a10-verdict2'), 'ok', '✓', 'CSDL bình thường nên cả hai bản đều chặn. Bật công tắc CSDL gặp sự cố để thấy khác biệt.');
+    }
     a10Done('access', true);
   }
   $('a10-access').addEventListener('click', a10Access);
   $('a10-dbdown').addEventListener('change', () => {
     if (ran.a10.access) { a10Access(); return; }
+    a10PreviewFlow();
     $('a10-trace').innerHTML = ''; setVerdict($('a10-verdict2'), 'idle', '…', 'Chưa truy cập.');
   });
   resets.a10 = () => {
+    document.querySelectorAll('#a10-payloads button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    $('a10-t1-badge').className = 'badge warn';
+    $('a10-t1-badge').textContent = 'Chưa gửi payload';
     $('a10-client').innerHTML = '<span class="dim">(trống)</span>';
     $('a10-server').innerHTML = '<span class="dim">(trống)</span>';
     $('a10-trace').innerHTML = '';
-    setVerdict($('a10-verdict1'), 'idle', '…', 'Chọn một giá trị để gửi.');
+    setVerdict($('a10-verdict1'), 'idle', '…', 'Chọn một giá trị điểm ở trên để gửi.');
     setVerdict($('a10-verdict2'), 'idle', '…', 'Chưa truy cập.');
+    a10PreviewFlow();
   };
   resets.a10();
   a07Reset();
